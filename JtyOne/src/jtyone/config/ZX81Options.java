@@ -22,51 +22,50 @@
 
 package jtyone.config;
 
-public class ZX81Options
-  {
-  public int emuid, major,minor,testver;
-  public boolean dirtydisplay;
-  public int machine;
-  public boolean extfont;
-  public boolean shadowROM;
-  public int RAM816k;
-  public boolean protectROM;
-  public int truehires;
-  public boolean NTSC;
-  public int inverse;
-  public int aysound;
-  public int aytype;
-  public boolean single_step;
-  public boolean vsyncsound;
-  public int beepersound;
-  public boolean ts2050;
-  public int ace96k;
-  public int TZXin, TZXout;
-  public int audioout,audioin;
-  public int colour;
-  public int debug1, debug2;
-  public int autoload;
-  public int wobble;
-  public int chrgen;
-  public boolean enableqschrgen;
-  public int bordersize;
-  public boolean simpleghost;
-  public int maxireg;
-  public boolean zxprinter;
-  
-  public int RAMTOP;
-  public int ROMTOP;
-  public int m1not;
-  public int romcrc;
-  public int frameskip;
-  public int speedup;
-  public int UseRShift;
-  
-  public String ROM81;
-  public String cwd;
-  public String temppath;
-  public String inipath;
-  public String configpath;
-  public String mydocs;
-  public String machinename;
-  }
+public class ZX81Options {
+    public int emuid, major, minor, testver;
+    public boolean dirtydisplay;
+    public int machine;
+    public boolean extfont;
+    public boolean shadowROM;
+    public int RAM816k;
+    public boolean protectROM;
+    public int truehires;
+    public boolean NTSC;
+    public int inverse;
+    public int aysound;
+    public int aytype;
+    public boolean single_step;
+    public boolean vsyncsound;
+    public int beepersound;
+    public boolean ts2050;
+    public int ace96k;
+    public int TZXin, TZXout;
+    public int audioout, audioin;
+    public int colour;
+    public int debug1, debug2;
+    public int autoload;
+    public int wobble;
+    public int chrgen;
+    public boolean enableqschrgen;
+    public int bordersize;
+    public boolean simpleghost;
+    public int maxireg;
+    public boolean zxprinter;
+
+    public int RAMTOP;
+    public int ROMTOP;
+    public int m1not;
+    public int romcrc;
+    public int frameskip;
+    public int speedup;
+    public int UseRShift;
+
+    public String ROM81;
+    public String cwd;
+    public String temppath;
+    public String inipath;
+    public String configpath;
+    public String mydocs;
+    public String machinename;
+}

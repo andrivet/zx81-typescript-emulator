@@ -22,214 +22,184 @@
 
 package jtyone.tzx;
 
-public class TZXFileDefs
-  {
-  
-  public static final int TZX_MAX_BLOCKS = 2000;
-  
-  //TODO: public static float TZXSCALE(int x,int clockSpeed) { return (((float)x)/(((float)3500000)/((float)clockSpeed))); }
+public class TZXFileDefs {
 
-  public static final int TZX_BLOCK_ROM          = 0x10;
-  public static final int TZX_BLOCK_TURBO        = 0x11;
-  public static final int TZX_BLOCK_TONE         = 0x12;
-  public static final int TZX_BLOCK_PULSE        = 0x13;
-  public static final int TZX_BLOCK_DATA         = 0x14;
-  public static final int TZX_BLOCK_DREC         = 0x15;
-  public static final int TZX_BLOCK_CSW          = 0x18;
-  public static final int TZX_BLOCK_GENERAL      = 0x19;
-  public static final int TZX_BLOCK_PAUSE        = 0x20;
-  public static final int TZX_BLOCK_GSTART       = 0x21;
-  public static final int TZX_BLOCK_GEND         = 0x22;
-  public static final int TZX_BLOCK_JUMP         = 0x23;
-  public static final int TZX_BLOCK_LSTART       = 0x24;
-  public static final int TZX_BLOCK_LEND         = 0x25;
-  public static final int TZX_BLOCK_SBLOCK       = 0x28;
-  public static final int TZX_BLOCK_STOP48K      = 0x2a;
-  public static final int TZX_BLOCK_SETLEVEL     = 0x2b;
-  public static final int TZX_BLOCK_TEXT         = 0x30;
-  public static final int TZX_BLOCK_MESSAGE      = 0x31;
-  public static final int TZX_BLOCK_ARCHIVE      = 0x32;
-  public static final int TZX_BLOCK_HWTYPE       = 0x33;
-  public static final int TZX_BLOCK_CUSTOM       = 0x35;
-  public static final int TZX_BLOCK_GLUE         = 0x5a;
+    public static final int TZX_MAX_BLOCKS = 2000;
 
-  public static final String T81_HEADER_ID = "EO81";
-  public static final int TZX_BYTE_EMPTY = -1;
-  }
+    //TODO: public static float TZXSCALE(int x,int clockSpeed) { return (((float)x)/(((float)3500000)/((float)clockSpeed))); }
 
-class TZXHeader
-  {
-  byte[] id = new byte[8];
-  int major;
-  int minor;
-  }
+    public static final int TZX_BLOCK_ROM = 0x10;
+    public static final int TZX_BLOCK_TURBO = 0x11;
+    public static final int TZX_BLOCK_TONE = 0x12;
+    public static final int TZX_BLOCK_PULSE = 0x13;
+    public static final int TZX_BLOCK_DATA = 0x14;
+    public static final int TZX_BLOCK_DREC = 0x15;
+    public static final int TZX_BLOCK_CSW = 0x18;
+    public static final int TZX_BLOCK_GENERAL = 0x19;
+    public static final int TZX_BLOCK_PAUSE = 0x20;
+    public static final int TZX_BLOCK_GSTART = 0x21;
+    public static final int TZX_BLOCK_GEND = 0x22;
+    public static final int TZX_BLOCK_JUMP = 0x23;
+    public static final int TZX_BLOCK_LSTART = 0x24;
+    public static final int TZX_BLOCK_LEND = 0x25;
+    public static final int TZX_BLOCK_SBLOCK = 0x28;
+    public static final int TZX_BLOCK_STOP48K = 0x2a;
+    public static final int TZX_BLOCK_SETLEVEL = 0x2b;
+    public static final int TZX_BLOCK_TEXT = 0x30;
+    public static final int TZX_BLOCK_MESSAGE = 0x31;
+    public static final int TZX_BLOCK_ARCHIVE = 0x32;
+    public static final int TZX_BLOCK_HWTYPE = 0x33;
+    public static final int TZX_BLOCK_CUSTOM = 0x35;
+    public static final int TZX_BLOCK_GLUE = 0x5a;
 
-class TZXUnknown extends TZXBlockInfo
-  {
-  int type;
-  int length;
-  }
+    public static final String T81_HEADER_ID = "EO81";
+    public static final int TZX_BYTE_EMPTY = -1;
+}
 
-class TZXROM extends TZXBlockInfo
-  {
-  int DataLen;
-  }
+class TZXHeader {
+    byte[] id = new byte[8];
+    int major;
+    int minor;
+}
 
-class TZXTurbo extends TZXBlockInfo
-  {
-  int PilotLen;
-  int Sync1Len;
-  int Sync2Len;
-  int Bit0Len;
-  int Bit1Len;
-  int PilotPulses;
-  int FinalBits;
-  int DataLen;
-  }
+class TZXUnknown extends TZXBlockInfo {
+    int type;
+    int length;
+}
 
-class TZXTone extends TZXBlockInfo
-  {
-  int PulseLen;
-  int NoPulses;
-  }
+class TZXROM extends TZXBlockInfo {
+    int DataLen;
+}
 
-class TZXPulse extends TZXBlockInfo
-  {
-  int NoPulses;
-  }
+class TZXTurbo extends TZXBlockInfo {
+    int PilotLen;
+    int Sync1Len;
+    int Sync2Len;
+    int Bit0Len;
+    int Bit1Len;
+    int PilotPulses;
+    int FinalBits;
+    int DataLen;
+}
 
-class TZXData extends TZXBlockInfo
-  {
-  int Len0;
-  int Len1;
-  int FinalBits;
-  int DataLen;
-  }
+class TZXTone extends TZXBlockInfo {
+    int PulseLen;
+    int NoPulses;
+}
 
-class TZXDRec extends TZXBlockInfo
-  {
-  int SampleLen;
-  int FinalBits;
-  int Samples;
-  }
+class TZXPulse extends TZXBlockInfo {
+    int NoPulses;
+}
 
-class TZXCSW extends TZXBlockInfo
-  {
-  int BlockLen;
-  int SampleRate;
-  int Compression;
-  int Flags;
-  int NoPulses;
-  }
+class TZXData extends TZXBlockInfo {
+    int Len0;
+    int Len1;
+    int FinalBits;
+    int DataLen;
+}
 
-class TZXGeneral extends TZXBlockInfo
-  {
-  int TOTP, NPP, ASP, TOTD, NPD, ASD;
-  int DataLen;
+class TZXDRec extends TZXBlockInfo {
+    int SampleLen;
+    int FinalBits;
+    int Samples;
+}
 
-  //int Flags, DataLen;
-  //int PilotLen;
-  //int PilotPulses;
-  //int SyncPulses;
-  //int MaxPulsesBit;
-  //int NoSymbols;
-  //int FinalBits;
-  }
+class TZXCSW extends TZXBlockInfo {
+    int BlockLen;
+    int SampleRate;
+    int Compression;
+    int Flags;
+    int NoPulses;
+}
 
-class TZXPause extends TZXBlockInfo
-  {
-  }
+class TZXGeneral extends TZXBlockInfo {
+    int TOTP, NPP, ASP, TOTD, NPD, ASD;
+    int DataLen;
 
-class TZXGStart extends TZXBlockInfo
-  {
-  int NameLen;
-  }
+    //int Flags, DataLen;
+    //int PilotLen;
+    //int PilotPulses;
+    //int SyncPulses;
+    //int MaxPulsesBit;
+    //int NoSymbols;
+    //int FinalBits;
+}
 
-class TZXGEnd extends TZXBlockInfo
-  {
-  };
+class TZXPause extends TZXBlockInfo {
+}
 
-class TZXJump extends TZXBlockInfo
-  {
-  int JumpRel;
-  }
+class TZXGStart extends TZXBlockInfo {
+    int NameLen;
+}
 
-class TZXLStart extends TZXBlockInfo
-  {
-  int Repeats;
-  }
+class TZXGEnd extends TZXBlockInfo {
+};
 
-class TZXLEend extends TZXBlockInfo  
-  {
-  }
+class TZXJump extends TZXBlockInfo {
+    int JumpRel;
+}
 
-class TZXSelect extends TZXBlockInfo
-  {
-  int Offset;
-  int TextLen;
-  }
+class TZXLStart extends TZXBlockInfo {
+    int Repeats;
+}
 
-class TZXSBlock extends TZXBlockInfo
-  {
-  int BlockLen;
-  int NoSelections;
-  }
+class TZXLEend extends TZXBlockInfo {
+}
 
-class TZXStop48K extends TZXBlockInfo
-  {
-  int BlockLen;
-  }
+class TZXSelect extends TZXBlockInfo {
+    int Offset;
+    int TextLen;
+}
 
-class TZXSetLevel extends TZXBlockInfo
-  {
-  int Level;
-  }
+class TZXSBlock extends TZXBlockInfo {
+    int BlockLen;
+    int NoSelections;
+}
 
-class TZXText extends TZXBlockInfo
-  {
-  int TextLen;
-  }
+class TZXStop48K extends TZXBlockInfo {
+    int BlockLen;
+}
 
-class TZXMessage extends TZXBlockInfo  
-  {
-  int Time;
-  int TextLen;
-  }
+class TZXSetLevel extends TZXBlockInfo {
+    int Level;
+}
 
-class TZXArchiveText extends TZXBlockInfo
-  {
-  int TextID;
-  int TextLen;
-  }
+class TZXText extends TZXBlockInfo {
+    int TextLen;
+}
 
-class TZXArchive extends TZXBlockInfo
-  {
-  int BlockLen;
-  int NoStrings;
-  }
+class TZXMessage extends TZXBlockInfo {
+    int Time;
+    int TextLen;
+}
 
-class TZXHWInfo extends TZXBlockInfo
-  {
-  int Type;
-  int ID;
-  int Information;
-  }
+class TZXArchiveText extends TZXBlockInfo {
+    int TextID;
+    int TextLen;
+}
 
-class TZXHWType extends TZXBlockInfo
-  {
-  int NoTypes;
-  }
+class TZXArchive extends TZXBlockInfo {
+    int BlockLen;
+    int NoStrings;
+}
 
-class TZXCustom extends TZXBlockInfo
-  {
-  String IDString;
-  int Length;
-  }
+class TZXHWInfo extends TZXBlockInfo {
+    int Type;
+    int ID;
+    int Information;
+}
 
-class TZXGlue extends TZXBlockInfo
-  {
-  }
+class TZXHWType extends TZXBlockInfo {
+    int NoTypes;
+}
 
-class TZXBlockInfo 
-  {
-  }
+class TZXCustom extends TZXBlockInfo {
+    String IDString;
+    int Length;
+}
+
+class TZXGlue extends TZXBlockInfo {
+}
+
+class TZXBlockInfo {
+}

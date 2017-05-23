@@ -22,19 +22,15 @@
 
 package jtyone.display;
 
-public class Scanline
-  {
-  public int sync_len, sync_valid;
-  public int scanline_len;
-  public int[] scanline = new int[4000];
+public class Scanline {
+    public int sync_len, sync_valid;
+    public int scanline_len;
+    public int[] scanline = new int[4000];
 
-  public
-  void add_blank(int tstates, int colour)
-    {
-    while(tstates-- > 0)
-      {
-      scanline[scanline_len++]=colour;
-      scanline[scanline_len++]=colour;
-      }
+    public void add_blank(int tstates, int colour) {
+        while (tstates-- > 0) {
+            scanline[scanline_len++] = colour;
+            scanline[scanline_len++] = colour;
+        }
     }
-  }          
+}

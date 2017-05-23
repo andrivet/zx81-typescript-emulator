@@ -22,11 +22,10 @@
 
 package jtyone.config;
 
-public class TVOptions
-  {
-  public boolean AdvancedEffects;
-  public boolean DotCrawl;
-  public boolean Interlaced;
-  public boolean DisableAdvanced;
-  public int frequency;
-  }
+public class TVOptions {
+    public boolean AdvancedEffects;
+    public boolean DotCrawl;
+    public boolean Interlaced;
+    public boolean DisableAdvanced;
+    public int frequency;
+}

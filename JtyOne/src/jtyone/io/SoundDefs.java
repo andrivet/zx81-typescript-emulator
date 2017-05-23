@@ -22,13 +22,12 @@
 
 package jtyone.io;
 
-public interface SoundDefs
-  {
-  int AY_TYPE_QUICKSILVA = 1;
-  int AY_TYPE_ZONX = 2;
-  int AY_TYPE_FULLER = 3;
-  int AY_TYPE_ACE = 4;
-  int AY_TYPE_SINCLAIR = 5;
-  int AY_TYPE_TIMEX = 6;
-  int AY_TYPE_BOLDFIELD = 7;
-  }
+public interface SoundDefs {
+    int AY_TYPE_QUICKSILVA = 1;
+    int AY_TYPE_ZONX = 2;
+    int AY_TYPE_FULLER = 3;
+    int AY_TYPE_ACE = 4;
+    int AY_TYPE_SINCLAIR = 5;
+    int AY_TYPE_TIMEX = 6;
+    int AY_TYPE_BOLDFIELD = 7;
+}

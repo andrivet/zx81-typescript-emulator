@@ -40,8 +40,6 @@
 
 package jtyone.zx81;
 
-import java.io.IOException;
-
 import jtyone.config.Machine;
 import jtyone.config.ZX81Config;
 import jtyone.config.ZX81ConfigDefs;
@@ -53,134 +51,126 @@ import jtyone.io.SoundDefs;
 import jtyone.io.Tape;
 import jtyone.z80.Z80;
 
+import java.io.IOException;
+
 public final class ZX81
-extends Machine
-implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
-  {
+        extends Machine
+        implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
+{
 
-  private static final int VBLANKCOLOUR = (0*16);
+    private static final int VBLANKCOLOUR = (0 * 16);
 
-  private static final int LASTINSTNONE  = 0;
-  private static final int LASTINSTINFE  = 1;
-  private static final int LASTINSTOUTFE = 2;
-  private static final int LASTINSTOUTFD = 3;
-  private static final int LASTINSTOUTFF = 4;
+    private static final int LASTINSTNONE = 0;
+    private static final int LASTINSTINFE = 1;
+    private static final int LASTINSTOUTFE = 2;
+    private static final int LASTINSTOUTFD = 3;
+    private static final int LASTINSTOUTFF = 4;
 
-  int border=7, ink=0, paper=7;
-  //int NMI_generator=0;
-  //int HSYNC_generator=0;
-  //int rowcounter=0;
-  public boolean NMI_generator=false;
-  public boolean HSYNC_generator=false;
-  public int rowcounter=0;
-  int hsync_counter=207;
-  public int borrow=0;
-  
-  int event_next_event;
-  int configbyte=0;
-  boolean setborder=false;
-  boolean zx81_stop=false;
-  int LastInstruction;
-  int MemotechMode=0;
-  int HaltCount;
+    int border = 7, ink = 0, paper = 7;
+    //int NMI_generator=0;
+    //int HSYNC_generator=0;
+    //int rowcounter=0;
+    public boolean NMI_generator = false;
+    public boolean HSYNC_generator = false;
+    public int rowcounter = 0;
+    int hsync_counter = 207;
+    public int borrow = 0;
 
-  private int[] font = new int[1024];
-  private int[] memhrg = new int[1024];
- 
-  int shift_register=0, shift_reg_inv, shift_store=0;
+    int event_next_event;
+    int configbyte = 0;
+    boolean setborder = false;
+    boolean zx81_stop = false;
+    int LastInstruction;
+    int MemotechMode = 0;
+    int HaltCount;
 
-  boolean int_pending=false;
+    private int[] font = new int[1024];
+    private int[] memhrg = new int[1024];
 
-  // Added here to avoid needing to update original code
-  private Z80 z80;
-  private ZX81Options zx81opts;
-  private Tape mTape;
+    int shift_register = 0, shift_reg_inv, shift_store = 0;
 
-  public 
-  void initialise(ZX81Config config)
-    {
-    zx81opts = config.zx81opts;
-    z80 = new Z80(this);
-    Snap snap = new Snap(config);
-    mTape = new Tape();
-    
-    memory = new int[64 * 1024];
+    boolean int_pending = false;
 
-    try
-      {
-      int i, romlen;
-      //z80_init();
-  
-      for(i=0;i<65536;i++) memory[i]=7;
-  
-      romlen=snap.memory_load(CurRom, 0, 65536);
-      zx81opts.romcrc=CRC32Block(memory,romlen);
-  
-      if (zx81opts.extfont) snap.font_load("lmbfnt.rom",font,512);
-      if (zx81opts.chrgen==CHRGENDK) romlen+=snap.memory_load("dkchr.rom",8192,65536);
-  
-      if (zx81opts.shadowROM && romlen<=8192)
-      {
-              for(i=0;i<8192;i++) memory[i+8192]=memory[i];
-              zx81opts.ROMTOP=16383;
-      }
-      else    zx81opts.ROMTOP=romlen-1;
+    // Added here to avoid needing to update original code
+    private Z80 z80;
+    private ZX81Options zx81opts;
+    private Tape mTape;
 
-      if (zx81opts.truehires==HIRESMEMOTECH) snap.memory_load("memohrg.rom", 8192, 2048);
-      if (zx81opts.truehires==HIRESG007) snap.memory_load("g007hrg.rom",10240,2048);
-  
-      else { ink=0; paper=border=7; }
-  
-      NMI_generator=false;
-      HSYNC_generator=false;
-      MemotechMode=0;
+    public void initialise(ZX81Config config) {
+        zx81opts = config.zx81opts;
+        z80 = new Z80(this);
+        Snap snap = new Snap(config);
+        mTape = new Tape();
 
-      z80.reset();
-      }
-    catch( IOException exc )
-      {
-      exc.printStackTrace();
-      }
+        memory = new int[64 * 1024];
+
+        try {
+            int i, romlen;
+            //z80_init();
+
+            for (i = 0; i < 65536; i++) memory[i] = 7;
+
+            romlen = snap.memory_load(CurRom, 0, 65536);
+            zx81opts.romcrc = CRC32Block(memory, romlen);
+
+            if (zx81opts.extfont) snap.font_load("lmbfnt.rom", font, 512);
+            if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
+
+            if (zx81opts.shadowROM && romlen <= 8192) {
+                for (i = 0; i < 8192; i++) memory[i + 8192] = memory[i];
+                zx81opts.ROMTOP = 16383;
+            } else zx81opts.ROMTOP = romlen - 1;
+
+            if (zx81opts.truehires == HIRESMEMOTECH) snap.memory_load("memohrg.rom", 8192, 2048);
+            if (zx81opts.truehires == HIRESG007) snap.memory_load("g007hrg.rom", 10240, 2048);
+
+            else {
+                ink = 0;
+                paper = border = 7;
+            }
+
+            NMI_generator = false;
+            HSYNC_generator = false;
+            MemotechMode = 0;
+
+            z80.reset();
+        } catch (IOException exc) {
+            exc.printStackTrace();
+        }
     }
 
-  public 
-  void writebyte(int Address, int Data)
-    {
-    //noise = (noise<<8) | Data;
-    // TODO: AccDraw.noise = (AccDraw.noise<<8) | Data;
+    public void writebyte(int Address, int Data) {
+        //noise = (noise<<8) | Data;
+        // TODO: AccDraw.noise = (AccDraw.noise<<8) | Data;
 
-    if (zx81opts.chrgen==CHRGENQS && Address>=0x8400 && Address<=0x87ff)
-    {
-            font[Address-0x8400]=Data;
-            zx81opts.enableqschrgen=true;
-    }
-    
-    if (Address>zx81opts.RAMTOP) Address = (Address&(zx81opts.RAMTOP));
+        if (zx81opts.chrgen == CHRGENQS && Address >= 0x8400 && Address <= 0x87ff) {
+            font[Address - 0x8400] = Data;
+            zx81opts.enableqschrgen = true;
+        }
 
-    if (Address<=zx81opts.ROMTOP && zx81opts.protectROM)
-    {
-            if ((zx81opts.truehires==HIRESMEMOTECH) && (Address<1024))
-                            memhrg[Address]=Data;
+        if (Address > zx81opts.RAMTOP) Address = (Address & (zx81opts.RAMTOP));
+
+        if (Address <= zx81opts.ROMTOP && zx81opts.protectROM) {
+            if ((zx81opts.truehires == HIRESMEMOTECH) && (Address < 1024))
+                memhrg[Address] = Data;
             return;
+        }
+
+        if (Address > 8191 && Address < 16384 && zx81opts.shadowROM && zx81opts.protectROM) return;
+        if (Address < 10240 && zx81opts.truehires == HIRESMEMOTECH) return;
+        if (Address >= 10240 && Address < 12288 && zx81opts.truehires == HIRESG007) return;
+
+        memory[Address] = Data;
     }
 
-    if (Address>8191 && Address<16384 && zx81opts.shadowROM && zx81opts.protectROM) return;
-    if (Address<10240 && zx81opts.truehires==HIRESMEMOTECH) return;
-    if (Address>=10240 && Address<12288 && zx81opts.truehires==HIRESG007) return;
+    public int readbyte(int Address) {
+        int data;
 
-    memory[Address]=Data;
-    }
+        if (Address <= zx81opts.RAMTOP) data = memory[Address];
+        else data = memory[(Address & (zx81opts.RAMTOP - 16384)) + 16384];
 
-  public 
-  int readbyte(int Address)
-    {
-    int data;
-
-    if (Address<=zx81opts.RAMTOP) data=memory[Address];
-    else data=memory[(Address&(zx81opts.RAMTOP-16384))+16384];
-
-    // TODO: AccDraw.noise = (AccDraw.noise<<8) | data;
-    return(data);
+        // TODO: AccDraw.noise = (AccDraw.noise<<8) | data;
+        return (data);
     }
 
 // BYTE opcode_fetch(int Address)
@@ -204,58 +194,52 @@ implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
 // on which bus RAM is placed, it can either be used for extended
 // Fonts OR WRX style hi-res graphics, but never both.
 
-  public
-  int opcode_fetch(int Address)
-    {
-    //int NewAddress, inv;
-    //int opcode, bit6, update=0;
-    boolean inv, update=false;
-    int opcode;
-    boolean bit6 = false;
-    //BYTE data;
-    int data;
+    public int opcode_fetch(int Address) {
+        //int NewAddress, inv;
+        //int opcode, bit6, update=0;
+        boolean inv, update = false;
+        int opcode;
+        boolean bit6 = false;
+        //BYTE data;
+        int data;
 
-    if (Address<zx81opts.m1not)
-    {
+        if (Address < zx81opts.m1not) {
             // This is not video related, so just return the opcode
             // and make some noise onscreen.
             //data = zx81_readbyte(Address);
             //noise |= data;
             data = readbyte(Address);
             // TODO: AccDraw.noise |= data;
-            return(data);
-    }
+            return (data);
+        }
 
-    // We can only execute code below M1NOT.  If an opcode fetch occurs
-    // above M1NOT, we actually fetch (address&32767).  This is important
-    // because it makes it impossible to place the display file in the
-    // 48-64k region if a 64k RAM Pack is used.  How does the real
-    // Hardware work?
+        // We can only execute code below M1NOT.  If an opcode fetch occurs
+        // above M1NOT, we actually fetch (address&32767).  This is important
+        // because it makes it impossible to place the display file in the
+        // 48-64k region if a 64k RAM Pack is used.  How does the real
+        // Hardware work?
 
-    data = readbyte((Address>=49152)?Address&32767:Address);
-    opcode=data;
-    bit6=(opcode&64)!=0;
+        data = readbyte((Address >= 49152) ? Address & 32767 : Address);
+        opcode = data;
+        bit6 = (opcode & 64) != 0;
 
-    // Since we got here, we're generating video (ouch!)
-    // Bit six of the opcode is important.  If set, the opcode
-    // gets executed and nothing appears onscreen.  If unset
-    // the Z80 executes a NOP and the code is used to somehow
-    // generate the TV picture (exactly how depends on which
-    // display method is used)
+        // Since we got here, we're generating video (ouch!)
+        // Bit six of the opcode is important.  If set, the opcode
+        // gets executed and nothing appears onscreen.  If unset
+        // the Z80 executes a NOP and the code is used to somehow
+        // generate the TV picture (exactly how depends on which
+        // display method is used)
 
-    if (!bit6) opcode=0;
-    inv = (data&128)!=0;
+        if (!bit6) opcode = 0;
+        inv = (data & 128) != 0;
 
-    // First check for WRX graphics.  This is easy, we just create a
-    // 16 bit Address from the IR Register pair and fetch that byte
-    // loading it into the video shift register.
-    if (zx81opts.truehires==HIRESWRX && z80.I>=zx81opts.maxireg && !bit6)
-    {
-            data=readbyte((z80.I<<8) | (z80.R7 & 128) | ((z80.R-1) & 127));
-            update=true;
-    }
-    else if (!bit6)
-    {
+        // First check for WRX graphics.  This is easy, we just create a
+        // 16 bit Address from the IR Register pair and fetch that byte
+        // loading it into the video shift register.
+        if (zx81opts.truehires == HIRESWRX && z80.I >= zx81opts.maxireg && !bit6) {
+            data = readbyte((z80.I << 8) | (z80.R7 & 128) | ((z80.R - 1) & 127));
+            update = true;
+        } else if (!bit6) {
             // If we get here, we're generating normal Characters
             // (or pseudo Hi-Res), but we still need to figure out
             // where to get the bitmap for the character from
@@ -264,10 +248,10 @@ implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
             // to use if CHR$x16 is in use.  Else, standard ZX81
             // character sets are only 64 characters in size.
 
-            if ((zx81opts.chrgen==CHRGENCHR16 && (z80.I&1)!=0)
-                    || (zx81opts.chrgen==CHRGENQS && zx81opts.enableqschrgen))
-                    data = ((data&128)>>1)|(data&63);
-            else    data = data&63;
+            if ((zx81opts.chrgen == CHRGENCHR16 && (z80.I & 1) != 0)
+                    || (zx81opts.chrgen == CHRGENQS && zx81opts.enableqschrgen))
+                data = ((data & 128) >> 1) | (data & 63);
+            else data = data & 63;
 
 
             // If I points to ROM, OR I points to the 8-16k region for
@@ -279,19 +263,16 @@ implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
             // Otherwise, we can't get a bitmap from anywhere, so
             // display 11111111 (??What does a real ZX81 do?).
 
-            if (z80.I<64 || (z80.I>=128 && z80.I<192 && zx81opts.chrgen==CHRGENCHR16))
-            {
-                    if (zx81opts.extfont || (zx81opts.chrgen==CHRGENQS && zx81opts.enableqschrgen))
-                            data= font[(data<<3) | rowcounter];
-                    else    data=readbyte(((z80.I&254)<<8) + (data<<3) | rowcounter);
-            }
-            else data=255;
+            if (z80.I < 64 || (z80.I >= 128 && z80.I < 192 && zx81opts.chrgen == CHRGENCHR16)) {
+                if (zx81opts.extfont || (zx81opts.chrgen == CHRGENQS && zx81opts.enableqschrgen))
+                    data = font[(data << 3) | rowcounter];
+                else data = readbyte(((z80.I & 254) << 8) + (data << 3) | rowcounter);
+            } else data = 255;
 
-            update=true;
-    }
+            update = true;
+        }
 
-    if (update)
-    {
+        if (update) {
             // Update gets set to true if we managed to fetch a bitmap from
             // somewhere.  The only time this doesn't happen is if we encountered
             // an opcode with bit 6 set above M1NOT.
@@ -300,280 +281,305 @@ implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
             // register, remembering to make some video noise too.
 
             shift_register |= data;
-            shift_reg_inv |= inv? 255:0;
+            shift_reg_inv |= inv ? 255 : 0;
             //if (zx81.machine==MACHINELAMBDA) noise |= (Address>>8);
             //else noise |= z80.i;
             // TODO: if (zx81.machine==MACHINELAMBDA) AccDraw.noise |= (Address>>8);
             // TODO: else AccDraw.noise |= z80.i.get();
-            return(0);
-    }
-    else
-      {
-      // This is the fallthrough for when we found an opcode with
-      // bit 6 set in the display file.  We actually execute these
-      // opcodes, and generate the noise.
+            return (0);
+        } else {
+            // This is the fallthrough for when we found an opcode with
+            // bit 6 set in the display file.  We actually execute these
+            // opcodes, and generate the noise.
 
-      //noise |= data;
-      // TODO: AccDraw.noise |= data;
-      return(opcode);
-      }
+            //noise |= data;
+            // TODO: AccDraw.noise |= data;
+            return (opcode);
+        }
     }
 
-  public
-  void writeport(int Address, int Data )
-    {
-    switch(Address&255)
-    {
-    case 0xfd:
-            LastInstruction = LASTINSTOUTFD;
-            break;
-    case 0xfe:
-            LastInstruction = LASTINSTOUTFE;
-            break;
-    default:
-            break;
-    }
+    public void writeport(int Address, int Data) {
+        switch (Address & 255) {
+            case 0xfd:
+                LastInstruction = LASTINSTOUTFD;
+                break;
+            case 0xfe:
+                LastInstruction = LASTINSTOUTFE;
+                break;
+            default:
+                break;
+        }
 
-    if (LastInstruction==0) LastInstruction=LASTINSTOUTFF;
-    if (zx81opts.vsyncsound)
+        if (LastInstruction == 0) LastInstruction = LASTINSTOUTFF;
+        if (zx81opts.vsyncsound)
             sound_beeper(1);
     }
 
-  private int beeper = 0;
-  public
-  int readport(int Address)
-    {
-    setborder=true;
-    if ((Address&1) == 0)
-    {
-            int keyb, data=0;
+    private int beeper = 0;
+
+    public int readport(int Address) {
+        setborder = true;
+        if ((Address & 1) == 0) {
+            int keyb, data = 0;
             int i;
             if (zx81opts.vsyncsound)
-                    sound_beeper(0);
-            if (zx81opts.NTSC) data|=64;
+                sound_beeper(0);
+            if (zx81opts.NTSC) data |= 64;
             if (!GetEarState()) data |= 128;
 
-            LastInstruction=LASTINSTINFE;
+            LastInstruction = LASTINSTINFE;
 
-            keyb=Address/256;
-            for(i=0; i<8; i++)
-            {
-                    if ( (keyb & (1<<i)) == 0 ) data |= KBStatus.ZXKeyboard[i];
+            keyb = Address / 256;
+            for (i = 0; i < 8; i++) {
+                if ((keyb & (1 << i)) == 0) data |= KBStatus.ZXKeyboard[i];
             }
-            return((~data)&0xff);
-            
-    }
-    else
-            switch(Address&255)
-            {
-            case 0x01:
-            {
+            return ((~data) & 0xff);
+
+        } else
+            switch (Address & 255) {
+                case 0x01: {
                     // TODO: what's this about?!?!
-                    return(0);
-            }
+                    return (0);
+                }
 
-            case 0x5f:
-                    if (zx81opts.truehires==HIRESMEMOTECH) MemotechMode=(Address>>8);
-                    return(255);
+                case 0x5f:
+                    if (zx81opts.truehires == HIRESMEMOTECH) MemotechMode = (Address >> 8);
+                    return (255);
 
-            case 0x73:
-                    if (zx81opts.ts2050) return(d8251readDATA());
+                case 0x73:
+                    if (zx81opts.ts2050) return (d8251readDATA());
 
-            case 0x77:
-                    if (zx81opts.ts2050) return(d8251readCTRL());
+                case 0x77:
+                    if (zx81opts.ts2050) return (d8251readCTRL());
 
-            case 0xdd:
-                    if (zx81opts.aytype==AY_TYPE_ACE)
-                            return(sound_ay_read(SelectAYReg));
+                case 0xdd:
+                    if (zx81opts.aytype == AY_TYPE_ACE)
+                        return (sound_ay_read(SelectAYReg));
 
-            case 0xf5:
-                    beeper = 1-beeper;
-                    return(255);
-            case 0xfb:
-                    if (zx81opts.zxprinter) return(ZXPrinterReadPort());
-            default:
+                case 0xf5:
+                    beeper = 1 - beeper;
+                    return (255);
+                case 0xfb:
+                    if (zx81opts.zxprinter) return (ZXPrinterReadPort());
+                default:
                     break;
             }
-    return(255);
+        return (255);
     }
 
-  public
-  int contendmem(int Address, int states, int time)
-    {
-    return(time);
+    public int contendmem(int Address, int states, int time) {
+        return (time);
     }
 
-  public
-  int contendio(int Address, int states, int time)
-    {
-    return(time);
+    public int contendio(int Address, int states, int time) {
+        return (time);
     }
 
-  public
-  void ramwobble(boolean now)
-    {
-    int start, length, data;
-    int i;
+    public void ramwobble(boolean now) {
+        int start, length, data;
+        int i;
 
-    start=zx81opts.ROMTOP+1;
-    length=zx81opts.RAMTOP-start;
-    data=random(256);
+        start = zx81opts.ROMTOP + 1;
+        length = zx81opts.RAMTOP - start;
+        data = random(256);
 
-    if (now || random(64) == 0)
-      for(i=0;i<length;i++) memory[start+i] ^= data;
+        if (now || random(64) == 0)
+            for (i = 0; i < length; i++) memory[start + i] ^= data;
     }
 
 
-  public
-  int do_scanline(Scanline CurScanLine)
-    {
-    int tstotal=0;
-    CurScanLine.scanline_len=0;
-    
-    int MaxScanLen = (zx81opts.single_step? 1:420);
-    
-    if (CurScanLine.sync_valid!=0)
-    {
-            CurScanLine.add_blank(borrow, HSYNC_generator ? (16*paper) : VBLANKCOLOUR );
-            borrow=0;
-            CurScanLine.sync_valid=0;
-            CurScanLine.sync_len=0;
-    }
-    do
-    {
-            LastInstruction=LASTINSTNONE;
-            z80.PC = ROMPatch.PatchTest(this,z80);
+    public int do_scanline(Scanline CurScanLine) {
+        int tstotal = 0;
+        CurScanLine.scanline_len = 0;
+
+        int MaxScanLen = (zx81opts.single_step ? 1 : 420);
+
+        if (CurScanLine.sync_valid != 0) {
+            CurScanLine.add_blank(borrow, HSYNC_generator ? (16 * paper) : VBLANKCOLOUR);
+            borrow = 0;
+            CurScanLine.sync_valid = 0;
+            CurScanLine.sync_len = 0;
+        }
+        do {
+            LastInstruction = LASTINSTNONE;
+            z80.PC = ROMPatch.PatchTest(this, z80);
             int ts = z80.do_opcode();
-    
-            if (int_pending)
-            {
-                    ts += z80.interrupt(ts);
-                    paper=border;
-                    int_pending=false;
+
+            if (int_pending) {
+                ts += z80.interrupt(ts);
+                paper = border;
+                int_pending = false;
             }
-    
+
             // TODO: AccDraw.frametstates += ts;
             WavClockTick(ts, !HSYNC_generator);
             if (zx81opts.zxprinter) ZXPrinterClockTick(ts);
-    
-            shift_store=shift_register;
-            int pixels=ts<<1;
-            
-            for (int i=0; i<pixels; i++)
-            {
-                    int colour, bit;
-    
-                    bit=((shift_register^shift_reg_inv)&32768);
-    
-                    if (HSYNC_generator) colour = (bit!=0 ? ink:paper)<<4;
-                    else colour=VBLANKCOLOUR;
-    
-                    CurScanLine.scanline[CurScanLine.scanline_len++] = colour;
-    
-                    shift_register<<=1;
-                    shift_reg_inv<<=1;
+
+            shift_store = shift_register;
+            int pixels = ts << 1;
+
+            for (int i = 0; i < pixels; i++) {
+                int colour, bit;
+
+                bit = ((shift_register ^ shift_reg_inv) & 32768);
+
+                if (HSYNC_generator) colour = (bit != 0 ? ink : paper) << 4;
+                else colour = VBLANKCOLOUR;
+
+                CurScanLine.scanline[CurScanLine.scanline_len++] = colour;
+
+                shift_register <<= 1;
+                shift_reg_inv <<= 1;
             }
-    
-            switch(LastInstruction)
-            {
-            case LASTINSTOUTFD:
-                    NMI_generator=false;
-                    if (!HSYNC_generator) rowcounter=0;
-                    if (CurScanLine.sync_len!=0) CurScanLine.sync_valid=SYNCTYPEV;
-                    HSYNC_generator=true;
+
+            switch (LastInstruction) {
+                case LASTINSTOUTFD:
+                    NMI_generator = false;
+                    if (!HSYNC_generator) rowcounter = 0;
+                    if (CurScanLine.sync_len != 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    HSYNC_generator = true;
                     break;
-            case LASTINSTOUTFE:
-                    NMI_generator=true;
-                    if (!HSYNC_generator) rowcounter=0;
-                    if (CurScanLine.sync_len!=0) CurScanLine.sync_valid=SYNCTYPEV;
-                    HSYNC_generator=true;
+                case LASTINSTOUTFE:
+                    NMI_generator = true;
+                    if (!HSYNC_generator) rowcounter = 0;
+                    if (CurScanLine.sync_len != 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    HSYNC_generator = true;
                     break;
-            case LASTINSTINFE:
-                    if (!NMI_generator)
-                    {
-                            HSYNC_generator=false;
-                            if (CurScanLine.sync_len==0) CurScanLine.sync_valid=0;
-                            HaltCount=0;
+                case LASTINSTINFE:
+                    if (!NMI_generator) {
+                        HSYNC_generator = false;
+                        if (CurScanLine.sync_len == 0) CurScanLine.sync_valid = 0;
+                        HaltCount = 0;
                     }
                     break;
-            case LASTINSTOUTFF:
-                    if (!HSYNC_generator) rowcounter=0;
-                    if (CurScanLine.sync_len!=0) CurScanLine.sync_valid=SYNCTYPEV;
-                    HSYNC_generator=true;
+                case LASTINSTOUTFF:
+                    if (!HSYNC_generator) rowcounter = 0;
+                    if (CurScanLine.sync_len != 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    HSYNC_generator = true;
                     break;
-            default:
+                default:
                     break;
             }
-    
+
             hsync_counter -= ts;
-    
-            if( (z80.R & 64) == 0 )
-              int_pending=true;
+
+            if ((z80.R & 64) == 0)
+                int_pending = true;
             if (!HSYNC_generator) CurScanLine.sync_len += ts;
-            if (hsync_counter<=0)
-            {
-                    if (NMI_generator)
-                    {
-                            int nmilen;
-                            nmilen = z80.nmi(CurScanLine.scanline_len);
-                            hsync_counter -= nmilen;
-                            ts += nmilen;
-                    }
-    
-                    borrow=-hsync_counter;
-                    if (HSYNC_generator && CurScanLine.sync_len==0)
-                    {
-                            CurScanLine.sync_len=10;
-                            CurScanLine.sync_valid=SYNCTYPEH;
-                            if (CurScanLine.scanline_len>=(tperscanline*2))
-                              CurScanLine.scanline_len=tperscanline*2;
-                            rowcounter = (++rowcounter)&7;
-                    }
-                    hsync_counter += tperscanline;
+            if (hsync_counter <= 0) {
+                if (NMI_generator) {
+                    int nmilen;
+                    nmilen = z80.nmi(CurScanLine.scanline_len);
+                    hsync_counter -= nmilen;
+                    ts += nmilen;
+                }
+
+                borrow = -hsync_counter;
+                if (HSYNC_generator && CurScanLine.sync_len == 0) {
+                    CurScanLine.sync_len = 10;
+                    CurScanLine.sync_valid = SYNCTYPEH;
+                    if (CurScanLine.scanline_len >= (tperscanline * 2))
+                        CurScanLine.scanline_len = tperscanline * 2;
+                    rowcounter = (++rowcounter) & 7;
+                }
+                hsync_counter += tperscanline;
             }
-    
+
             tstotal += ts;
-    
+
             // TODO: DebugUpdate();
-    
-    } while(CurScanLine.scanline_len<MaxScanLen && CurScanLine.sync_valid==0 && !zx81_stop);
-    
-    if (CurScanLine.sync_valid==SYNCTYPEV)
-    {
-            hsync_counter=tperscanline;
+
+        } while (CurScanLine.scanline_len < MaxScanLen && CurScanLine.sync_valid == 0 && !zx81_stop);
+
+        if (CurScanLine.sync_valid == SYNCTYPEV) {
+            hsync_counter = tperscanline;
             //borrow=0;
-    }
-    
-    return(tstotal);
+        }
+
+        return (tstotal);
     }
 
-  // From Machine
-  public void reset() {}
-  public void nmi() {}
-  public void exit() {}
-  public boolean stop() { return zx81_stop; }
-  public Tape getTape() { return mTape; }
+    // From Machine
+    public void reset() {
+    }
 
-  //TODO: stub methods/values.
-  void sound_ay_write(int a, int b) {}
-  int sound_ay_read(int a) {return 0;}
-  int d8255_read(int a) {return 0;}
-  int D8255PRTA = 0;
-  int D8255PRTB = 0;
-  int D8255PRTC = 0;
-  void d8255_write(int a, int b) {}
-  void d8251writeDATA(int b) {}
-  void d8251writeCTRL(int b) {}
-  int CRC32Block(int[] memory, int romlen) {return 0;}
-  int SelectAYReg;
-  void DebugUpdate() {}
-  void ZXPrinterWritePort(int b) {}
-  int ZXPrinterReadPort() {return 0;}
-  void sound_beeper(int a) {}
-  boolean GetEarState() {return false;}
-  int d8251readDATA() {return 0;}
-  int d8251readCTRL() {return 0;}
-  int random(int a) { return 0;}
-  void WavClockTick(int a, boolean b) {}
-  void ZXPrinterClockTick(int a) {}
-  }
+    public void nmi() {
+    }
+
+    public void exit() {
+    }
+
+    public boolean stop() {
+        return zx81_stop;
+    }
+
+    public Tape getTape() {
+        return mTape;
+    }
+
+    //TODO: stub methods/values.
+    void sound_ay_write(int a, int b) {
+    }
+
+    int sound_ay_read(int a) {
+        return 0;
+    }
+
+    int d8255_read(int a) {
+        return 0;
+    }
+
+    int D8255PRTA = 0;
+    int D8255PRTB = 0;
+    int D8255PRTC = 0;
+
+    void d8255_write(int a, int b) {
+    }
+
+    void d8251writeDATA(int b) {
+    }
+
+    void d8251writeCTRL(int b) {
+    }
+
+    int CRC32Block(int[] memory, int romlen) {
+        return 0;
+    }
+
+    int SelectAYReg;
+
+    void DebugUpdate() {
+    }
+
+    void ZXPrinterWritePort(int b) {
+    }
+
+    int ZXPrinterReadPort() {
+        return 0;
+    }
+
+    void sound_beeper(int a) {
+    }
+
+    boolean GetEarState() {
+        return false;
+    }
+
+    int d8251readDATA() {
+        return 0;
+    }
+
+    int d8251readCTRL() {
+        return 0;
+    }
+
+    int random(int a) {
+        return 0;
+    }
+
+    void WavClockTick(int a, boolean b) {
+    }
+
+    void ZXPrinterClockTick(int a) {
+    }
+}

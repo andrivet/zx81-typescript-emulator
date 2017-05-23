@@ -23,67 +23,72 @@
 package jtyone.zx81;
 
 import jtyone.config.Machine;
-import jtyone.io.Tape;
 import jtyone.z80.Z80;
 
 
-public class ROMPatch
-  {
+public class ROMPatch {
 
-  private static int pop16(Machine machine, Z80 z80)
-    {
-    int h,l;
+    private static int pop16(Machine machine, Z80 z80) {
+        int h, l;
 
-    l=machine.memory[z80.SP++];
-    h=machine.memory[z80.SP++];
-    return((h<<8) | l);
+        l = machine.memory[z80.SP++];
+        h = machine.memory[z80.SP++];
+        return ((h << 8) | l);
     }
 
-  public static int PatchTest(Machine machine, Z80 z80)
-    {
-    int b = machine.memory[z80.PC];
-    
-    if (z80.PC==0x0356 && b == 0x1f )  // ZX81, start loading
-      {
-      byte[] currentProgram = machine.getTape().getNextEntry();
-      if( currentProgram != null )
-        {
-        // Skip the ZX81 program name.
-        // TODO: really ought to compare the ZX81 program name with that being
-        // loaded (if any).
-        int pos = 0;
-        while( (currentProgram[pos++] & 0x80) == 0 );
-        for( int i = pos; i < currentProgram.length; i++ )
-          machine.memory[0x4009+i-pos] = currentProgram[i]&0xff;                   
-        // Note: can't do arraycopy as memory is ints, currentProgram is bytes... 
-        
-        pop16(machine,z80);
-        return 0x0207;    // ZX81, load complete.
-        }
-      }
+    public static int PatchTest(Machine machine, Z80 z80) {
+        int b = machine.memory[z80.PC];
 
-    if (z80.PC==0x0222 && b == 0x3E )  // ZX80, start loading
-      {
-      byte[] currentProgram = machine.getTape().getNextEntry();
-      if( currentProgram != null )
+        if (z80.PC == 0x0356 && b == 0x1f)  // ZX81, start loading
         {
-        for( int i = 0; i < currentProgram.length; i++ )
-          machine.memory[0x4000+i] = currentProgram[i]&0xff;                   
-        // Note: can't do arraycopy as memory is ints, currentProgram is bytes... 
-        
-        pop16(machine,z80);
-        return 0x0203;    // ZX80, load complete.
+            byte[] currentProgram = machine.getTape().getNextEntry();
+            if (currentProgram != null) {
+                // Skip the ZX81 program name.
+                // TODO: really ought to compare the ZX81 program name with that being
+                // loaded (if any).
+                int pos = 0;
+                while ((currentProgram[pos++] & 0x80) == 0) ;
+                for (int i = pos; i < currentProgram.length; i++)
+                    machine.memory[0x4009 + i - pos] = currentProgram[i] & 0xff;
+                // Note: can't do arraycopy as memory is ints, currentProgram is bytes...
+
+                pop16(machine, z80);
+                return 0x0207;    // ZX81, load complete.
+            }
         }
-      }
-    
-    return(z80.PC);
+
+        if (z80.PC == 0x0222 && b == 0x3E)  // ZX80, start loading
+        {
+            byte[] currentProgram = machine.getTape().getNextEntry();
+            if (currentProgram != null) {
+                for (int i = 0; i < currentProgram.length; i++)
+                    machine.memory[0x4000 + i] = currentProgram[i] & 0xff;
+                // Note: can't do arraycopy as memory is ints, currentProgram is bytes...
+
+                pop16(machine, z80);
+                return 0x0203;    // ZX80, load complete.
+            }
+        }
+
+        return (z80.PC);
     }
 
-  // TODO: Stub methods
-  public static final int TZX_BYTE_EMPTY = -1;
-  public static void WavStop() { }
-  public static void WavStart() { }
-  public static void WavStartRec() { }
-  public static void WavRecordByte(int b) { }
-  public static boolean FlashSaveable() { return false; }
-  }
+    // TODO: Stub methods
+    public static final int TZX_BYTE_EMPTY = -1;
+
+    public static void WavStop() {
+    }
+
+    public static void WavStart() {
+    }
+
+    public static void WavStartRec() {
+    }
+
+    public static void WavRecordByte(int b) {
+    }
+
+    public static boolean FlashSaveable() {
+        return false;
+    }
+}

@@ -21,90 +21,76 @@
  */
 package jtyone.display;
 
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Rectangle;
+import java.awt.*;
 
 /**
  * This class allows display of the Jtyone emulator as an application or
  * applet.
- * 
+ *
  * @author Simon Holdsworth
  */
-public class AccCanvas 
-extends Canvas
-  {
-  private Dimension mSize;
-  private AccDraw mDisplayDrawer;
-  
-  public AccCanvas(AccDraw dd)
-    {
-    mDisplayDrawer = dd;
-    }
-  
-  public void setRequiredSize( Dimension size )
-    {
-    mSize = size;
-    setSize(size);
-    }
-  
-  public void paint(Graphics g)
-    {
-    mDisplayDrawer.RedrawDisplay(g);
-    }
-  
-  // The follow methods are all to ensure that the canvas stays at
-  // the required size.  Not really necessary for an application, but
-  // needed for an applet to make sure there isn't any minor scaling
-  // that would distort the display.
-  public void setSize(Dimension d)
-    {
-    if( mSize != null &&
-        !d.equals(mSize) )
-      return;
-    super.setSize(d);
-    }
-  
-  public void setSize(int w, int h)
-    {
-    if( mSize != null &&
-        (w != mSize.width || h != mSize.height) )
-      return;
-    
-    super.setSize(w,h);
-    }
-  
-  public void setBounds(Rectangle r)
-    {
-    if( mSize != null &&
-        (r.width != mSize.width || r.height != mSize.height) )
-      return;
-    
-    super.setBounds(r);
+public class AccCanvas
+        extends Canvas {
+    private Dimension mSize;
+    private AccDraw mDisplayDrawer;
+
+    public AccCanvas(AccDraw dd) {
+        mDisplayDrawer = dd;
     }
 
-  public void setBounds(int x, int y, int w, int h)
-    {
-    if( mSize != null &&
-        (w != mSize.width || h != mSize.height) )
-      return;
-    
-    super.setBounds(x,y,w,h);
+    public void setRequiredSize(Dimension size) {
+        mSize = size;
+        setSize(size);
     }
 
-  public Dimension getMinimumSize() 
-    {
-    return mSize;
+    public void paint(Graphics g) {
+        mDisplayDrawer.RedrawDisplay(g);
     }
-  
-  public Dimension getPreferredSize() 
-    {
-    return mSize;
+
+    // The follow methods are all to ensure that the canvas stays at
+    // the required size.  Not really necessary for an application, but
+    // needed for an applet to make sure there isn't any minor scaling
+    // that would distort the display.
+    public void setSize(Dimension d) {
+        if (mSize != null &&
+                !d.equals(mSize))
+            return;
+        super.setSize(d);
     }
-  
-  public Dimension getMaximumSize() 
-    {
-    return mSize;
+
+    public void setSize(int w, int h) {
+        if (mSize != null &&
+                (w != mSize.width || h != mSize.height))
+            return;
+
+        super.setSize(w, h);
     }
-  }
+
+    public void setBounds(Rectangle r) {
+        if (mSize != null &&
+                (r.width != mSize.width || r.height != mSize.height))
+            return;
+
+        super.setBounds(r);
+    }
+
+    public void setBounds(int x, int y, int w, int h) {
+        if (mSize != null &&
+                (w != mSize.width || h != mSize.height))
+            return;
+
+        super.setBounds(x, y, w, h);
+    }
+
+    public Dimension getMinimumSize() {
+        return mSize;
+    }
+
+    public Dimension getPreferredSize() {
+        return mSize;
+    }
+
+    public Dimension getMaximumSize() {
+        return mSize;
+    }
+}

@@ -25,29 +25,41 @@ package jtyone.config;
 import jtyone.display.Scanline;
 import jtyone.io.Tape;
 
-public abstract class Machine
-  {
-  public abstract void initialise(ZX81Config config);
-  public abstract int do_scanline(Scanline line);
-  public abstract void writebyte(int Address, int Data);
-  public abstract int readbyte(int Address);
-  public abstract int opcode_fetch(int Address);
-  public abstract void writeport(int Address, int Data);
-  public abstract int readport(int Address);
-  public abstract int contendmem(int Address, int states, int time);
-  public abstract int contendio(int Address, int states, int time);
-  public abstract void reset();
-  public abstract void nmi();
-  public abstract void exit();
-  public abstract boolean stop();
-  public abstract Tape getTape();
-  
-  public int clockspeed;
-  public int tperscanline;
-  public int tperframe;
-  public int intposition;
-  public int scanlines;
-  public String CurRom;
-  
-  public int[] memory;
-  }
+public abstract class Machine {
+    public abstract void initialise(ZX81Config config);
+
+    public abstract int do_scanline(Scanline line);
+
+    public abstract void writebyte(int Address, int Data);
+
+    public abstract int readbyte(int Address);
+
+    public abstract int opcode_fetch(int Address);
+
+    public abstract void writeport(int Address, int Data);
+
+    public abstract int readport(int Address);
+
+    public abstract int contendmem(int Address, int states, int time);
+
+    public abstract int contendio(int Address, int states, int time);
+
+    public abstract void reset();
+
+    public abstract void nmi();
+
+    public abstract void exit();
+
+    public abstract boolean stop();
+
+    public abstract Tape getTape();
+
+    public int clockspeed;
+    public int tperscanline;
+    public int tperframe;
+    public int intposition;
+    public int scanlines;
+    public String CurRom;
+
+    public int[] memory;
+}

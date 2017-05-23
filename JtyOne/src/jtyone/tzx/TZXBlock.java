@@ -22,17 +22,15 @@
 
 package jtyone.tzx;
 
-public class TZXBlock
-  {
-  public int BlockID;
-  public int Pause;
-  public int Group;
-  public TZXBlockInfo Head;
-  public TZXBlockData Data;
-  public int[] SymDefP, SymDefD, PRLE;
-  
-  public TZXBlock()
-    {
-    Data = new TZXBlockData();
-    }   
-  }
+public class TZXBlock {
+    public int BlockID;
+    public int Pause;
+    public int Group;
+    public TZXBlockInfo Head;
+    public TZXBlockData Data;
+    public int[] SymDefP, SymDefD, PRLE;
+
+    public TZXBlock() {
+        Data = new TZXBlockData();
+    }
+}

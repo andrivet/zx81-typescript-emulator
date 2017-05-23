@@ -27,7 +27,6 @@
 
 package jtyone.z80;
 
-/* Macros used for accessing the registers */
 
 public abstract class Register
   {

@@ -145,13 +145,6 @@ implements KeyListener, WindowListener, ActionListener, FocusListener
   private
   void init(String tzxFileName, String hires, String scale, String machine, Container container, boolean applet )
     {
-    // Sort out any configured options for the emulator.
-    if( "ZX80".equals(machine) )
-      {
-      mConfig.machine.CurRom = mConfig.zx81opts.ROM80;
-      mConfig.zx81opts.machine = ZX81ConfigDefs.MACHINEZX80;
-      }
-    else 
       mConfig.machine.CurRom = mConfig.zx81opts.ROM81;
     
     int scaleCanvas = 2;

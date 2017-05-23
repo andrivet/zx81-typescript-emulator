@@ -31,25 +31,24 @@ package jtyone.z80;
 
 public interface RegisterPair
   {
-  public int get();
-  public void set( int w );
-  public void set(RegisterPair rp);
-  public int postInc();
-  public void inc();
-  public int postDec();
-  public int preDec();
-  public void dec();
-  public void add(int a);
-  public Register getRH(String name);
-  public Register getRL(String name);
-  public String toString();
-  public String getName();
+    int get();
+  void set( int w );
+  void set(RegisterPair rp);
+  int postInc();
+  void inc();
+  int postDec();
+  int preDec();
+  void dec();
+  void add(int a);
+  Register getRH(String name);
+  Register getRL(String name);
+  String toString();
+  String getName();
   }
 
 final class MasterRegisterPair
 implements RegisterPair
   {
-  //int word;
   int word;
   public String name;
   public MasterRegisterPair(String name) { this.name = name; }
@@ -75,7 +74,6 @@ implements RegisterPair
 final class SlaveRegisterPair
 implements RegisterPair
   {
-  //int word;
   MasterRegister hi;
   MasterRegister low;
   public String name;

@@ -22,25 +22,13 @@
 
 package jtyone.io;
 
-/*
-#ifndef SOUND_H
-#define SOUND_H
-*/
-
 public interface SoundDefs
   {
-//#define AY_TYPE_QUICKSILVA 1
-//#define AY_TYPE_ZONX 2
-//#define AY_TYPE_FULLER 3
-//#define AY_TYPE_ACE 4
-//#define AY_TYPE_SINCLAIR 5
-//#define AY_TYPE_TIMEX 6
-//#define AY_TYPE_BOLDFIELD 7
-  public static final int AY_TYPE_QUICKSILVA = 1;
-  public static final int AY_TYPE_ZONX = 2;
-  public static final int AY_TYPE_FULLER = 3;
-  public static final int AY_TYPE_ACE = 4;
-  public static final int AY_TYPE_SINCLAIR = 5;
-  public static final int AY_TYPE_TIMEX = 6;
-  public static final int AY_TYPE_BOLDFIELD = 7;
+  int AY_TYPE_QUICKSILVA = 1;
+  int AY_TYPE_ZONX = 2;
+  int AY_TYPE_FULLER = 3;
+  int AY_TYPE_ACE = 4;
+  int AY_TYPE_SINCLAIR = 5;
+  int AY_TYPE_TIMEX = 6;
+  int AY_TYPE_BOLDFIELD = 7;
   }

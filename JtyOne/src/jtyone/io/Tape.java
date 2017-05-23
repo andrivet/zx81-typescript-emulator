@@ -120,8 +120,6 @@ public class Tape
       //System.out.println("Autoloading");
       if( config.zx81opts.machine == ZX81ConfigDefs.MACHINEZX81 )
         autoload(keyboard,'J',true);
-      else if( config.zx81opts.machine == ZX81ConfigDefs.MACHINEZX80 )
-        autoload(keyboard,'W',false);
       }
     }
   

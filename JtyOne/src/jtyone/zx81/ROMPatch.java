@@ -26,24 +26,10 @@ import jtyone.config.Machine;
 import jtyone.io.Tape;
 import jtyone.z80.Z80;
 
-/*
-#include "z80.h"
-#include "zx81.h"
-#include "snap.h"
-#include "zx81config.h"
-#include "WavCInterface.h"
-#include "rompatch.h"
-
-extern int TZXByte, TZXEventCounter;
-#define TZX_BYTE_EMPTY -1
-*/
 
 public class ROMPatch
   {
 
-  //public static int TZXByte = 0;
-  //public static int TZXEventCounter = 0;
-  
   private static int pop16(Machine machine, Z80 z80)
     {
     int h,l;
@@ -75,25 +61,7 @@ public class ROMPatch
         return 0x0207;    // ZX81, load complete.
         }
       }
-    /*
-    if (pc==0x0207 && b==0x21)
-            WavStop(); // ZX81, Normal Display, Stop Tape
-    if (pc==0x0203 && b==0xc9) WavStop(); // Lambda, Normal Display, Stop Tape
-    if (pc==0x0203 && b==0xc3) WavStop(); // ZX80, Normal Display, Stop Tape
-    if ((pc==0x0356 && b==0x1f) || (pc==0x19b3 && b==0x07))
-                    // ZX81, Lambda, Get Byte - Start loading
-      {
-      WavStart();
-      if (TZXByte!=TZX_BYTE_EMPTY)
-        {
-        B.set(TZXByte);
-        pc=pop16();
-        TZXByte=TZX_BYTE_EMPTY;
-        TZXEventCounter=0;
-        }
-      }
-    */
-    
+
     if (z80.PC==0x0222 && b == 0x3E )  // ZX80, start loading
       {
       byte[] currentProgram = machine.getTape().getNextEntry();
@@ -108,53 +76,6 @@ public class ROMPatch
         }
       }
     
-    /*
-    if (pc==0x0222 && b==0x3E)
-                    // ZX80, Get Byte - Start loading
-      {
-      WavStart();
-
-      if (TZXByte!=TZX_BYTE_EMPTY)
-        {
-        ZX81.memory[HL.get()]=TZXByte;
-        pc=0x0248;
-        TZXByte=TZX_BYTE_EMPTY;
-        TZXEventCounter=0;
-        }
-      }
-
-    if (pc==0x02ff && b==0xcd)            // ZX81, Save Delay, Start Saving
-    {
-            WavStartRec();
-            if (FlashSaveable()) DE.set(0x0001);  // If FlashSaving, remove Save Delay
-    }
-
-    if (pc==0x0d0d && b==0x16)            // Lambda, Save Delay, Start Saving
-    {
-            WavStartRec();
-            //if (FlashSaveable()) z80.de.w=0x0001;  // If FlashSaving, remove Save Delay
-    }
-
-    if (pc==0x01BA && b==0x3E)            // ZX80, Save Delay, Start Saving
-    {
-            WavStartRec();
-            if (FlashSaveable()) DE.set(0x0001);  // If FlashSaving, remove Save Delay
-    }
-
-    if (FlashSaveable() && ((pc==0x031e && b==0x5e)
-                             || (pc==0x17Ed && b==0x37)))
-            // ZX81, Lambda, Out Byte - Save Byte
-    {
-                    WavRecordByte(ZX81.memory[HL.get()]);
-                    PC.set(pop16());
-    }
-
-    if (FlashSaveable() && pc==0x1cb && b==0x11) // ZX81, Lambda, Out Byte - Save Byte
-    {
-                    WavRecordByte(ZX81.memory[HL.get()]);
-                    PC.set(0x01f3);
-    }
-    */
     return(z80.PC);
     }
 

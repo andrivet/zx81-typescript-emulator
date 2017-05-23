@@ -22,33 +22,17 @@
 
 package jtyone.display;
 
-/*
-#include <string.h>
-#include <dir.h>
-
-#include "zx81config.h"
-
-*/
-
-// From zx81config.h...
-
-//typedef struct
 public class Scanline
   {
   public int sync_len, sync_valid;
   public int scanline_len;
-  //BYTE scanline[4000];
   public int[] scanline = new int[4000];
-  //} SCANLINE;
-  
-  // From AccDraw_.cpp
-  public  
+
+  public
   void add_blank(int tstates, int colour)
     {
     while(tstates-- > 0)
       {
-      //CurScanLine->scanline[CurScanLine->scanline_len++]=colour;
-      //CurScanLine->scanline[CurScanLine->scanline_len++]=colour;
       scanline[scanline_len++]=colour;
       scanline[scanline_len++]=colour;
       }

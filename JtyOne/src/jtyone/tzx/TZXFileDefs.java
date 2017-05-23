@@ -28,7 +28,6 @@ public class TZXFileDefs
   public static final int TZX_MAX_BLOCKS = 2000;
   
   //TODO: public static float TZXSCALE(int x,int clockSpeed) { return (((float)x)/(((float)3500000)/((float)clockSpeed))); }
-//  public static final int TZXSCALE(x) (x)
 
   public static final int TZX_BLOCK_ROM          = 0x10;
   public static final int TZX_BLOCK_TURBO        = 0x11;

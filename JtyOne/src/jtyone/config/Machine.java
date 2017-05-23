@@ -25,31 +25,8 @@ package jtyone.config;
 import jtyone.display.Scanline;
 import jtyone.io.Tape;
 
-/*
-#include <string.h>
-#include <dir.h>
-
-#include "zx81config.h"
-
-*/
-
-  // From zx81config.h...
-
-  //typedef struct
 public abstract class Machine
   {
-  //void (*initialise)(void);
-  //int (*do_scanline)(SCANLINE *line);
-  //void (*writebyte)(int Address, int Data);
-  //BYTE (*readbyte)(int Address);
-  //BYTE (*opcode_fetch)(int Address);
-  //void (*writeport)(int Address, int Data, int *tstates);
-  //BYTE (*readport)(int Address, int *tstates);
-  //int (*contendmem)(int Address, int states, int time);
-  //int (*contendio)(int Address, int states, int time);
-  //void (*reset)(void);
-  //void (*nmi)(void);
-  //void (*exit)(void);
   public abstract void initialise(ZX81Config config);
   public abstract int do_scanline(Scanline line);
   public abstract void writebyte(int Address, int Data);
@@ -70,9 +47,7 @@ public abstract class Machine
   public int tperframe;
   public int intposition;
   public int scanlines;
-  //char CurRom[256];
   public String CurRom;
   
   public int[] memory;
-  //} MACHINE;
   }

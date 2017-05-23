@@ -29,7 +29,6 @@ public class TZXBlock
   public int Group;
   public TZXBlockInfo Head;
   public TZXBlockData Data;
-  //int *SyncPulses, *Alphabet;
   public int[] SymDefP, SymDefD, PRLE;
   
   public TZXBlock()

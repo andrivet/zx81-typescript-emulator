@@ -22,27 +22,11 @@
 
 package jtyone.config;
 
-/*
-#include <string.h>
-#include <dir.h>
-
-#include "zx81config.h"
-
-*/
-
-  // From zx81config.h...
-
-  //typedef struct
 public class TVOptions
   {
-  //int AdvancedEffects;
-  //int DotCrawl;
-  //int Interlaced;
-  //int DisableAdvanced;
   public boolean AdvancedEffects;
   public boolean DotCrawl;
   public boolean Interlaced;
   public boolean DisableAdvanced;
   public int frequency;
-  //} TV;
   }

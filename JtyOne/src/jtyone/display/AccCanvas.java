@@ -60,7 +60,6 @@ extends Canvas
   // that would distort the display.
   public void setSize(Dimension d)
     {
-    //System.out.println("setSize; d = "+d+" mSize = "+mSize);
     if( mSize != null &&
         !d.equals(mSize) )
       return;
@@ -69,7 +68,6 @@ extends Canvas
   
   public void setSize(int w, int h)
     {
-    //System.out.println("setSize; w = "+w+" h = "+h+" mSize = "+mSize);
     if( mSize != null &&
         (w != mSize.width || h != mSize.height) )
       return;
@@ -79,7 +77,6 @@ extends Canvas
   
   public void setBounds(Rectangle r)
     {
-    //System.out.println("setBounds; w = "+r.width+" h = "+r.height+" mSize = "+mSize);
     if( mSize != null &&
         (r.width != mSize.width || r.height != mSize.height) )
       return;
@@ -89,7 +86,6 @@ extends Canvas
 
   public void setBounds(int x, int y, int w, int h)
     {
-    //System.out.println("setBounds; w = "+w+" h = "+h+" mSize = "+mSize);
     if( mSize != null &&
         (w != mSize.width || h != mSize.height) )
       return;

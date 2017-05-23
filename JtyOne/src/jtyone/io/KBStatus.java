@@ -29,30 +29,17 @@ import java.awt.event.KeyEvent;
 import jtyone.config.ZX81Config;
 import jtyone.config.ZX81ConfigDefs;
 
-
-/*
-#include <vcl.h>
-#pragma hdrstop
-
-#include "kbstatus.h"
-#include "zx81.h"
-#include "zx81config.h"
-*/
-
 public class KBStatus
 implements ZX81ConfigDefs
   {
   int PCShift=1;
-  //unsigned int PCALT=0;
   int PCALT=0;
   
-  // FROM zx81/zx81.h
   private static final int kbD0 = 1;
   private static final int kbD1 = 2;
   private static final int kbD2 = 4;
   private static final int kbD3 = 8;
   private static final int kbD4 = 16;
-  //private static final int kbD5 = 32;
 
   private static final int kbA8  = 0;
   private static final int kbA9  = 1;
@@ -91,10 +78,8 @@ implements ZX81ConfigDefs
   static final int VK_MENU = KeyEvent.VK_ALT;   // TODO: is this correct?
   static final int VK_QUOTE = KeyEvent.VK_QUOTE;
 
-    //struct kb *KeyMap;
   static kb[] KeyMap;
   
-//  struct kb KBZX81[]=
   static int[][] KBZX81_ints =
     {
       { 0, VK_SHIFT , kbA8, kbD0, 255,255 },
@@ -150,43 +135,24 @@ implements ZX81ConfigDefs
       { 0, VK_NUMPAD9 , kbA12, kbD1, 255,255 },
       { 0, VK_NUMPAD0 , kbA12, kbD0, 255,255 },
 
-      //{ 0, VK_MULTIPLY , kbA8, kbD4, 255,255 },
-      //{ 0, VK_DIVIDE , kbA15, kbD4, 255,255 },
       { 0, VK_MULTIPLY , kbA15, kbD4, kbA8, kbD0 },
       { 0, VK_DIVIDE , kbA8, kbD4, kbA8, kbD0 },
 
-      //{ 1, 186, kbA8, kbD2, kbA8, kbD0 },         // ;
       { 1, ';', kbA8, kbD2, kbA8, kbD0 },           // ;
       { 2, ';', kbA8, kbD1, kbA8, kbD0 },           // : (Shift ;)
-      //{ 1, 189, kbA14, kbD3, kbA8, kbD0 },        // -
       { 1, '-', kbA14, kbD3, kbA8, kbD0 },          // -
-      //{ 1, VK_SUBTRACT, kbA14, kbD3, kbA8, kbD0 },
       { 0, VK_SUBTRACT, kbA14, kbD3, kbA8, kbD0 },
 
-      //{ 1, 187, kbA14, kbD1, kbA8, kbD0 },        // =
-      //{ 2, 187, kbA14, kbD2, kbA8, kbD0 },        // + (Shift =)
       { 1, '=', kbA14, kbD1, kbA8, kbD0 },          // =
       { 2, '=', kbA14, kbD2, kbA8, kbD0 },          // + (Shift =)
-      //{ 2, VK_ADD, kbA14, kbD2, kbA8, kbD0 },     // + (Shift numpad+)
       { 0, VK_ADD, kbA14, kbD2, kbA8, kbD0 },       // + (numpad+)
 
-      //{ 1, 188, kbA15, kbD1, kbA8, kbD0 },        // ,
-      //{ 2, 188, kbA15, kbD3, kbA8, kbD0 },        // < (Shift ,)
       { 1, ',', kbA15, kbD1, kbA8, kbD0 },          // ,
       { 2, ',', kbA15, kbD3, kbA8, kbD0 },          // < (Shift ,)
 
-      //{ 1, 190 , kbA15, kbD1, 255,255 },          // .
       { 1, '.' , kbA15, kbD1, 255,255 },            // .
-      //{ 1, VK_DECIMAL , kbA15, kbD1, 255,255 },   // . (numpad.)
       { 0, VK_DECIMAL , kbA15, kbD1, 255,255 },     // . (numpad.)
-      //{ 2, 190 , kbA15, kbD2, kbA8, kbD0 },       // > (Shift .)
       { 2, '.' , kbA15, kbD2, kbA8, kbD0 },         // > (Shift .)
-      //{ 1, 191 , kbA8, kbD4, kbA8, kbD0 },        // /
-      //{ 2, 191 , kbA8, kbD3, kbA8, kbD0 },        // ? (Shift /)
-      //{ 0, 219 , kbA13, kbD2, kbA8, kbD0 },       // [
-      //{ 0, 221 , kbA13, kbD1, kbA8, kbD0 },       // ]
-      //{ 2, 222 , kbA13, kbD0, kbA8, kbD0 },       // #
-      //{ 0, 192 , kbA13, kbD0, kbA8, kbD0 },       // '
       { 1, '/' , kbA8, kbD4, kbA8, kbD0 },          // /
       { 2, '/' , kbA8, kbD3, kbA8, kbD0 },          // ? (Shift /)
       { 0, '[' , kbA13, kbD2, kbA8, kbD0 },         // ( ([ or { these are not in ZX81 character set)
@@ -194,9 +160,6 @@ implements ZX81ConfigDefs
       { 1, 520 , kbA13, kbD0, kbA8, kbD0 },         // " (# or ~ these are not in ZX81 character set)
       { 0, VK_QUOTE , kbA13, kbD0, kbA8, kbD0 },    // " (' or @ these are not in ZX81 character set)
 
-      //{ 2, 188, kbA15, kbD3, kbA8, kbD0 },
-      //{ 2, 190, kbA15, kbD2, kbA8, kbD0 },
-
       { 0, VK_BACK , kbA12, kbD0, kbA8, kbD0 },
       { 0, VK_LEFT , kbA11, kbD4, kbA8, kbD0 },
       { 0, VK_DOWN , kbA12, kbD4, kbA8, kbD0 },
@@ -208,387 +171,12 @@ implements ZX81ConfigDefs
       {0, 0, 0, 0, 0, 0 }
     };
   
-  // TODO: the rest of the keyboards need fixing as for the ZX81 above.
-  
-  //struct kb KBZX80[]=
-  static int[][] KBZX80_ints =  
-    {
-      { 0, VK_SHIFT , kbA8, kbD0, 255,255 },
-      { 0, VK_RETURN , kbA14, kbD0, 255,255 },
-      { 0, VK_SPACE , kbA15, kbD0, 255,255 },
 
-      { 0, 'A' , kbA9, kbD0, 255,255 },
-      { 0, 'B' , kbA15, kbD4, 255,255 },
-      { 0, 'C' , kbA8, kbD3, 255,255 },
-      { 0, 'D' , kbA9, kbD2, 255,255 },
-      { 0, 'E' , kbA10, kbD2, 255,255 },
-      { 0, 'F' , kbA9, kbD3, 255,255 },
-      { 0, 'G' , kbA9, kbD4, 255,255 },
-      { 0, 'H' , kbA14, kbD4, 255,255 },
-      { 0, 'I' , kbA13, kbD2, 255,255 },
-      { 0, 'J' , kbA14, kbD3, 255,255 },
-      { 0, 'K' , kbA14, kbD2, 255,255 },
-      { 0, 'L' , kbA14, kbD1, 255,255 },
-      { 0, 'M' , kbA15, kbD2, 255,255 },
-      { 0, 'N' , kbA15, kbD3, 255,255 },
-      { 0, 'O' , kbA13, kbD1, 255,255 },
-      { 0, 'P' , kbA13, kbD0, 255,255 },
-      { 0, 'Q' , kbA10, kbD0, 255,255 },
-      { 0, 'R' , kbA10, kbD3, 255,255 },
-      { 0, 'S' , kbA9, kbD1, 255,255 },
-      { 0, 'T' , kbA10, kbD4, 255,255 },
-      { 0, 'U' , kbA13, kbD3, 255,255 },
-      { 0, 'V' , kbA8, kbD4, 255,255 },
-      { 0, 'W' , kbA10, kbD1, 255,255 },
-      { 0, 'X' , kbA8, kbD2, 255,255 },
-      { 0, 'Y' , kbA13, kbD4, 255,255 },
-      { 0, 'Z' , kbA8, kbD1, 255,255 },
-
-      { 0, '1' , kbA11, kbD0, 255,255 },
-      { 0, '2' , kbA11, kbD1, 255,255 },
-      { 0, '3' , kbA11, kbD2, 255,255 },
-      { 0, '4' , kbA11, kbD3, 255,255 },
-      { 0, '5' , kbA11, kbD4, 255,255 },
-      { 0, '6' , kbA12, kbD4, 255,255 },
-      { 0, '7' , kbA12, kbD3, 255,255 },
-      { 0, '8' , kbA12, kbD2, 255,255 },
-      { 0, '9' , kbA12, kbD1, 255,255 },
-      { 0, '0' , kbA12, kbD0, 255,255 },
-
-      { 0, VK_NUMPAD1 , kbA11, kbD0, 255,255 },
-      { 0, VK_NUMPAD2 , kbA11, kbD1, 255,255 },
-      { 0, VK_NUMPAD3 , kbA11, kbD2, 255,255 },
-      { 0, VK_NUMPAD4 , kbA11, kbD3, 255,255 },
-      { 0, VK_NUMPAD5 , kbA11, kbD4, 255,255 },
-      { 0, VK_NUMPAD6 , kbA12, kbD4, 255,255 },
-      { 0, VK_NUMPAD7 , kbA12, kbD3, 255,255 },
-      { 0, VK_NUMPAD8 , kbA12, kbD2, 255,255 },
-      { 0, VK_NUMPAD9 , kbA12, kbD1, 255,255 },
-      { 0, VK_NUMPAD0 , kbA12, kbD0, 255,255 },
-
-      { 0, VK_MULTIPLY , kbA8, kbD4, 255,255 },
-      { 0, VK_DIVIDE , kbA15, kbD4, 255,255 },
-
-      { 1, 186, kbA8, kbD2, kbA8, kbD0 },
-      { 2, 186, kbA8, kbD1, kbA8, kbD0 },
-      { 1, 189, kbA14, kbD3, kbA8, kbD0 },
-      { 1, VK_SUBTRACT, kbA14, kbD3, kbA8, kbD0 },
-
-      { 1, 187, kbA14, kbD1, kbA8, kbD0 },
-      { 2, 187, kbA14, kbD2, kbA8, kbD0 },
-      { 2, VK_ADD, kbA14, kbD2, kbA8, kbD0 },
-
-      { 1, 188, kbA15, kbD1, kbA8, kbD0 },
-      { 2, 188, kbA15, kbD3, kbA8, kbD0 },
-
-      { 1, 190 , kbA15, kbD1, 255,255 },
-      { 1, VK_DECIMAL , kbA15, kbD1, 255,255 },
-      { 2, 190 , kbA15, kbD2, kbA8, kbD0 },
-      { 1, 191 , kbA8, kbD4, kbA8, kbD0 },
-      { 2, 191 , kbA8, kbD3, kbA8, kbD0 },
-      { 0, 219 , kbA13, kbD2, kbA8, kbD0 },
-      { 0, 221 , kbA13, kbD1, kbA8, kbD0 },
-      { 2, 222 , kbA13, kbD4, kbA8, kbD0 },
-
-      //{ 2, 188, kbA15, kbD3, kbA8, kbD0 },
-      //{ 2, 190, kbA15, kbD2, kbA8, kbD0 },
-
-      { 0, VK_BACK , kbA12, kbD0, kbA8, kbD0 },
-      { 0, VK_LEFT , kbA11, kbD4, kbA8, kbD0 },
-      { 0, VK_DOWN , kbA12, kbD4, kbA8, kbD0 },
-      { 0, VK_UP , kbA12, kbD3, kbA8, kbD0 },
-      { 0, VK_RIGHT , kbA12, kbD2, kbA8, kbD0 },
-
-      { 0, VK_CONTROL , kbA14, kbD0, kbA8 , kbD0 },
-
-      {0, 0, 0, 0, 0, 0 }
-    };
-  
-  //struct kb KBACE[]=
-  static int[][] KBACE_ints =
-    {
-      { 0, VK_SHIFT , kbA8, kbD0, 255,255 },
-      { 0, VK_CONTROL , kbA8, kbD1, 255,255 },
-
-      { 0, VK_RETURN , kbA14, kbD0, 255,255 },
-      { 0, VK_SPACE , kbA15, kbD0, 255,255 },
-
-      { 0, 'A' , kbA9, kbD0, 255,255 },
-      { 0, 'B' , kbA15, kbD3, 255,255 },
-      { 0, 'C' , kbA8, kbD4, 255,255 },
-      { 0, 'D' , kbA9, kbD2, 255,255 },
-      { 0, 'E' , kbA10, kbD2, 255,255 },
-      { 0, 'F' , kbA9, kbD3, 255,255 },
-      { 0, 'G' , kbA9, kbD4, 255,255 },
-      { 0, 'H' , kbA14, kbD4, 255,255 },
-      { 0, 'I' , kbA13, kbD2, 255,255 },
-      { 0, 'J' , kbA14, kbD3, 255,255 },
-      { 0, 'K' , kbA14, kbD2, 255,255 },
-      { 0, 'L' , kbA14, kbD1, 255,255 },
-      { 0, 'M' , kbA15, kbD1, 255,255 },
-      { 0, 'N' , kbA15, kbD2, 255,255 },
-      { 0, 'O' , kbA13, kbD1, 255,255 },
-      { 0, 'P' , kbA13, kbD0, 255,255 },
-      { 0, 'Q' , kbA10, kbD0, 255,255 },
-      { 0, 'R' , kbA10, kbD3, 255,255 },
-      { 0, 'S' , kbA9, kbD1, 255,255 },
-      { 0, 'T' , kbA10, kbD4, 255,255 },
-      { 0, 'U' , kbA13, kbD3, 255,255 },
-      { 0, 'V' , kbA15, kbD4, 255,255 },
-      { 0, 'W' , kbA10, kbD1, 255,255 },
-      { 0, 'X' , kbA8, kbD3, 255,255 },
-      { 0, 'Y' , kbA13, kbD4, 255,255 },
-      { 0, 'Z' , kbA8, kbD2, 255,255 },
-
-      { 0, '1' , kbA11, kbD0, 255,255 },
-      { 0, '2' , kbA11, kbD1, 255,255 },
-      { 0, '3' , kbA11, kbD2, 255,255 },
-      { 0, '4' , kbA11, kbD3, 255,255 },
-      { 0, '5' , kbA11, kbD4, 255,255 },
-      { 0, '6' , kbA12, kbD4, 255,255 },
-      { 0, '7' , kbA12, kbD3, 255,255 },
-      { 0, '8' , kbA12, kbD2, 255,255 },
-      { 0, '9' , kbA12, kbD1, 255,255 },
-      { 0, '0' , kbA12, kbD0, 255,255 },
-
-      { 1, 186, kbA13, kbD1, kbA8, kbD1 },
-      { 2, 186, kbA8, kbD2, kbA8, kbD1 },
-      //{ 1, 192, kbA13, kbD1, kbA8, kbD1 },
-      { 2, 192, kbA11, kbD1, kbA8, kbD1 },
-      { 1, 222, kbA11, kbD2, kbA8, kbD1 },
-      { 2, 222, kbA9, kbD0, kbA8, kbD1 },
-      { 1, 219, kbA13, kbD4, kbA8, kbD1 },
-      { 1, 221, kbA13, kbD3, kbA8, kbD1 },
-      { 2, 219, kbA9, kbD3, kbA8, kbD1 },
-      { 2, 221, kbA9, kbD4, kbA8, kbD1 },
-      { 1, 189, kbA14, kbD3, kbA8, kbD1 },
-      { 2, 189, kbA12, kbD0, kbA8, kbD1 },
-      { 1, 187, kbA14, kbD1, kbA8, kbD1 },
-      { 2, 187, kbA14, kbD2, kbA8, kbD1 },
-      { 1, 189, kbA14, kbD3, kbA8, kbD1 },
-      { 2, 189, kbA12, kbD0, kbA8, kbD1 },
-      { 1, 188, kbA15, kbD2, kbA8, kbD1 },
-      { 1, 190, kbA15, kbD1, kbA8, kbD1 },
-      { 2, 188, kbA10, kbD3, kbA8, kbD1 },
-      { 2, 190, kbA10, kbD4, kbA8, kbD1 },
-      { 1, 191, kbA15, kbD4, kbA8, kbD1 },
-      { 2, 191, kbA8, kbD4, kbA8, kbD1 },
-      { 1, 220, kbA9, kbD2, kbA8, kbD1 },
-      { 2, 220, kbA9, kbD1, kbA8, kbD1 },
-
-      { 0, VK_BACK , kbA12, kbD0, kbA8, kbD0 },
-      { 0, VK_LEFT , kbA11, kbD4, kbA8, kbD0 },
-      { 0, VK_UP , kbA12, kbD4, kbA8, kbD0 },
-      { 0, VK_DOWN , kbA12, kbD3, kbA8, kbD0 },
-      { 0, VK_RIGHT , kbA12, kbD2, kbA8, kbD0 },
-      {0, 0, 0, 0, 0, 0 }
-    };
-  
-  //struct kb KBLAMBDA[]=
-  static int[][] KBLAMBDA_ints = 
-    {
-      { 0, VK_SHIFT , kbA8, kbD0, 255,255 },
-      { 0, VK_RETURN , kbA14, kbD0, 255,255 },
-      { 0, VK_SPACE , kbA15, kbD0, 255,255 },
-
-      { 0, 'A' , kbA9, kbD0, 255,255 },
-      { 0, 'B' , kbA15, kbD4, 255,255 },
-      { 0, 'C' , kbA8, kbD3, 255,255 },
-      { 0, 'D' , kbA9, kbD2, 255,255 },
-      { 0, 'E' , kbA10, kbD2, 255,255 },
-      { 0, 'F' , kbA9, kbD3, 255,255 },
-      { 0, 'G' , kbA9, kbD4, 255,255 },
-      { 0, 'H' , kbA14, kbD4, 255,255 },
-      { 0, 'I' , kbA13, kbD2, 255,255 },
-      { 0, 'J' , kbA14, kbD3, 255,255 },
-      { 0, 'K' , kbA14, kbD2, 255,255 },
-      { 0, 'L' , kbA14, kbD1, 255,255 },
-      { 0, 'M' , kbA15, kbD2, 255,255 },
-      { 0, 'N' , kbA15, kbD3, 255,255 },
-      { 0, 'O' , kbA13, kbD1, 255,255 },
-      { 0, 'P' , kbA13, kbD0, 255,255 },
-      { 0, 'Q' , kbA10, kbD0, 255,255 },
-      { 0, 'R' , kbA10, kbD3, 255,255 },
-      { 0, 'S' , kbA9, kbD1, 255,255 },
-      { 0, 'T' , kbA10, kbD4, 255,255 },
-      { 0, 'U' , kbA13, kbD3, 255,255 },
-      { 0, 'V' , kbA8, kbD4, 255,255 },
-      { 0, 'W' , kbA10, kbD1, 255,255 },
-      { 0, 'X' , kbA8, kbD2, 255,255 },
-      { 0, 'Y' , kbA13, kbD4, 255,255 },
-      { 0, 'Z' , kbA8, kbD1, 255,255 },
-
-      { 0, '1' , kbA11, kbD0, 255,255 },
-      { 0, '2' , kbA11, kbD1, 255,255 },
-      { 0, '3' , kbA11, kbD2, 255,255 },
-      { 0, '4' , kbA11, kbD3, 255,255 },
-      { 0, '5' , kbA11, kbD4, 255,255 },
-      { 0, '6' , kbA12, kbD4, 255,255 },
-      { 0, '7' , kbA12, kbD3, 255,255 },
-      { 0, '8' , kbA12, kbD2, 255,255 },
-      { 0, '9' , kbA12, kbD1, 255,255 },
-      { 0, '0' , kbA12, kbD0, 255,255 },
-
-      { 0, VK_NUMPAD1 , kbA11, kbD0, 255,255 },
-      { 0, VK_NUMPAD2 , kbA11, kbD1, 255,255 },
-      { 0, VK_NUMPAD3 , kbA11, kbD2, 255,255 },
-      { 0, VK_NUMPAD4 , kbA11, kbD3, 255,255 },
-      { 0, VK_NUMPAD5 , kbA11, kbD4, 255,255 },
-      { 0, VK_NUMPAD6 , kbA12, kbD4, 255,255 },
-      { 0, VK_NUMPAD7 , kbA12, kbD3, 255,255 },
-      { 0, VK_NUMPAD8 , kbA12, kbD2, 255,255 },
-      { 0, VK_NUMPAD9 , kbA12, kbD1, 255,255 },
-      { 0, VK_NUMPAD0 , kbA12, kbD0, 255,255 },
-
-      { 0, VK_MULTIPLY , kbA8, kbD4, 255,255 },
-      { 0, VK_DIVIDE , kbA15, kbD4, 255,255 },
-
-      { 1, 186, kbA12, kbD4, kbA8, kbD0 },
-      //{ 2, 186, kbA8, kbD1, kbA8, kbD0 }, // No : on the lambda
-      { 1, 189, kbA14, kbD2, kbA8, kbD0 },
-      { 1, VK_SUBTRACT, kbA14, kbD2, kbA8, kbD0 },
-
-      { 1, 187, kbA12, kbD0, kbA8, kbD0 },
-      { 2, 187, kbA14, kbD1, kbA8, kbD0 },
-      { 2, VK_ADD, kbA14, kbD2, kbA8, kbD0 },
-
-      { 1, 188, kbA12, kbD3, kbA8, kbD0 },
-      { 2, 188, kbA13, kbD1, kbA8, kbD0 },
-
-      { 1, 190 , kbA15, kbD1, 255,255 },
-      { 1, VK_DECIMAL , kbA15, kbD1, 255,255 },
-      { 2, 190 , kbA13, kbD0, kbA8, kbD0 },
-      { 1, 191 , kbA14, kbD4, kbA8, kbD0 },
-
-      { 0, 219 , kbA12, kbD2, kbA8, kbD0 },
-      { 0, 221 , kbA12, kbD1, kbA8, kbD0 },
-
-      // { 2, 191 , kbA8, kbD3, kbA8, kbD0 }, // Lambda has no ? symbol!
-      { 2, 222 , kbA11, kbD4, kbA8, kbD0 },
-
-      //{ 2, 188, kbA15, kbD3, kbA8, kbD0 },
-      //{ 2, 190, kbA15, kbD2, kbA8, kbD0 },
-
-      { 0, VK_BACK , kbA15, kbD1, kbA8, kbD0 },
-      { 0, VK_LEFT , kbA11, kbD4, kbA8, kbD0 },
-      { 0, VK_DOWN , kbA12, kbD4, kbA8, kbD0 },
-      { 0, VK_UP , kbA12, kbD3, kbA8, kbD0 },
-      { 0, VK_RIGHT , kbA12, kbD2, kbA8, kbD0 },
-
-      { 0, VK_CONTROL , kbA14, kbD0, kbA8 , kbD0 },
-
-      {0, 0, 0, 0, 0, 0 }
-    };
-  
-  //struct kb KBSPEC[]=
-  static int[][] KBSPEC_ints = 
-    {
-      { 0, VK_SHIFT , kbA8, kbD0, 255,255 },
-      { 0, VK_RETURN , kbA14, kbD0, 255,255 },
-      { 0, VK_SPACE , kbA15, kbD0, 255,255 },
-
-      { 0, 'A' , kbA9, kbD0, 255,255 },
-      { 0, 'B' , kbA15, kbD4, 255,255 },
-      { 0, 'C' , kbA8, kbD3, 255,255 },
-      { 0, 'D' , kbA9, kbD2, 255,255 },
-      { 0, 'E' , kbA10, kbD2, 255,255 },
-      { 0, 'F' , kbA9, kbD3, 255,255 },
-      { 0, 'G' , kbA9, kbD4, 255,255 },
-      { 0, 'H' , kbA14, kbD4, 255,255 },
-      { 0, 'I' , kbA13, kbD2, 255,255 },
-      { 0, 'J' , kbA14, kbD3, 255,255 },
-      { 0, 'K' , kbA14, kbD2, 255,255 },
-      { 0, 'L' , kbA14, kbD1, 255,255 },
-      { 0, 'M' , kbA15, kbD2, 255,255 },
-      { 0, 'N' , kbA15, kbD3, 255,255 },
-      { 0, 'O' , kbA13, kbD1, 255,255 },
-      { 0, 'P' , kbA13, kbD0, 255,255 },
-      { 0, 'Q' , kbA10, kbD0, 255,255 },
-      { 0, 'R' , kbA10, kbD3, 255,255 },
-      { 0, 'S' , kbA9, kbD1, 255,255 },
-      { 0, 'T' , kbA10, kbD4, 255,255 },
-      { 0, 'U' , kbA13, kbD3, 255,255 },
-      { 0, 'V' , kbA8, kbD4, 255,255 },
-      { 0, 'W' , kbA10, kbD1, 255,255 },
-      { 0, 'X' , kbA8, kbD2, 255,255 },
-      { 0, 'Y' , kbA13, kbD4, 255,255 },
-      { 0, 'Z' , kbA8, kbD1, 255,255 },
-
-      { 0, '1' , kbA11, kbD0, 255,255 },
-      { 0, '2' , kbA11, kbD1, 255,255 },
-      { 0, '3' , kbA11, kbD2, 255,255 },
-      { 0, '4' , kbA11, kbD3, 255,255 },
-      { 0, '5' , kbA11, kbD4, 255,255 },
-      { 0, '6' , kbA12, kbD4, 255,255 },
-      { 0, '7' , kbA12, kbD3, 255,255 },
-      { 0, '8' , kbA12, kbD2, 255,255 },
-      { 0, '9' , kbA12, kbD1, 255,255 },
-      { 0, '0' , kbA12, kbD0, 255,255 },
-
-      { 0, VK_NUMPAD1 , kbA11, kbD0, 255,255 },
-      { 0, VK_NUMPAD2 , kbA11, kbD1, 255,255 },
-      { 0, VK_NUMPAD3 , kbA11, kbD2, 255,255 },
-      { 0, VK_NUMPAD4 , kbA11, kbD3, 255,255 },
-      { 0, VK_NUMPAD5 , kbA11, kbD4, 255,255 },
-      { 0, VK_NUMPAD6 , kbA12, kbD4, 255,255 },
-      { 0, VK_NUMPAD7 , kbA12, kbD3, 255,255 },
-      { 0, VK_NUMPAD8 , kbA12, kbD2, 255,255 },
-      { 0, VK_NUMPAD9 , kbA12, kbD1, 255,255 },
-      { 0, VK_NUMPAD0 , kbA12, kbD0, 255,255 },
-
-      { 0, VK_MULTIPLY , kbA8, kbD4, 255,255 },
-      { 0, VK_DIVIDE , kbA15, kbD4, 255,255 },
-
-      { 1, 186, kbA13, kbD1, kbA15, kbD1 },
-      { 2, 186, kbA8, kbD1, kbA15, kbD1 },
-      { 1, 189, kbA14, kbD3, kbA15, kbD1 },
-      { 2, 189, kbA12, kbD0, kbA15, kbD1 },
-      { 1, VK_SUBTRACT, kbA14, kbD3, kbA15, kbD1 },
-
-      { 1, 187, kbA14, kbD1, kbA15, kbD1 },
-      { 2, 187, kbA14, kbD2, kbA15, kbD1 },
-      { 2, VK_ADD, kbA14, kbD2, kbA15, kbD1 },
-
-      { 1, 188, kbA15, kbD3, kbA15, kbD1 },
-      { 2, 188, kbA10, kbD3, kbA15, kbD1 },
-
-      { 1, 190 , kbA15, kbD2, kbA15, kbD1 },
-      { 2, 190 , kbA10, kbD4, kbA15, kbD1 },
-      { 1, VK_DECIMAL , kbA15, kbD1, 255,255 },
-      { 1, 191 , kbA8, kbD4, kbA15, kbD1 },
-      { 2, 191 , kbA8, kbD3, kbA15, kbD1 },
-      { 1, 192 , kbA12, kbD3, kbA15, kbD1 },
-      { 2, 192 , kbA11, kbD1, kbA15, kbD1 },
-      { 0, 219 , kbA12, kbD2, kbA15, kbD1 },
-      { 0, 221 , kbA12, kbD1, kbA15, kbD1 },
-      { 0, 222 , kbA11, kbD2, kbA15, kbD1 },
-
-      //{ 2, 188, kbA15, kbD3, kbA8, kbD0 },
-      //{ 2, 190, kbA15, kbD2, kbA8, kbD0 },
-
-      { 0, VK_BACK , kbA12, kbD0, kbA8, kbD0 },
-      { 0, VK_LEFT , kbA11, kbD4, kbA8, kbD0 },
-      { 0, VK_DOWN , kbA12, kbD4, kbA8, kbD0 },
-      { 0, VK_UP , kbA12, kbD3, kbA8, kbD0 },
-      { 0, VK_RIGHT , kbA12, kbD2, kbA8, kbD0 },
-
-      { 0, VK_CONTROL , kbA15, kbD1, 255,255 },
-
-      {0, 0, 0, 0, 0, 0 }
-    };
-  //---------------------------------------------------------------------------
-  
-  //#pragma package(smart_init)
-  
   // For convenience in the code below.
   public static int[] ZXKeyboard = new int[8];
 
   static kb[] KBZX81 = intTokb(KBZX81_ints);
-  static kb[] KBZX80 = intTokb(KBZX80_ints);
-  static kb[] KBACE  = intTokb(KBACE_ints);
-  static kb[] KBLAMBDA = intTokb(KBLAMBDA_ints);
-  static kb[] KBSPEC = intTokb(KBSPEC_ints);
-  
+
   static kb[] intTokb(int[][] ints)
     {
     kb[] kb = new kb[ints.length];
@@ -599,7 +187,6 @@ implements ZX81ConfigDefs
   
   private ZX81Config mConfig;
   
-  //void PCKbInit(void)
   public KBStatus(ZX81Config config)
     {
     mConfig = config;
@@ -608,35 +195,17 @@ implements ZX81ConfigDefs
 
     switch(mConfig.zx81opts.machine)
       {
-      case MACHINEZX80:
-        KeyMap=KBZX80;
-        break;
-  
-      case MACHINESPEC48:
-        KeyMap=KBSPEC;
-        break;
-  
-      case MACHINEACE:
-        KeyMap=KBACE;
-        break;
-  
-      case MACHINELAMBDA:
-        KeyMap=KBLAMBDA;
-        break;
-  
       default:
         KeyMap=KBZX81;
         break;
       }
     }
   
-  //int PCFindKey(Word key)
   public
   int PCFindKey(int key)
     {
     int i=0;
 
-    //while (KeyMap[i].WinKey)
     while (KeyMap[i].WinKey!=0)
       {
       if (KeyMap[i].WinKey == key) return(i);
@@ -646,8 +215,7 @@ implements ZX81ConfigDefs
     return(-1);
     }
   
-  //void PCSetKey(WORD dest, int source, int shift)
-  public  
+  public
   void PCSetKey(int dest, int source, int shift)
     {
     int d;
@@ -678,9 +246,6 @@ implements ZX81ConfigDefs
     {
     int Kctrl;
 
-    if (mConfig.zx81opts.machine==MACHINESPEC48 || mConfig.zx81opts.machine==MACHINEACE) return;
-
-    //if (!key)
     if (key!=0)
       {
       Kctrl=PCFindKey(VK_RETURN);
@@ -709,8 +274,7 @@ implements ZX81ConfigDefs
     PCSetKey(VK_UP,Kup,shift);
     PCSetKey(VK_RIGHT,Kright,shift);
     }
-  
-  //void PCKeyDown(WORD key)
+
   public 
   void PCKeyDown(int key)
     {
@@ -719,18 +283,13 @@ implements ZX81ConfigDefs
     // TODO: PCALT=(GetKeyState(VK_MENU)&128);
     PCALT=0;
 
-    //if (PCALT) return;
-    //while (KeyMap[i].WinKey)
     if (PCALT!=0) return;
     while (KeyMap[i].WinKey!=0)
       {
       if ((KeyMap[i].WinKey == key) &&
           ((KeyMap[i].Shift==PCShift) || (KeyMap[i].Shift==0)))
         {
-        if (key>=186 && key<=222 && mConfig.zx81opts.machine==MACHINESPEC48)
-            ZXKeyboard[kbA8] &= ~kbD0;
-
-        ZXKeyboard[KeyMap[i].Addr1] |= KeyMap[i].Data1;
+          ZXKeyboard[KeyMap[i].Addr1] |= KeyMap[i].Data1;
         if (KeyMap[i].Addr2!=255)
             ZXKeyboard[KeyMap[i].Addr2] |= KeyMap[i].Data2;
         return;
@@ -738,8 +297,7 @@ implements ZX81ConfigDefs
       i++;
       }
     }
-  
-  //void PCKeyUp(WORD key)
+
   public 
   void PCKeyUp(int key)
     {
@@ -747,25 +305,21 @@ implements ZX81ConfigDefs
 
     if (key==VK_SHIFT) PCShift=1;
 
-    //while (KeyMap[i].WinKey)
     while (KeyMap[i].WinKey!=0)
       {
-      if (KeyMap[i].WinKey == key) /* &&
-              ((KeyMap[i].Shift==PCShift) || (KeyMap[i].Shift==0))) */
+      if (KeyMap[i].WinKey == key)
         {
         ZXKeyboard[KeyMap[i].Addr1] &= ~KeyMap[i].Data1;
         if (KeyMap[i].Addr2!=255)
                 ZXKeyboard[KeyMap[i].Addr2] &= ~KeyMap[i].Data2;
 
-        //if (PCShift==2) ZXKeyboard[kbA8] |= kbD0;
         }
       i++;
       }
     if (PCShift==2) ZXKeyboard[kbA8] |= kbD0;
     }
   
-  //void PCAllKeysUp()
-  public 
+  public
   void PCAllKeysUp()
     {
     int i;
@@ -773,12 +327,6 @@ implements ZX81ConfigDefs
     }
   }
 
-//struct kb
-//{
-//  BYTE Shift;
-//  WORD WinKey;
-//  BYTE Addr1, Data1, Addr2, Data2;
-//};
 class kb
   {
   int Shift;

@@ -1,7 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="722f0dbb-0e1b-4b2a-adea-3b75b7814c5e" name="Default" comment="" />
+    <list default="true" id="722f0dbb-0e1b-4b2a-adea-3b75b7814c5e" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/config/Machine.java" afterPath="$PROJECT_DIR$/src/jtyone/config/Machine.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/config/TVOptions.java" afterPath="$PROJECT_DIR$/src/jtyone/config/TVOptions.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/config/ZX81Config.java" afterPath="$PROJECT_DIR$/src/jtyone/config/ZX81Config.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/config/ZX81ConfigDefs.java" afterPath="$PROJECT_DIR$/src/jtyone/config/ZX81ConfigDefs.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/config/ZX81Options.java" afterPath="$PROJECT_DIR$/src/jtyone/config/ZX81Options.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/display/AccCanvas.java" afterPath="$PROJECT_DIR$/src/jtyone/display/AccCanvas.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/display/AccDraw.java" afterPath="$PROJECT_DIR$/src/jtyone/display/AccDraw.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/display/Scanline.java" afterPath="$PROJECT_DIR$/src/jtyone/display/Scanline.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/io/KBStatus.java" afterPath="$PROJECT_DIR$/src/jtyone/io/KBStatus.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/io/Mouse.java" afterPath="$PROJECT_DIR$/src/jtyone/io/Mouse.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/io/Snap.java" afterPath="$PROJECT_DIR$/src/jtyone/io/Snap.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/io/SoundDefs.java" afterPath="$PROJECT_DIR$/src/jtyone/io/SoundDefs.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/io/Tape.java" afterPath="$PROJECT_DIR$/src/jtyone/io/Tape.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/main/JtyOne.java" afterPath="$PROJECT_DIR$/src/jtyone/main/JtyOne.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/tzx/TZXBlock.java" afterPath="$PROJECT_DIR$/src/jtyone/tzx/TZXBlock.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/tzx/TZXBlockData.java" afterPath="$PROJECT_DIR$/src/jtyone/tzx/TZXBlockData.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/tzx/TZXFile.java" afterPath="$PROJECT_DIR$/src/jtyone/tzx/TZXFile.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/tzx/TZXFileDefs.java" afterPath="$PROJECT_DIR$/src/jtyone/tzx/TZXFileDefs.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/z80/Register.java" afterPath="$PROJECT_DIR$/src/jtyone/z80/Register.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/z80/RegisterPair.java" afterPath="$PROJECT_DIR$/src/jtyone/z80/RegisterPair.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/z80/Z80.java" afterPath="$PROJECT_DIR$/src/jtyone/z80/Z80.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/zx81/ROMPatch.java" afterPath="$PROJECT_DIR$/src/jtyone/zx81/ROMPatch.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/jtyone/zx81/ZX81.java" afterPath="$PROJECT_DIR$/src/jtyone/zx81/ZX81.java" />
+    </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -12,114 +36,16 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="JtyOne.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/main/JtyOne.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="288">
-              <caret line="194" column="0" lean-forward="false" selection-start-line="194" selection-start-column="0" selection-end-line="194" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="RegisterPair.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/z80/RegisterPair.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="205">
-              <caret line="75" column="3" lean-forward="false" selection-start-line="75" selection-start-column="3" selection-end-line="75" selection-end-column="3" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Snap.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/io/Snap.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="247" column="0" lean-forward="false" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ZX81.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ZX81.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="179">
-              <caret line="554" column="25" lean-forward="false" selection-start-line="554" selection-start-column="25" selection-end-line="554" selection-end-column="25" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="KBStatus.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/io/KBStatus.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="187">
-              <caret line="291" column="10" lean-forward="false" selection-start-line="291" selection-start-column="10" selection-end-line="291" selection-end-column="10" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="AccDraw.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/display/AccDraw.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="553" column="8" lean-forward="false" selection-start-line="553" selection-start-column="8" selection-end-line="553" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Tape.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/io/Tape.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="344">
-              <caret line="117" column="0" lean-forward="false" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ZX81ConfigDefs.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX81ConfigDefs.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="240">
-              <caret line="47" column="4" lean-forward="false" selection-start-line="47" selection-start-column="4" selection-end-line="47" selection-end-column="4" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="Z80.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/z80/Z80.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="659">
-              <caret line="5339" column="0" lean-forward="false" selection-start-line="5339" selection-start-column="0" selection-end-line="5339" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="ROMPatch.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ROMPatch.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="689">
-              <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300" />
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
       <find>.rom</find>
       <find>public static final</find>
     </findStrings>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/.." />
   </component>
   <component name="GradleLocalSettings">
     <option name="externalProjectsViewState">
@@ -163,6 +89,7 @@
     <option name="width" value="1680" />
     <option name="height" value="1050" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator currentView="ProjectPane" proportions="" version="1">
       <flattenPackages />
@@ -191,6 +118,17 @@
               <item name="JtyOne" type="462c0819:PsiDirectoryNode" />
               <item name="src" type="462c0819:PsiDirectoryNode" />
             </path>
+            <path>
+              <item name="JtyOne" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JtyOne" type="462c0819:PsiDirectoryNode" />
+              <item name="src" type="462c0819:PsiDirectoryNode" />
+              <item name="jtyone" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="JtyOne" type="b2602c69:ProjectViewProjectNode" />
+              <item name="JtyOne" type="462c0819:PsiDirectoryNode" />
+              <item name="Tapes" type="462c0819:PsiDirectoryNode" />
+            </path>
           </expand>
           <select />
         </subPane>
@@ -207,6 +145,7 @@
     <property name="project.structure.proportion" value="0.0" />
     <property name="project.structure.side.proportion" value="0.0" />
     <property name="FullScreen" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -237,7 +176,7 @@
       </extension>
       <option name="MAIN_CLASS_NAME" value="jtyone.main.JtyOne" />
       <option name="VM_PARAMETERS" value="" />
-      <option name="PROGRAM_PARAMETERS" value="$PROJECT_DIR$/USINE1.TZX" />
+      <option name="PROGRAM_PARAMETERS" value="$PROJECT_DIR$/Tapes/USINE.TZX" />
       <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
       <option name="ALTERNATIVE_JRE_PATH" />
@@ -347,11 +286,12 @@
       <workItem from="1495488691992" duration="1585000" />
       <workItem from="1495491577247" duration="598000" />
       <workItem from="1495550764867" duration="6745000" />
+      <workItem from="1495574095421" duration="759000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="8928000" />
+    <option name="totallyTimeSpent" value="9687000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1680" height="1050" extended-state="0" />
@@ -364,20 +304,20 @@
       <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32958034" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32958034" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21916972" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.22161172" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32958034" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.24969475" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Theme Preview" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.39918116" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
@@ -401,13 +341,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/jtyone/main/JtyOne.java</url>
-          <line>194</line>
+          <line>165</line>
           <properties />
           <option name="timeStamp" value="5" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/jtyone/io/Tape.java</url>
-          <line>51</line>
+          <line>45</line>
           <properties />
           <option name="timeStamp" value="6" />
         </line-breakpoint>
@@ -421,6 +361,86 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/jtyone/z80/RegisterPair.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="750">
+          <caret line="75" column="3" lean-forward="false" selection-start-line="75" selection-start-column="3" selection-end-line="75" selection-end-column="3" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/main/JtyOne.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2310">
+          <caret line="194" column="0" lean-forward="false" selection-start-line="194" selection-start-column="0" selection-end-line="194" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/io/Snap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3210">
+          <caret line="247" column="0" lean-forward="false" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ZX81.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7485">
+          <caret line="554" column="25" lean-forward="false" selection-start-line="554" selection-start-column="25" selection-end-line="554" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/io/KBStatus.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3990">
+          <caret line="291" column="10" lean-forward="false" selection-start-line="291" selection-start-column="10" selection-end-line="291" selection-end-column="10" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/display/AccDraw.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7515">
+          <caret line="553" column="8" lean-forward="false" selection-start-line="553" selection-start-column="8" selection-end-line="553" selection-end-column="8" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX81ConfigDefs.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="47" column="4" lean-forward="false" selection-start-line="47" selection-start-column="4" selection-end-line="47" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/z80/Z80.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80085">
+          <caret line="5339" column="0" lean-forward="false" selection-start-line="5339" selection-start-column="0" selection-end-line="5339" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ROMPatch.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="840">
+          <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/io/Tape.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1275">
+          <caret line="117" column="0" lean-forward="false" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/main/JtyOne.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
@@ -461,14 +481,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/jtyone/config/SpectrumOptions.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="25" column="22" lean-forward="false" selection-start-line="25" selection-start-column="22" selection-end-line="25" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/config/SpectrumOptions.java" />
     <entry file="file://$PROJECT_DIR$/src/jtyone/config/TVOptions.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="165">
@@ -485,14 +498,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX97Options.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="34" selection-end-column="18" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX97Options.java" />
     <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX81Options.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="517">
@@ -567,7 +573,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/z80/RegisterPair.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
+        <state relative-caret-position="750">
           <caret line="75" column="3" lean-forward="false" selection-start-line="75" selection-start-column="3" selection-end-line="75" selection-end-column="3" />
           <folding />
         </state>
@@ -583,7 +589,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/z80/Z80.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="659">
+        <state relative-caret-position="79500">
           <caret line="5339" column="0" lean-forward="false" selection-start-line="5339" selection-start-column="0" selection-end-line="5339" selection-end-column="0" />
           <folding />
         </state>
@@ -591,7 +597,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ROMPatch.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="689">
+        <state relative-caret-position="840">
           <caret line="78" column="0" lean-forward="false" selection-start-line="78" selection-start-column="0" selection-end-line="78" selection-end-column="0" />
           <folding />
         </state>
@@ -599,7 +605,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/config/ZX81ConfigDefs.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
+        <state relative-caret-position="405">
           <caret line="47" column="4" lean-forward="false" selection-start-line="47" selection-start-column="4" selection-end-line="47" selection-end-column="4" />
           <folding />
         </state>
@@ -607,7 +613,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/io/KBStatus.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
+        <state relative-caret-position="3990">
           <caret line="291" column="10" lean-forward="false" selection-start-line="291" selection-start-column="10" selection-end-line="291" selection-end-column="10" />
           <folding />
         </state>
@@ -615,7 +621,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/display/AccDraw.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="210">
+        <state relative-caret-position="7515">
           <caret line="553" column="8" lean-forward="false" selection-start-line="553" selection-start-column="8" selection-end-line="553" selection-end-column="8" />
           <folding />
         </state>
@@ -623,7 +629,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/io/Snap.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="187">
+        <state relative-caret-position="3210">
           <caret line="247" column="0" lean-forward="false" selection-start-line="247" selection-start-column="0" selection-end-line="247" selection-end-column="0" />
           <folding />
         </state>
@@ -631,7 +637,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/zx81/ZX81.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="179">
+        <state relative-caret-position="7485">
           <caret line="554" column="25" lean-forward="false" selection-start-line="554" selection-start-column="25" selection-end-line="554" selection-end-column="25" />
           <folding />
         </state>
@@ -639,7 +645,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/main/JtyOne.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="288">
+        <state relative-caret-position="2310">
           <caret line="194" column="0" lean-forward="false" selection-start-line="194" selection-start-column="0" selection-end-line="194" selection-end-column="0" />
           <folding />
         </state>
@@ -647,7 +653,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/jtyone/io/Tape.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="344">
+        <state relative-caret-position="1275">
           <caret line="117" column="0" lean-forward="false" selection-start-line="117" selection-start-column="0" selection-end-line="117" selection-end-column="0" />
           <folding />
         </state>

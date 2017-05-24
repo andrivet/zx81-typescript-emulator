@@ -38,16 +38,11 @@ public class Tape {
     /**
      * Load data from a .TZX file.
      */
-    public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum, boolean applet) {
+    public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum) {
         mPrograms.clear();
         mCurrentProgram = 0;
         try {
-            InputStream is;
-            if (applet)
-                is = Tape.class.getClassLoader().getResourceAsStream(fileName);
-            else
-                is = new FileInputStream(fileName);
-
+            InputStream is = new FileInputStream(fileName);
             if (is == null) {
                 System.err.println("Error - could not get resource: " + fileName);
                 return;
@@ -93,6 +88,7 @@ public class Tape {
             is.close();
         } catch (IOException exc) {
             exc.printStackTrace();
+            return;
         }
 
         mCurrentProgram = entryNum;

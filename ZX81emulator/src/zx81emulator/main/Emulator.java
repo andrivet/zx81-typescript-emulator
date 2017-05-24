@@ -25,7 +25,6 @@ import zx81emulator.display.AccDraw;
 import zx81emulator.io.KBStatus;
 import zx81emulator.zx81.ZX81;
 
-import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.*;
 
@@ -36,7 +35,6 @@ import java.awt.event.*;
  * @author Simon Holdsworth
  */
 public class Emulator
-        extends Applet
         implements KeyListener, WindowListener, ActionListener, FocusListener {
     private AccDraw mDisplayDrawer;
     private KBStatus mKeyboard;
@@ -51,8 +49,6 @@ public class Emulator
         Emulator emulator = new Emulator();
         Frame f = new Frame("ZX81 Emulator");
         emulator.init(args, f);
-        // Focus listening is only done for the application. For the applet, that's
-        // handled via javascript on the web page.
         f.addWindowListener(emulator);
         f.addKeyListener(emulator);
         f.pack();
@@ -69,13 +65,6 @@ public class Emulator
         mConfig.zx81opts.m1not = 32768;
     }
 
-    public void init() {
-        init(getParameter("tzxFileName"),
-                getParameter("hires"),
-                getParameter("scale"),
-                this, true);
-    }
-
     private void init(String[] args, Container container) {
         String tzxFileName = (args.length > 0 && !args[0].startsWith("-")) ? args[0] : null;
         String scale = null;
@@ -90,10 +79,10 @@ public class Emulator
             }
         }
 
-        init(tzxFileName, hires, scale, container, false);
+        init(tzxFileName, hires, scale, container);
     }
 
-    private void init(String tzxFileName, String hires, String scale, Container container, boolean applet) {
+    private void init(String tzxFileName, String hires, String scale, Container container) {
         mConfig.machine.CurRom = mConfig.zx81opts.ROM81;
 
         int scaleCanvas = 2;
@@ -148,7 +137,7 @@ public class Emulator
                     entryNum = Integer.parseInt(tzxEntry);
                 }
 
-                mConfig.machine.getTape().loadTZX(mConfig, mKeyboard, tzxFileName, entryNum, applet);
+                mConfig.machine.getTape().loadTZX(mConfig, mKeyboard, tzxFileName, entryNum);
             }
         } catch (Exception exc) {
             System.out.println("Error: " + exc);

@@ -54,10 +54,6 @@ public abstract class Register {
     public String toString() {
         return "$" + Integer.toHexString(get() + 0x100).substring(1).toUpperCase();
     }
-
-    public String toBinaryString() {
-        return "b" + Integer.toBinaryString(get() + 0x100).substring(1);
-    }
 }
 
 final class RegisterHigh extends Register {
@@ -118,7 +114,7 @@ final class RegisterHigh extends Register {
 final class RegisterLow extends Register {
     private MasterRegisterPair rp;
 
-    public RegisterLow(MasterRegisterPair rp, String name) {
+    RegisterLow(MasterRegisterPair rp, String name) {
         this.rp = rp;
         this.name = name;
     }
@@ -228,7 +224,7 @@ final class value8 extends Register {
 final class MasterRegister extends Register {
     int value;
 
-    public MasterRegister(String name) {
+    MasterRegister(String name) {
         this.value = 0;
         this.name = name;
     }

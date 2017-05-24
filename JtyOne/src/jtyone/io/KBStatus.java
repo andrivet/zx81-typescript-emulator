@@ -31,8 +31,7 @@ import java.awt.event.KeyEvent;
 
 public class KBStatus
         implements ZX81ConfigDefs {
-    int PCShift = 1;
-    int PCALT = 0;
+    private int PCShift = 1;
 
     private static final int kbD0 = 1;
     private static final int kbD1 = 2;
@@ -50,36 +49,35 @@ public class KBStatus
     private static final int kbA15 = 7;
 
     // For convenience in the following tables.
-    static final int VK_SHIFT = KeyEvent.VK_SHIFT;
-    static final int VK_RETURN = KeyEvent.VK_ENTER;
-    static final int VK_SPACE = KeyEvent.VK_SPACE;
-    static final int VK_NUMPAD0 = KeyEvent.VK_NUMPAD0;
-    static final int VK_NUMPAD1 = KeyEvent.VK_NUMPAD1;
-    static final int VK_NUMPAD2 = KeyEvent.VK_NUMPAD2;
-    static final int VK_NUMPAD3 = KeyEvent.VK_NUMPAD3;
-    static final int VK_NUMPAD4 = KeyEvent.VK_NUMPAD4;
-    static final int VK_NUMPAD5 = KeyEvent.VK_NUMPAD5;
-    static final int VK_NUMPAD6 = KeyEvent.VK_NUMPAD6;
-    static final int VK_NUMPAD7 = KeyEvent.VK_NUMPAD7;
-    static final int VK_NUMPAD8 = KeyEvent.VK_NUMPAD8;
-    static final int VK_NUMPAD9 = KeyEvent.VK_NUMPAD9;
-    static final int VK_MULTIPLY = KeyEvent.VK_MULTIPLY;
-    static final int VK_DIVIDE = KeyEvent.VK_DIVIDE;
-    static final int VK_SUBTRACT = KeyEvent.VK_SUBTRACT;
-    static final int VK_ADD = KeyEvent.VK_ADD;
-    static final int VK_DECIMAL = KeyEvent.VK_DECIMAL;
-    static final int VK_BACK = KeyEvent.VK_BACK_SPACE;
-    static final int VK_DOWN = KeyEvent.VK_DOWN;
-    static final int VK_UP = KeyEvent.VK_UP;
-    static final int VK_LEFT = KeyEvent.VK_LEFT;
-    static final int VK_RIGHT = KeyEvent.VK_RIGHT;
-    static final int VK_CONTROL = KeyEvent.VK_CONTROL;
-    static final int VK_MENU = KeyEvent.VK_ALT;   // TODO: is this correct?
-    static final int VK_QUOTE = KeyEvent.VK_QUOTE;
+    private static final int VK_SHIFT = KeyEvent.VK_SHIFT;
+    private static final int VK_RETURN = KeyEvent.VK_ENTER;
+    private static final int VK_SPACE = KeyEvent.VK_SPACE;
+    private static final int VK_NUMPAD0 = KeyEvent.VK_NUMPAD0;
+    private static final int VK_NUMPAD1 = KeyEvent.VK_NUMPAD1;
+    private static final int VK_NUMPAD2 = KeyEvent.VK_NUMPAD2;
+    private static final int VK_NUMPAD3 = KeyEvent.VK_NUMPAD3;
+    private static final int VK_NUMPAD4 = KeyEvent.VK_NUMPAD4;
+    private static final int VK_NUMPAD5 = KeyEvent.VK_NUMPAD5;
+    private static final int VK_NUMPAD6 = KeyEvent.VK_NUMPAD6;
+    private static final int VK_NUMPAD7 = KeyEvent.VK_NUMPAD7;
+    private static final int VK_NUMPAD8 = KeyEvent.VK_NUMPAD8;
+    private static final int VK_NUMPAD9 = KeyEvent.VK_NUMPAD9;
+    private static final int VK_MULTIPLY = KeyEvent.VK_MULTIPLY;
+    private static final int VK_DIVIDE = KeyEvent.VK_DIVIDE;
+    private static final int VK_SUBTRACT = KeyEvent.VK_SUBTRACT;
+    private static final int VK_ADD = KeyEvent.VK_ADD;
+    private static final int VK_DECIMAL = KeyEvent.VK_DECIMAL;
+    private static final int VK_BACK = KeyEvent.VK_BACK_SPACE;
+    private static final int VK_DOWN = KeyEvent.VK_DOWN;
+    private static final int VK_UP = KeyEvent.VK_UP;
+    private static final int VK_LEFT = KeyEvent.VK_LEFT;
+    private static final int VK_RIGHT = KeyEvent.VK_RIGHT;
+    private static final int VK_CONTROL = KeyEvent.VK_CONTROL;
+    private static final int VK_QUOTE = KeyEvent.VK_QUOTE;
 
-    static kb[] KeyMap;
+    private static kb[] KeyMap;
 
-    static int[][] KBZX81_ints =
+    private static int[][] KBZX81_ints =
             {
                     {0, VK_SHIFT, kbA8, kbD0, 255, 255},
                     {0, VK_RETURN, kbA14, kbD0, 255, 255},
@@ -174,94 +172,30 @@ public class KBStatus
     // For convenience in the code below.
     public static int[] ZXKeyboard = new int[8];
 
-    static kb[] KBZX81 = intTokb(KBZX81_ints);
+    private static kb[] KBZX81 = intTokb(KBZX81_ints);
 
-    static kb[] intTokb(int[][] ints) {
+    private static kb[] intTokb(int[][] ints) {
         kb[] kb = new kb[ints.length];
         for (int i = 0; i < ints.length; i++)
             kb[i] = new kb(ints[i][0], ints[i][1], ints[i][2], ints[i][3], ints[i][4], ints[i][5]);
         return kb;
     }
 
-    private ZX81Config mConfig;
-
     public KBStatus(ZX81Config config) {
-        mConfig = config;
 
         for (int i = 0; i < 8; i++) ZXKeyboard[i] = 0;
 
-        switch (mConfig.zx81opts.machine) {
+        switch (config.zx81opts.machine) {
             default:
                 KeyMap = KBZX81;
                 break;
         }
     }
 
-    public int PCFindKey(int key) {
-        int i = 0;
-
-        while (KeyMap[i].WinKey != 0) {
-            if (KeyMap[i].WinKey == key) return (i);
-            i++;
-        }
-
-        return (-1);
-    }
-
-    public void PCSetKey(int dest, int source, int shift) {
-        int d;
-
-        d = PCFindKey(dest);
-
-        if (d != -1) {
-            KeyMap[d].Addr1 = KeyMap[source].Addr1;
-            KeyMap[d].Data1 = KeyMap[source].Data1;
-
-            //if (shift)
-            if (shift != 0) {
-                KeyMap[d].Addr2 = kbA8;
-                KeyMap[d].Data2 = kbD0;
-            } else {
-                KeyMap[d].Addr2 = 255;
-                KeyMap[d].Data2 = 255;
-            }
-        }
-    }
-
-    public void PCKeySetCTRL(int key) {
-        int Kctrl;
-
-        if (key != 0) {
-            Kctrl = PCFindKey(VK_RETURN);
-            PCSetKey(VK_CONTROL, Kctrl, 1);
-        } else {
-            Kctrl = PCFindKey(key);
-            PCSetKey(VK_CONTROL, Kctrl, 0);
-        }
-    }
-
-    public void PCKeySetCursor(char left, char down, char up, char right, int shift) {
-        int Kleft, Kdown, Kright, Kup;
-        //char temp;
-
-        Kleft = PCFindKey(left);
-        Kdown = PCFindKey(down);
-        Kup = PCFindKey(up);
-        Kright = PCFindKey(right);
-
-        PCSetKey(VK_LEFT, Kleft, shift);
-        PCSetKey(VK_DOWN, Kdown, shift);
-        PCSetKey(VK_UP, Kup, shift);
-        PCSetKey(VK_RIGHT, Kright, shift);
-    }
-
     public void PCKeyDown(int key) {
         int i = 0;
         if (key == VK_SHIFT) PCShift = 2;
-        // TODO: PCALT=(GetKeyState(VK_MENU)&128);
-        PCALT = 0;
 
-        if (PCALT != 0) return;
         while (KeyMap[i].WinKey != 0) {
             if ((KeyMap[i].WinKey == key) &&
                     ((KeyMap[i].Shift == PCShift) || (KeyMap[i].Shift == 0))) {
@@ -289,11 +223,6 @@ public class KBStatus
             i++;
         }
         if (PCShift == 2) ZXKeyboard[kbA8] |= kbD0;
-    }
-
-    public void PCAllKeysUp() {
-        int i;
-        for (i = 0; i < 8; i++) ZXKeyboard[i] = 0;
     }
 }
 

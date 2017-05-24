@@ -44,12 +44,6 @@ public abstract class Machine {
 
     public abstract int contendio(int Address, int states, int time);
 
-    public abstract void reset();
-
-    public abstract void nmi();
-
-    public abstract void exit();
-
     public abstract boolean stop();
 
     public abstract Tape getTape();
@@ -58,7 +52,6 @@ public abstract class Machine {
     public int tperscanline;
     public int tperframe;
     public int intposition;
-    public int scanlines;
     public String CurRom;
 
     public int[] memory;

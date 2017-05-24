@@ -46,16 +46,11 @@ public class JtyOne
     private Thread mDisplayThread;
     private Button mPauseButton;
     private Button mResetButton;
-    private Label mStatusLabel;
-    private Label mJtyOneLabel;
 
-    /**
-     * @param args
-     */
     public static void main(String[] args) {
         JtyOne jtyone = new JtyOne();
         Frame f = new Frame("JtyOne Emulator Window");
-        jtyone.init(args, f, false);
+        jtyone.init(args, f);
         // Focus listening is only done for the application. For the applet, that's
         // handled via javascript on the web page.
         f.addWindowListener(jtyone);
@@ -65,10 +60,7 @@ public class JtyOne
         jtyone.start();
     }
 
-    /**
-     * Constructor.
-     */
-    public JtyOne() {
+    private JtyOne() {
         // One-off initialisation.
         mConfig = new ZX81Config();
         mConfig.machine = new ZX81();
@@ -77,26 +69,17 @@ public class JtyOne
         mConfig.zx81opts.m1not = 32768;
     }
 
-    /**
-     *
-     */
     public void init() {
         init(getParameter("tzxFileName"),
                 getParameter("hires"),
                 getParameter("scale"),
-                getParameter("machine"),
                 this, true);
     }
 
-
-    /**
-     *
-     */
-    public void init(String[] args, Container container, boolean applet) {
+    private void init(String[] args, Container container) {
         String tzxFileName = (args.length > 0 && !args[0].startsWith("-")) ? args[0] : null;
         String scale = null;
         String hires = null;
-        String machine = null;
 
         for (int aPos = tzxFileName == null ? 0 : 1; aPos < args.length; aPos++) {
             if (args[aPos].equals("-scale") && aPos < args.length - 1) {
@@ -105,18 +88,12 @@ public class JtyOne
             if (args[aPos].equals("-hires") && aPos < args.length - 1) {
                 hires = args[++aPos];
             }
-            if (args[aPos].equals("-machine") && aPos < args.length - 1) {
-                machine = args[++aPos];
-            }
         }
 
-        init(tzxFileName, hires, scale, machine, container, applet);
+        init(tzxFileName, hires, scale, container, false);
     }
 
-    /**
-     *
-     */
-    private void init(String tzxFileName, String hires, String scale, String machine, Container container, boolean applet) {
+    private void init(String tzxFileName, String hires, String scale, Container container, boolean applet) {
         mConfig.machine.CurRom = mConfig.zx81opts.ROM81;
 
         int scaleCanvas = 2;
@@ -149,9 +126,9 @@ public class JtyOne
         mResetButton = new Button("Reset");
         mResetButton.addActionListener(this);
         buttonPanel.add(mResetButton);
-        mStatusLabel = new Label("status");
+        Label mStatusLabel = new Label("status");
         bottomPanel.add(mStatusLabel, "Center");
-        mJtyOneLabel = new Label("JtyOne");
+        Label mJtyOneLabel = new Label("JtyOne");
         bottomPanel.add(mJtyOneLabel, "West");
 
         // Set up the display.
@@ -164,7 +141,7 @@ public class JtyOne
         // Load the .TZX file.
         try {
             if (tzxFileName != null) {
-                String tzxEntry = null;
+                String tzxEntry;
                 int entryNum = 0;
                 int atPos = tzxFileName.indexOf('@');
                 if (atPos != -1) {
@@ -246,7 +223,7 @@ public class JtyOne
         }
     }
 
-    public void windowActive(boolean active) {
+    private void windowActive(boolean active) {
         mDisplayDrawer.setPaused(!active);
         mPauseButton.setLabel(active ? "Pause" : "Start");
     }

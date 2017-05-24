@@ -63,9 +63,5 @@ public class ZX81Options {
 
     public String ROM81;
     public String cwd;
-    public String temppath;
-    public String inipath;
-    public String configpath;
-    public String mydocs;
     public String machinename;
 }

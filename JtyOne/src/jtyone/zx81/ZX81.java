@@ -47,7 +47,6 @@ import jtyone.config.ZX81Options;
 import jtyone.display.Scanline;
 import jtyone.io.KBStatus;
 import jtyone.io.Snap;
-import jtyone.io.SoundDefs;
 import jtyone.io.Tape;
 import jtyone.z80.Z80;
 
@@ -55,10 +54,10 @@ import java.io.IOException;
 
 public final class ZX81
         extends Machine
-        implements ZX81ConfigDefs, SoundDefs // Allow use of constant names directly.
+        implements ZX81ConfigDefs // Allow use of constant names directly.
 {
 
-    private static final int VBLANKCOLOUR = (0 * 16);
+    private static final int VBLANKCOLOUR = 0;
 
     private static final int LASTINSTNONE = 0;
     private static final int LASTINSTINFE = 1;
@@ -66,30 +65,23 @@ public final class ZX81
     private static final int LASTINSTOUTFD = 3;
     private static final int LASTINSTOUTFF = 4;
 
-    int border = 7, ink = 0, paper = 7;
-    //int NMI_generator=0;
-    //int HSYNC_generator=0;
-    //int rowcounter=0;
+    private int border = 7, ink = 0, paper = 7;
     public boolean NMI_generator = false;
     public boolean HSYNC_generator = false;
     public int rowcounter = 0;
-    int hsync_counter = 207;
+    private int hsync_counter = 207;
     public int borrow = 0;
 
-    int event_next_event;
-    int configbyte = 0;
-    boolean setborder = false;
-    boolean zx81_stop = false;
-    int LastInstruction;
-    int MemotechMode = 0;
-    int HaltCount;
+    private boolean zx81_stop = false;
+    private int LastInstruction;
 
     private int[] font = new int[1024];
     private int[] memhrg = new int[1024];
 
-    int shift_register = 0, shift_reg_inv, shift_store = 0;
+    private int shift_register = 0;
+    private int shift_reg_inv;
 
-    boolean int_pending = false;
+    private boolean int_pending = false;
 
     // Added here to avoid needing to update original code
     private Z80 z80;
@@ -131,7 +123,6 @@ public final class ZX81
 
             NMI_generator = false;
             HSYNC_generator = false;
-            MemotechMode = 0;
 
             z80.reset();
         } catch (IOException exc) {
@@ -195,12 +186,10 @@ public final class ZX81
 // Fonts OR WRX style hi-res graphics, but never both.
 
     public int opcode_fetch(int Address) {
-        //int NewAddress, inv;
-        //int opcode, bit6, update=0;
+
         boolean inv, update = false;
         int opcode;
-        boolean bit6 = false;
-        //BYTE data;
+        boolean bit6;
         int data;
 
         if (Address < zx81opts.m1not) {
@@ -318,7 +307,6 @@ public final class ZX81
     private int beeper = 0;
 
     public int readport(int Address) {
-        setborder = true;
         if ((Address & 1) == 0) {
             int keyb, data = 0;
             int i;
@@ -343,7 +331,6 @@ public final class ZX81
                 }
 
                 case 0x5f:
-                    if (zx81opts.truehires == HIRESMEMOTECH) MemotechMode = (Address >> 8);
                     return (255);
 
                 case 0x73:
@@ -351,10 +338,6 @@ public final class ZX81
 
                 case 0x77:
                     if (zx81opts.ts2050) return (d8251readCTRL());
-
-                case 0xdd:
-                    if (zx81opts.aytype == AY_TYPE_ACE)
-                        return (sound_ay_read(SelectAYReg));
 
                 case 0xf5:
                     beeper = 1 - beeper;
@@ -374,19 +357,6 @@ public final class ZX81
     public int contendio(int Address, int states, int time) {
         return (time);
     }
-
-    public void ramwobble(boolean now) {
-        int start, length, data;
-        int i;
-
-        start = zx81opts.ROMTOP + 1;
-        length = zx81opts.RAMTOP - start;
-        data = random(256);
-
-        if (now || random(64) == 0)
-            for (i = 0; i < length; i++) memory[start + i] ^= data;
-    }
-
 
     public int do_scanline(Scanline CurScanLine) {
         int tstotal = 0;
@@ -415,7 +385,6 @@ public final class ZX81
             WavClockTick(ts, !HSYNC_generator);
             if (zx81opts.zxprinter) ZXPrinterClockTick(ts);
 
-            shift_store = shift_register;
             int pixels = ts << 1;
 
             for (int i = 0; i < pixels; i++) {
@@ -449,7 +418,6 @@ public final class ZX81
                     if (!NMI_generator) {
                         HSYNC_generator = false;
                         if (CurScanLine.sync_len == 0) CurScanLine.sync_valid = 0;
-                        HaltCount = 0;
                     }
                     break;
                 case LASTINSTOUTFF:
@@ -517,69 +485,32 @@ public final class ZX81
         return mTape;
     }
 
-    //TODO: stub methods/values.
-    void sound_ay_write(int a, int b) {
-    }
-
-    int sound_ay_read(int a) {
+    private int CRC32Block(int[] memory, int romlen) {
         return 0;
     }
 
-    int d8255_read(int a) {
+    private int ZXPrinterReadPort() {
         return 0;
     }
 
-    int D8255PRTA = 0;
-    int D8255PRTB = 0;
-    int D8255PRTC = 0;
-
-    void d8255_write(int a, int b) {
+    private void sound_beeper(int a) {
     }
 
-    void d8251writeDATA(int b) {
-    }
-
-    void d8251writeCTRL(int b) {
-    }
-
-    int CRC32Block(int[] memory, int romlen) {
-        return 0;
-    }
-
-    int SelectAYReg;
-
-    void DebugUpdate() {
-    }
-
-    void ZXPrinterWritePort(int b) {
-    }
-
-    int ZXPrinterReadPort() {
-        return 0;
-    }
-
-    void sound_beeper(int a) {
-    }
-
-    boolean GetEarState() {
+    private boolean GetEarState() {
         return false;
     }
 
-    int d8251readDATA() {
+    private int d8251readDATA() {
         return 0;
     }
 
-    int d8251readCTRL() {
+    private int d8251readCTRL() {
         return 0;
     }
 
-    int random(int a) {
-        return 0;
+    private void WavClockTick(int a, boolean b) {
     }
 
-    void WavClockTick(int a, boolean b) {
-    }
-
-    void ZXPrinterClockTick(int a) {
+    private void ZXPrinterClockTick(int a) {
     }
 }

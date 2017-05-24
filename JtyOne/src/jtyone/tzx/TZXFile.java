@@ -27,10 +27,8 @@ import java.io.InputStream;
 
 public class TZXFile
         extends TZXFileDefs {
-    public static int TZXByte;
-    public static int TZXEventCounter;
 
-    static final String TZX_ID = "ZXTape!\032";
+    private static final String TZX_ID = "ZXTape!\032";
 
     public static TZXBlock[] Tape = new TZXBlock[TZX_MAX_BLOCKS];
 
@@ -39,114 +37,23 @@ public class TZXFile
             Tape[i] = new TZXBlock();
     }
 
-    static String FileName;
+    private static String FileName;
     public static int Blocks, CurBlock;
-    static int CurBlockLen, CurBlockProgress;
-    static int Pause;
-    static boolean FlashLoad;
-    static boolean AutoStart;
-    static boolean Playing;
-    static boolean Stopping;
-    static int StartBlock;
-    static int EarState;
-    static int LoopBlockStart, LoopBlockCounter;
-    static boolean BlockInProgress;
 
-    static final String[] HWName =
-            {
-                    "ZX Spectrum 16k",
-                    "ZX Spectrum 48k, Plus",
-                    "ZX Spectrum 48k ISSUE 1",
-                    "ZX Spectrum 128k +(Sinclair)",
-                    "ZX Spectrum 128k +2 (grey case)",
-                    "ZX Spectrum 128k +2A, +3",
-                    "Timex Sinclair TC-2048",
-                    "Timex Sinclair TS-2068",
-                    "Pentagon 128",
-                    "Sam Coupe",
-                    "Didaktik M",
-                    "Didaktik Gama",
-                    "ZX-80",
-                    "ZX-81",
-                    "ZX Spectrum 128k, Spanish version",
-                    "ZX Spectrum, Arabic version",
-                    "TK 90-X",
-                    "TK 95",
-                    "Byte",
-                    "Elwro",
-                    "ZS Scorpion",
-                    "Amstrad CPC 464",
-                    "Amstrad CPC 664",
-                    "Amstrad CPC 6128",
-                    "Amstrad CPC 464+",
-                    "Amstrad CPC 6128+",
-                    "Jupiter ACE",
-                    "Enterprise",
-                    "Commodore 64",
-                    "Commodore 128",
-                    "Inves Spectrum+",
-                    "Profi",
-                    "GrandRomMax",
-                    "Kay 1024",
-                    "Ice Felix HC91",
-                    "Ice Felix HC 2000",
-                    "Amaterske RADIO Mistrum",
-                    "Quorum 128",
-                    "MicroART ATM",
-                    "MicroART ATM Turbo 2",
-                    "Chrome",
-                    "ZX Badaloc",
-                    "TS1500",
-                    "Lambda",
-                    "TK85",
-                    "ZX97"
-            };
-
-
-    static BLKNAMES[] BlockNames =
-            {
-                    new BLKNAMES(0, "Unknown"),
-                    new BLKNAMES(TZX_BLOCK_ROM, "Spectrum ROM"),
-                    new BLKNAMES(TZX_BLOCK_TURBO, "Turbo Loader"),
-                    new BLKNAMES(TZX_BLOCK_TONE, "Pure Tone"),
-                    new BLKNAMES(TZX_BLOCK_PULSE, "Pulse Sequence"),
-                    new BLKNAMES(TZX_BLOCK_DATA, "Pure Data"),
-                    new BLKNAMES(TZX_BLOCK_DREC, "Direct Recording"),
-                    new BLKNAMES(TZX_BLOCK_CSW, "CSW Recording"),
-                    new BLKNAMES(TZX_BLOCK_GENERAL, "General Data"),
-                    new BLKNAMES(TZX_BLOCK_PAUSE, "Pause"),
-                    new BLKNAMES(TZX_BLOCK_GSTART, "Group Start"),
-                    new BLKNAMES(TZX_BLOCK_GEND, "Group End"),
-                    new BLKNAMES(TZX_BLOCK_JUMP, "Jump to Block"),
-                    new BLKNAMES(TZX_BLOCK_LSTART, "Loop Start"),
-                    new BLKNAMES(TZX_BLOCK_LEND, "Loop End"),
-                    new BLKNAMES(TZX_BLOCK_SBLOCK, "Select Block"),
-                    new BLKNAMES(TZX_BLOCK_STOP48K, "Stop Tape"),
-                    new BLKNAMES(TZX_BLOCK_SETLEVEL, "Set Level"),
-                    new BLKNAMES(TZX_BLOCK_TEXT, "Text Description"),
-                    new BLKNAMES(TZX_BLOCK_MESSAGE, "Message"),
-                    new BLKNAMES(TZX_BLOCK_ARCHIVE, "Archive info"),
-                    new BLKNAMES(TZX_BLOCK_HWTYPE, "Hardware Type"),
-                    new BLKNAMES(TZX_BLOCK_CUSTOM, "Custom Info"),
-                    new BLKNAMES(TZX_BLOCK_GLUE, "Glue"),
-                    new BLKNAMES(-1, "")
-            };
-
-    static void EraseAll() {
+    private static void EraseAll() {
         int i;
         for (i = 0; i < Blocks; i++) EraseBlock(i);
         Blocks = CurBlock = 0;
     }
 
-    static void NewTZX() {
+    private static void NewTZX() {
         EraseAll();
         AddTextBlock("Created with EightyOneTZX");
         //AddHWTypeBlock(0x00, 0x0c);
         CurBlock = 0;
-        AutoStart = true;
     }
 
-    static void EraseBlock(int BlockNo) {
+    private static void EraseBlock(int BlockNo) {
 
         Tape[BlockNo].BlockID = 0;
 
@@ -167,140 +74,7 @@ public class TZXFile
         }
     }
 
-    static int GetGroup(int Block) {
-        return (Tape[Block].Group);
-    }
-
-
-    static String GetBlockName(int BlockNo) {
-        int i, len, BlockID;
-        String text, parameters;
-        char c;
-        byte[] data;
-
-        BlockID = Tape[BlockNo].BlockID;
-        parameters = "";
-
-        switch (BlockID) {
-            case 0x10:
-                data = Tape[BlockNo].Data.Data;
-                if ((data[0] == 0) && ((TZXROM) Tape[BlockNo].Head).DataLen == 19
-                        || ((TZXROM) Tape[BlockNo].Head).DataLen == 20) {
-                    switch (data[1]) {
-                        case 0:
-                            text = "Program: ";
-                            i = (data[14] & 0xff) + (data[15] & 0xff) * 256;
-                            if (i < 32768) {
-                                parameters = " LINE ";
-                                parameters += i;
-                            }
-                            break;
-                        case 1:
-                            text = "Num Array: ";
-                            break;
-                        case 2:
-                            text = "Chr Array: ";
-                            break;
-                        case 3:
-                            text = "Code: ";
-                            i = (data[14] & 0xff) + (data[15] & 0xff) * 256;
-                            parameters += i;
-                            parameters += ",";
-                            i = (data[12] & 0xff) + (data[13] & 0xff) * 256;
-                            parameters += i;
-                            if (parameters == "16384,6912")
-                                parameters = "SCREEN$";
-
-                            break;
-                        default:
-                            text = "Unknown: ";
-                            break;
-                    }
-
-                    text += "\"";
-                    for (i = 2; i < 12; i++)
-                        if (data[i] >= 32 && data[i] < 127) text += data[i];
-                        else text += "?";
-                    text.trim();
-                    text += "\" ";
-                    text += parameters;
-                } else if (data[0] == 0 && ((TZXROM) Tape[BlockNo].Head).DataLen == 27) {
-                    switch (data[1]) {
-                        case 0:
-                            text = "Dict: \"";
-                            break;
-                        case 32:
-                            text = "Bytes: \"";
-                            i = (data[14] & 0xff) + (data[15] & 0xff) * 256;
-                            parameters += i;
-                            parameters += ",";
-                            i = (data[12] & 0xff) + (data[13] & 0xff) * 256;
-                            parameters += i;
-                            break;
-                        default:
-                            text = "Unknown: \"";
-                            break;
-                    }
-                    for (i = 2; i < 12; i++)
-                        if (data[i] >= 32 && data[i] < 127) text += data[i];
-                        else text += "?";
-                    text.trim();
-                    text += "\" " + parameters;
-                } else text = "";
-                return (text);
-
-            case 0x30:
-            case 0x21:
-                len = ((TZXText) Tape[BlockNo].Head).TextLen;
-
-                text = "";
-                for (i = 0; i < len; i++) {
-                    c = (char) ((Tape[BlockNo].Data.Data[i]) & 0xff);
-                    text += c;
-                }
-
-                return (text);
-
-            case 0x33:
-                text = "Hardware - ";
-                text += HWName[Tape[BlockNo].Data.HWTypes[0].ID];
-                return (text);
-
-            case 0x19:
-                if ((((TZXGeneral) Tape[BlockNo].Head).TOTP == 0)
-                        && (((TZXGeneral) Tape[BlockNo].Head).NPP == 0)
-                        && (((TZXGeneral) Tape[BlockNo].Head).ASP == 0)
-                        && (((TZXGeneral) Tape[BlockNo].Head).NPD == 19)
-                        && (((TZXGeneral) Tape[BlockNo].Head).ASD == 2)) {
-                    text = GetFName(BlockNo);
-                    if (text != "") text = "Program: \"" + text + "\"";
-                    else text = "Code";
-                } else text = "";
-                return (text);
-
-            case TZX_BLOCK_PAUSE:
-                if (Tape[BlockNo].Pause == 0) text = "--- Stop The Tape ---";
-                else text = "Pause";
-                return (text);
-
-            default:
-                i = 0;
-                do {
-                    if (BlockNames[i].id == Tape[BlockNo].BlockID)
-                        return (BlockNames[i].name);
-
-                    i++;
-                } while (BlockNames[i].id != -1);
-        }
-
-        return ("");
-    }
-
-    static byte[] GetBlockData(int Block) {
-        return (Tape[Block].Data.Data);
-    }
-
-    static void DeleteBlock(int Block) {
+    private static void DeleteBlock(int Block) {
         int i;
 
         if (Block >= Blocks) return;
@@ -312,7 +86,7 @@ public class TZXFile
         Blocks--;
     }
 
-    static void InsertBlock(int Position) {
+    private static void InsertBlock(int Position) {
         int i;
         i = Blocks;
 
@@ -326,28 +100,7 @@ public class TZXFile
         Blocks++;
     }
 
-    static void MoveBlock(int from, int to) {
-        while (from != to) {
-            if (from == to) return;
-            if (from > to) {
-                SwapBlocks(from, from - 1);
-                from--;
-            } else {
-                SwapBlocks(from, from + 1);
-                from++;
-            }
-        }
-    }
-
-    static void SwapBlocks(int b1, int b2) {
-        TZXBlock b;
-
-        b = Tape[b1];
-        Tape[b1] = Tape[b2];
-        Tape[b2] = b;
-    }
-
-    static void MergeBlocks() {
+    private static void MergeBlocks() {
         int i;
         if (Blocks == 0) return;
 
@@ -369,153 +122,17 @@ public class TZXFile
         if (Tape[i].BlockID == TZX_BLOCK_PAUSE) DeleteBlock(i);
     }
 
-    static boolean IsEditable(int BlockNo) {
-        switch (Tape[BlockNo].BlockID) {
-            case TZX_BLOCK_TEXT:
-            case TZX_BLOCK_HWTYPE:
-            case TZX_BLOCK_GENERAL:
-            case TZX_BLOCK_PAUSE:
-            case TZX_BLOCK_ARCHIVE:
-            case TZX_BLOCK_GSTART:
-            case TZX_BLOCK_ROM:
-            case TZX_BLOCK_TURBO:
-            case TZX_BLOCK_DATA:
-                return (true);
-
-            default:
-                return (false);
-        }
-    }
-
-    String GetBlockType(int BlockNo) {
-        switch (Tape[BlockNo].BlockID) {
-            case 0x30:
-            case 0x32:
-            case 0x33:
-            case 0x35:
-                return ("Info");
-
-            default:
-                return (Integer.toHexString(Tape[BlockNo].BlockID));
-        }
-        //return(Tape[BlockNo].BlockID);
-    }
-
-    static String GetBlockLength(int BlockNo) {
-        String value;
-        int len = -1;
-
-        switch (Tape[BlockNo].BlockID) {
-            case TZX_BLOCK_PAUSE:
-                len = -Tape[BlockNo].Pause;
-                break;
-            case TZX_BLOCK_ROM:
-                len = ((TZXROM) Tape[BlockNo].Head).DataLen;
-                break;
-            case TZX_BLOCK_TURBO:
-                len = ((TZXTurbo) Tape[BlockNo].Head).DataLen;
-                break;
-            case TZX_BLOCK_DATA:
-                len = ((TZXData) Tape[BlockNo].Head).DataLen;
-                break;
-            case TZX_BLOCK_GENERAL:
-                len = ((TZXGeneral) Tape[BlockNo].Head).DataLen;
-                break;
-            case TZX_BLOCK_TONE:
-            case TZX_BLOCK_PULSE:
-            case TZX_BLOCK_DREC:
-            case TZX_BLOCK_CSW:
-            default:
-                break;
-        }
-
-        if (len == -1) return ("");
-
-        if (len >= 0) return (len + "ms");
-
-        len = -len;
-        value = len + "ms";
-
-        return (value);
-    }
-
-    static boolean GetEarState() {
-        return (EarState != 0);
-    }
-
-    static String GetFName(int BlockNo) {
-        String Name = "";
-        byte[] p;
-        int pos = 0;
-        int i = 32;
-        boolean end = false;
-
-
-        if (Tape[BlockNo].BlockID != TZX_BLOCK_GENERAL) return ("");
-
-        p = Tape[BlockNo].Data.Data;
-
-        do {
-            int c = p[pos++];
-
-            if ((c & 128) != 0) {
-                end = true;
-                c = c & 127;
-            }
-
-            if (c == 0) Name += " ";
-            if (c >= 28 && c <= 37) Name += (char) ((c - 28) + ('0'));
-            if (c >= 38 && c <= 63) Name += (char) ((c - 38) + ('A'));
-            i--;
-        } while (i != 0 && !end);
-
-        return (Name);
-    }
-
-    static void EditBlock(int Block, int Mx, int My) {
-        switch (Tape[Block].BlockID) {
-            case TZX_BLOCK_PAUSE:
-                //EditPauseForm->Go(Block, Mx, My);
-                break;
-
-            case TZX_BLOCK_ARCHIVE:
-                //EditArchiveInfo->Go(Block, Mx, My);
-                break;
-
-            case TZX_BLOCK_TEXT:
-            case TZX_BLOCK_GSTART:
-                //EditTextForm->Go(Block, Mx, My);
-                break;
-
-            case TZX_BLOCK_HWTYPE:
-                //EditHWInfoForm->Go(Block, Mx, My);
-                break;
-            case TZX_BLOCK_GENERAL:
-                //EditGeneralForm->Go(Block, Mx, My);
-                break;
-
-            case TZX_BLOCK_ROM:
-            case TZX_BLOCK_TURBO:
-            case TZX_BLOCK_DATA:
-                //EditDataForm->Go(Block, Mx, My);
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    static int ReadByte(InputStream f)
+    private static int ReadByte(InputStream f)
             throws IOException {
         return f.read();
     }
 
-    static int ReadWord(InputStream f)
+    private static int ReadWord(InputStream f)
             throws IOException {
         return f.read() + (f.read() << 8);
     }
 
-    static int ReadDWord(InputStream f)
+    private static int ReadDWord(InputStream f)
             throws IOException {
         return f.read() +
                 (f.read() << 8) +
@@ -523,30 +140,28 @@ public class TZXFile
                 (f.read() << 24);
     }
 
-    static int Read3Bytes(InputStream f)
+    private static int Read3Bytes(InputStream f)
             throws IOException {
         return f.read() +
                 (f.read() << 8) +
                 (f.read() << 16);
     }
 
-    static void ReadBytes(InputStream f, int len, byte[] buf)
+    private static void ReadBytes(InputStream f, int len, byte[] buf)
             throws IOException {
         f.read(buf, 0, len);
     }
 
-    static void ReadWords(InputStream f, int len, int[] buf)
+    private static void ReadWords(InputStream f, int len, int[] buf)
             throws IOException {
         for (int i = 0; i < len; i++)
             buf[i] = ReadWord(f);
     }
 
-    static boolean LoadOldGeneralBlock(InputStream f)
+    private static boolean LoadOldGeneralBlock(InputStream f)
             throws IOException {
-        int bl, flags, pl, pp, ns, np, as, usedbits, pause;
+        int bl, flags, pl, pp, ns, np, as, pause;
         int datalen;
-        int BlockType;
-        long pos;
         int i;
 
         int[] SymDef =
@@ -577,12 +192,6 @@ public class TZXFile
             return (true);
         }
 
-        int[] sp = null;
-        if (ns != 0) {
-            sp = new int[ns];
-            for (i = 0; i < pp; i++) sp[i] = ReadWord(f);
-        }
-
         np = ReadByte(f);
         as = ReadByte(f);
 
@@ -590,10 +199,10 @@ public class TZXFile
             return (true);
         }
 
-        int[] at = new int[np * as];
-        for (i = 0; i < (np * as); i++) at[i] = ReadWord(f);
+        for (i = 0; i < (np * as); i++)
+            ReadWord(f);
 
-        usedbits = ReadByte(f);
+        ReadByte(f); // usedbits
         pause = ReadWord(f);
 
         datalen = bl - (11 + 2 * (ns + np * as));
@@ -619,16 +228,14 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadGeneralBlock(InputStream f)
+    private static boolean LoadGeneralBlock(InputStream f)
             throws IOException {
-        int[] SymDefP, SymDefD = null, PRLE = null;
+        int[] SymDefP, SymDefD = null, PRLE;
         byte[] Data;
-        int DataLen, Pause;
+        int Pause;
         int TOTP, NPP, ASP, TOTD, NPD, ASD;
         int bits, bytes = 0;
         int i, j, k;
-
-        long pos;
 
         f.mark(65536);
 
@@ -636,7 +243,7 @@ public class TZXFile
 
         f.reset();
 
-        DataLen = ReadDWord(f);
+        ReadDWord(f); // DataLen
         Pause = ReadWord(f);
         TOTP = ReadDWord(f);
         NPP = ReadByte(f) + 1;
@@ -680,7 +287,6 @@ public class TZXFile
         }
 
         if (TOTD > 0) {
-            int SymSize;
 
             i = 1;
             bits = 0;
@@ -729,7 +335,7 @@ public class TZXFile
     }
 
 
-    static boolean LoadROMBlock(InputStream f)
+    private static boolean LoadROMBlock(InputStream f)
             throws IOException {
         int length;
         int pause;
@@ -749,7 +355,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadTurboBlock(InputStream f)
+    private static boolean LoadTurboBlock(InputStream f)
             throws IOException {
         int datalen, lp, ls1, ls2, l0, l1, lpt, usedbits, pause;
         byte[] data;
@@ -783,7 +389,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadToneBlock(InputStream f)
+    private static boolean LoadToneBlock(InputStream f)
             throws IOException {
         int pulselen, pulses;
 
@@ -798,7 +404,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadPulseBlock(InputStream f)
+    private static boolean LoadPulseBlock(InputStream f)
             throws IOException {
         int nopulses;
         int[] pulses;
@@ -815,7 +421,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadDataBlock(InputStream f)
+    private static boolean LoadDataBlock(InputStream f)
             throws IOException {
         int datalen, len0, len1, usedbits, pause;
         byte[] data;
@@ -840,7 +446,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadDRecBlock(InputStream f)
+    private static boolean LoadDRecBlock(InputStream f)
             throws IOException {
         int samplelen, pause, usedbits, datalen;
         byte[] data;
@@ -864,7 +470,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadCSWBlock(InputStream f)
+    private static boolean LoadCSWBlock(InputStream f)
             throws IOException {
         int datalen, pause, samplerate, compression, flags, nopulses;
         byte[] data;
@@ -892,7 +498,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadPauseBlock(InputStream f)
+    private static boolean LoadPauseBlock(InputStream f)
             throws IOException {
         int pause;
 
@@ -903,7 +509,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadGStartBlock(InputStream f)
+    private static boolean LoadGStartBlock(InputStream f)
             throws IOException {
         int length;
         byte[] data;
@@ -920,13 +526,13 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadGEndBlock(InputStream f)
+    private static boolean LoadGEndBlock(InputStream f)
             throws IOException {
         Tape[CurBlock].BlockID = TZX_BLOCK_GEND;
         return (false);
     }
 
-    static boolean LoadJumpBlock(InputStream f)
+    private static boolean LoadJumpBlock(InputStream f)
             throws IOException {
         int jump;
 
@@ -938,7 +544,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadLStartBlock(InputStream f)
+    private static boolean LoadLStartBlock(InputStream f)
             throws IOException {
         int repeats;
 
@@ -951,13 +557,13 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadLEndBlock(InputStream f)
+    private static boolean LoadLEndBlock(InputStream f)
             throws IOException {
         Tape[CurBlock].BlockID = TZX_BLOCK_LEND;
         return (false);
     }
 
-    static boolean LoadSBlock(InputStream f)
+    private static boolean LoadSBlock(InputStream f)
             throws IOException {
         int length, selections;
         byte[] data;
@@ -976,7 +582,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadStop48KBlock(InputStream f)
+    private static boolean LoadStop48KBlock(InputStream f)
             throws IOException {
         ReadDWord(f);
         Tape[CurBlock].BlockID = TZX_BLOCK_STOP48K;
@@ -984,7 +590,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadSetLevelBlock(InputStream f)
+    private static boolean LoadSetLevelBlock(InputStream f)
             throws IOException {
         int level;
 
@@ -998,7 +604,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadTextBlock(InputStream f)
+    private static boolean LoadTextBlock(InputStream f)
             throws IOException {
         int length;
         byte[] data;
@@ -1015,7 +621,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadMessageBlock(InputStream f)
+    private static boolean LoadMessageBlock(InputStream f)
             throws IOException {
         int length, time;
         byte[] data;
@@ -1034,7 +640,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadArchiveBlock(InputStream f)
+    private static boolean LoadArchiveBlock(InputStream f)
             throws IOException {
         int length, strings;
         byte[] data;
@@ -1053,7 +659,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadHWTypeBlock(InputStream f)
+    private static boolean LoadHWTypeBlock(InputStream f)
             throws IOException {
         int blocks, i;
         TZXHWInfo[] data;
@@ -1078,7 +684,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadCustomBlock(InputStream f)
+    private static boolean LoadCustomBlock(InputStream f)
             throws IOException {
         byte[] data, id = new byte[17];
         int len;
@@ -1099,7 +705,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadGlueBlock(InputStream f)
+    private static boolean LoadGlueBlock(InputStream f)
             throws IOException {
         Tape[CurBlock].BlockID = TZX_BLOCK_GLUE;
         ReadDWord(f);
@@ -1107,7 +713,7 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadUnknownBlock(InputStream f, int BlockID)
+    private static boolean LoadUnknownBlock(InputStream f, int BlockID)
             throws IOException {
         int length;
         byte[] data;
@@ -1125,195 +731,11 @@ public class TZXFile
         return (false);
     }
 
-    static boolean LoadTAPFile(String FileName, boolean Insert)
-            throws IOException {
-        String p;
-        int BlockID, i;
-        int HeaderLen;
-        int len;
-        int AddSync, AddChecksum;
-        boolean FirstBlock, error;
-        byte[] data = new byte[65536];
-
-        InputStream f = TZXFile.class.getClassLoader().getResourceAsStream(FileName);
-        if (f == null) return (false);
-        TZXFile.FileName = FileName;
-
-        FirstBlock = true;
-        AddSync = 0;
-        AddChecksum = 0;
-
-        if (!Insert) EraseAll();
-        error = false;
-
-        // TODO: available() probably not correct here...
-        while (f.available() > 0 && !error) {
-            len = ReadWord(f);
-
-            if (FirstBlock) {
-                if (len == 26) AddSync = 1;
-                if (len == 25) {
-                    AddSync = 1;
-                    AddChecksum = 1;
-                }
-                HeaderLen = len;
-            }
-            FirstBlock = false;
-
-            if (len < 1 || len > 65536) error = true;
-            else {
-                  /* TODO:
-                        ReadBytes(f, len, data+AddSync);
-                        if (AddSync)
-                        {
-                                if (len==HeaderLen) data[0]=0;
-                                else data[0]=255;
-                        }
-
-                        if (AddChecksum)
-                        {
-                                unsigned char check=0;
-
-                                for(i=0;i<(len);i++)
-                                        check = check ^ data[i+AddSync];
-                                data[len+AddSync]=check;
-                        }
-
-                        len+= AddSync+AddChecksum;
-
-                        MoveBlock(AddROMBlock(data, len), CurBlock);
-                        if (AddSync)
-                        {
-                                if (len==27) Tape[CurBlock].Pause=100;
-                                else Tape[CurBlock].Pause=5000;
-                        }
-                        CurBlock++;
-                        */
-            }
-        }
-
-        f.close();
-        GroupCount();
-        return (true);
-    }
-
-    static boolean LoadPFile(String FileName, boolean Insert)
-            throws IOException {
-        int len, fnamelen;
-        byte[] tempdata = new byte[65536 + 256];
-
-        InputStream f = TZXFile.class.getClassLoader().getResourceAsStream(FileName);
-        if (f == null) return (false);
-        TZXFile.FileName = FileName;
-
-        if (!Insert) NewTZX();
-
-        /* TODO:
-        if (FileName.toUpperCase().endsWith(".P") )
-        {
-                ConvertASCIIZX81(RemoveExt(RemovePath(FileName)), tempdata);
-                fnamelen=ZX81Strlen(tempdata);
-        }
-        else    fnamelen=0;
-
-        len=fread(tempdata+fnamelen, 1, 65536, f);
-
-        MoveBlock(AddGeneralBlock(tempdata, len+fnamelen), CurBlock);
-        */
-        Tape[CurBlock].Pause = 3000;
-
-        f.close();
-        GroupCount();
-        return (true);
-    }
-
-    static boolean LoadT81File(String FileName, boolean Insert)
-            throws IOException {
-        byte[] header = new byte[5];
-        byte[] fname = new byte[32], flen = new byte[16];
-        byte[] buffer1 = new byte[65536 + 256], buffer2 = new byte[65535 + 256];
-
-        InputStream fptr;
-        int length, zxnamelen, i;
-
-        InputStream f = TZXFile.class.getClassLoader().getResourceAsStream(FileName);
-        if (f == null) return (false);
-        TZXFile.FileName = FileName;
-
-        ReadBytes(f, 4, header);
-        if (!new String(header).equals(T81_HEADER_ID)) {
-            f.close();
-            return (false);
-        }
-
-        if (!Insert) NewTZX();
-
-        do {
-            ReadBytes(f, 32, fname);
-            ReadBytes(f, 16, flen);
-
-            length = Integer.parseInt(new String(flen));
-            String sfname = new String(fname);
-
-            if ((sfname.length() > 29) || (length < 20) || (length > 65535))
-                break;
-
-                /* TODO:
-                if (sfname.equals("<Silence>")) MoveBlock(TZXFile.AddPauseBlock(length), CurBlock++);
-                else
-                {
-                        fread(buffer1, length, 1, fptr);
-                        if ( (*buffer1==0x00) || (*buffer1==255) || (*buffer1==1) ) // If buffer doesn't include the filename, add one
-                        {
-                                ConvertASCIIZX81(fname, buffer2);
-                                zxnamelen = ZX81Strlen(buffer2);
-                        }
-                        else    zxnamelen = 0;
-
-                        memcpy(buffer2+zxnamelen, buffer1, length);
-                        length += zxnamelen;
-
-                        while(length>0 && buffer2[length-1]!=0x80) length--;
-
-                        MoveBlock(AddGeneralBlock(buffer2, length), CurBlock++);
-                }
-                */
-        } while (f.available() > 0);
-
-        f.close();
-        MergeBlocks();
-
-        for (i = 1; i < Blocks; i++)
-            if (Tape[i].BlockID == TZX_BLOCK_GENERAL && Tape[i].Pause == 0) Tape[i].Pause = 5000;
-
-        GroupCount();
-        return (true);
-    }
-
-
-    public static boolean LoadFile(String FileName, boolean Insert)
-            throws IOException {
-        int extPos = FileName.lastIndexOf(".");
-        String Extension = extPos == -1 ? "" : FileName.substring(extPos + 1).toUpperCase();
-
-        if (Extension.equals(".TAP")) return (LoadTAPFile(FileName, Insert));
-        if (Extension.equals(".P")
-                || Extension.equals(".O")
-                || Extension.equals(".A83")) return (LoadPFile(FileName, Insert));
-        if (Extension == ".T81") return (LoadT81File(FileName, Insert));
-
-        InputStream f = TZXFile.class.getClassLoader().getResourceAsStream(FileName);
-        if (f == null) return (false);
-        TZXFile.FileName = FileName;
-
-        return LoadFile(f, Insert);
-    }
-
     public static boolean LoadFile(InputStream f, boolean Insert)
             throws IOException {
         TZXHeader head = new TZXHeader();
         boolean error;
-        int BlockID, i, OldCurBlock;
+        int BlockID;
 
         ReadBytes(f, 8, head.id);
         head.major = ReadByte(f);
@@ -1428,7 +850,7 @@ public class TZXFile
         return (true);
     }
 
-    static void GroupCount() {
+    private static void GroupCount() {
         int i;
 
         int GroupCount = 0;
@@ -1446,22 +868,7 @@ public class TZXFile
         }
     }
 
-    static int AddGroupStartBlock(String str) {
-        byte[] data = str.getBytes();
-
-        Tape[Blocks].BlockID = TZX_BLOCK_GSTART;
-        Tape[Blocks].Head = new TZXGStart();
-        Tape[Blocks].Data.Data = data;
-        ((TZXGStart) Tape[Blocks].Head).NameLen = str.length();
-        return (Blocks++);
-    }
-
-    static int AddGroupEndBlock() {
-        Tape[Blocks].BlockID = TZX_BLOCK_GEND;
-        return (Blocks++);
-    }
-
-    static int AddTextBlock(String str) {
+    private static int AddTextBlock(String str) {
         byte[] data = str.getBytes();
 
         Tape[Blocks].BlockID = TZX_BLOCK_TEXT;
@@ -1469,94 +876,5 @@ public class TZXFile
         Tape[Blocks].Data.Data = data;
         ((TZXText) Tape[Blocks].Head).TextLen = str.length();
         return (Blocks++);
-    }
-
-    static int AddHWTypeBlock(int type, int id) {
-        TZXHWInfo[] data = new TZXHWInfo[]{new TZXHWInfo()};
-
-        data[0].Type = type;
-        data[0].ID = id;
-        data[0].Information = 0;
-
-        Tape[Blocks].BlockID = TZX_BLOCK_HWTYPE;
-        Tape[Blocks].Head = new TZXHWType();
-        Tape[Blocks].Data.HWTypes = data;
-        ((TZXHWType) Tape[Blocks].Head).NoTypes = 1;
-        return (Blocks++);
-    }
-
-    static int AddPauseBlock(int len) {
-        if (len > 65535) {
-            AddPauseBlock(65535);
-            return (AddPauseBlock(len - 65535));
-        }
-
-        Tape[Blocks].BlockID = TZX_BLOCK_PAUSE;
-        Tape[Blocks].Head = new TZXPause();
-        Tape[Blocks].Pause = len;
-        return (Blocks++);
-    }
-
-    static int AddROMBlock(byte[] data, int len) {
-        Tape[Blocks].BlockID = TZX_BLOCK_ROM;
-        Tape[Blocks].Head = new TZXROM();
-
-        Tape[Blocks].Pause = 3000;
-        ((TZXROM) Tape[Blocks].Head).DataLen = len;
-        Tape[Blocks].Data.Data = data;
-        return (Blocks++);
-    }
-
-    static int AddGeneralBlock(byte[] data, int len) {
-        int i;
-
-        int[] SymDef =
-                {3, 530, 520, 530, 520, 530, 520, 530, 4689,
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        3, 530, 520, 530, 520, 530, 520, 530, 520, 530,
-                        520, 530, 520, 530, 520, 530, 520, 530, 4689};
-
-        Tape[Blocks].BlockID = TZX_BLOCK_GENERAL;
-        Tape[Blocks].Head = new TZXGeneral();
-        Tape[Blocks].Pause = Pause;
-        ((TZXGeneral) Tape[Blocks].Head).TOTP = 0;
-        ((TZXGeneral) Tape[Blocks].Head).NPP = 0;
-        ((TZXGeneral) Tape[Blocks].Head).ASP = 0;
-        ((TZXGeneral) Tape[Blocks].Head).TOTD = len * 8;
-        ((TZXGeneral) Tape[Blocks].Head).NPD = 19;
-        ((TZXGeneral) Tape[Blocks].Head).ASD = 2;
-        ((TZXGeneral) Tape[Blocks].Head).DataLen = len;
-
-        Tape[Blocks].SymDefD = SymDef;
-        Tape[Blocks].Data.Data = data;
-        Tape[Blocks].SymDefP = null;
-        Tape[Blocks].PRLE = null;
-
-        return (Blocks++);
-    }
-
-    static int AddArchiveBlock(String str) {
-        byte[] p = new byte[str.length() + 2];
-        str.getBytes(0, str.length(), p, 2);
-
-        p[0] = 0;
-        p[1] = (byte) str.length();
-
-        Tape[Blocks].BlockID = TZX_BLOCK_ARCHIVE;
-        Tape[Blocks].Head = new TZXArchive();
-        Tape[Blocks].Data.Data = p;
-        ((TZXArchive) Tape[Blocks].Head).NoStrings = 1;
-        return (Blocks++);
-
-    }
-}
-
-class BLKNAMES {
-    int id;
-    String name;
-
-    public BLKNAMES(int id, String name) {
-        this.id = id;
-        this.name = name;
     }
 }

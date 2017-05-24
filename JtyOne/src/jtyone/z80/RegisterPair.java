@@ -27,7 +27,6 @@
 
 package jtyone.z80;
 
-/* Macros used for accessing the registers */
 
 public interface RegisterPair {
     int get();
@@ -60,9 +59,9 @@ public interface RegisterPair {
 final class MasterRegisterPair
         implements RegisterPair {
     int word;
-    public String name;
+    private String name;
 
-    public MasterRegisterPair(String name) {
+    MasterRegisterPair(String name) {
         this.name = name;
     }
 
@@ -142,11 +141,11 @@ final class MasterRegisterPair
 
 final class SlaveRegisterPair
         implements RegisterPair {
-    MasterRegister hi;
-    MasterRegister low;
-    public String name;
+    private MasterRegister hi;
+    private MasterRegister low;
+    private String name;
 
-    public SlaveRegisterPair(String name) {
+    SlaveRegisterPair(String name) {
         this.name = name;
     }
 

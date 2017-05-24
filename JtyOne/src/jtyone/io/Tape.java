@@ -37,16 +37,12 @@ public class Tape {
 
     /**
      * Load data from a .TZX file.
-     * <p>
-     * All we are interested in is the ZX81 programs...
-     *
-     * @param fileName The name of the TZX file.
      */
     public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum, boolean applet) {
         mPrograms.clear();
         mCurrentProgram = 0;
         try {
-            InputStream is = null;
+            InputStream is;
             if (applet)
                 is = Tape.class.getClassLoader().getResourceAsStream(fileName);
             else
@@ -103,15 +99,12 @@ public class Tape {
         if (config.autoload) {
             //System.out.println("Autoloading");
             if (config.zx81opts.machine == ZX81ConfigDefs.MACHINEZX81)
-                autoload(keyboard, 'J', true);
+                autoload(keyboard);
         }
     }
 
     /**
      * Add all ZX81 file entries from the .TZX file to the current list.
-     *
-     * @param is
-     * @param length
      */
     private void addTZXEntries(InputStream is) {
         try {
@@ -131,8 +124,6 @@ public class Tape {
 
     /**
      * Get the bytes for the next entry.
-     *
-     * @return
      */
     public byte[] getNextEntry() {
         if (mCurrentProgram < mPrograms.size())
@@ -141,55 +132,41 @@ public class Tape {
         return null;
     }
 
-    /**
-     * Get the bytes for the given entry.
-     *
-     * @return
-     */
-    public void setCurrentEntry(int entry) {
-        mCurrentProgram = entry;
-    }
-
-    public void autoload(KBStatus keyboard, char loadKey, boolean useQuotes) {
-        new Thread(new AutoLoader(keyboard, loadKey, useQuotes)).start();
+    private void autoload(KBStatus keyboard) {
+        new Thread(new AutoLoader(keyboard)).start();
     }
 }
 
 /**
- * Class to support auto-loading, i.e. typing LOAD "" after
- * a tape has been selected.
+ * Class to support auto-loading, i.e. typing LOAD "" after a tape has been selected.
  */
 class AutoLoader implements Runnable {
     private KBStatus mKeyboard;
-    private char mLoadKey;
-    private boolean mUseQuotes;
 
-    public AutoLoader(KBStatus keyboard, char loadKey, boolean useQuotes) {
+    AutoLoader(KBStatus keyboard) {
         mKeyboard = keyboard;
-        mLoadKey = loadKey;
-        mUseQuotes = useQuotes;
     }
 
     public void run() {
         try {
+            char key = 'J';
+
             // TODO: need to trigger autoload by when the Z80 gets to a particular
             // address, in case it takes longer than 4 seconds to start up.
             Thread.sleep(5000);
-            mKeyboard.PCKeyDown(mLoadKey);
+            mKeyboard.PCKeyDown(key);
             Thread.sleep(200);
-            mKeyboard.PCKeyUp(mLoadKey);
+            mKeyboard.PCKeyUp(key);
             Thread.sleep(200);
 
-            if (mUseQuotes) {
-                mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
-                Thread.sleep(200);
-                mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
-                Thread.sleep(200);
-                mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
-                Thread.sleep(200);
-                mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
-                Thread.sleep(200);
-            }
+            mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
+            Thread.sleep(200);
+            mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
+            Thread.sleep(200);
+            mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
+            Thread.sleep(200);
+            mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
+            Thread.sleep(200);
 
             mKeyboard.PCKeyDown(KeyEvent.VK_ENTER);
             Thread.sleep(200);

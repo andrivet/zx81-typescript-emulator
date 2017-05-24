@@ -80,10 +80,6 @@ public final class Z80 {
     public int IFF1, IFF2, IM;
     public int halted;
 
-    public int F() {
-        return F.get();
-    }
-
     private final value8 tempreg = new value8("value8");
 
     /* Set up the z80 emulation */
@@ -113,7 +109,7 @@ public final class Z80 {
 
     /* Initalise the tables used to set flags */
     //void z80_init_tables(void)
-    void init_tables() {
+    private void init_tables() {
         int i, j, k;
         int parity;
 
@@ -213,42 +209,38 @@ public final class Z80 {
     // From Z80Macros.
     //==========================================================================================
 
-    int tstates;
-
-    int IR() {
-        return ((I << 8) | (R7 & 0x80) | (R & 0x7f));
-    }
+    private int tstates;
 
     /* Get the appropriate contended memory delay. Use this macro later
   to avoid a function call if memory contention is disabled */
-    void contend(int address, int time) {
+    private void contend(int address, int time) {
         tstates += machine.contendmem(address, tstates, time);
     }
 
-    void contend(RegisterPair rp, int time) {
+    private void contend(RegisterPair rp, int time) {
         tstates += machine.contendmem(rp.get(), tstates, time);
     }
 
-    void contend_io(int port, int time) {
+    private void contend_io(int port, int time) {
         tstates += machine.contendio(port, tstates, time);
     }
 
-    void contend_io(RegisterPair rp, int time) {
+    private void contend_io(RegisterPair rp, int time) {
         tstates += machine.contendio(rp.get(), tstates, time);
     }
 
     /* Some commonly used instructions */
-    void AND(Register r) {
+    private void AND(Register r) {
         A.value &= r.get();
         F.set(FLAG_H | sz53p_table[A.value]);
     }
 
-    void AND(int value) {
+    private void AND(int value) {
         A.value &= value;
         F.set(FLAG_H | sz53p_table[A.value]);
     }
 
-    void ADC(int value) {
+    private void ADC(int value) {
         int adctemp = A.value + value + (F.value & FLAG_C);
         int lookup = ((A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) |
                 ((adctemp & 0x88) >> 1);
@@ -258,7 +250,7 @@ public final class Z80 {
                 sz53_table[A.value]);
     }
 
-    void ADC16(int value) {
+    private void ADC16(int value) {
         int add16temp = HL.word + value + (F.value & FLAG_C);
         int lookup = ((HL.word & 0x8800) >> 11) |
                 ((value & 0x8800) >> 10) |
@@ -271,7 +263,7 @@ public final class Z80 {
                 (HL.word == 0 ? 0 : FLAG_Z));
     }
 
-    void ADD(int value) {
+    private void ADD(int value) {
         int addtemp = A.value + value;
         int lookup = ((A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) |
                 ((addtemp & 0x88) >> 1);
@@ -281,7 +273,7 @@ public final class Z80 {
                 sz53_table[A.value]);
     }
 
-    void ADD16(RegisterPair rp1, RegisterPair rp2) {
+    private void ADD16(RegisterPair rp1, RegisterPair rp2) {
         int add16temp = rp1.get() + rp2.get();
         int lookup = ((rp1.get() & 0x0800) >> 11) |
                 ((rp2.get() & 0x0800) >> 10) |
@@ -294,7 +286,7 @@ public final class Z80 {
                 halfcarry_add_table[lookup]);
     }
 
-    void ADD16(RegisterPair rp1, int value) {
+    private void ADD16(RegisterPair rp1, int value) {
         int add16temp = rp1.get() + value;
         int lookup = ((rp1.get() & 0x0800) >> 11) |
                 ((value & 0x0800) >> 10) |
@@ -307,19 +299,18 @@ public final class Z80 {
                 halfcarry_add_table[lookup]);
     }
 
-
-    void BIT(int bit, Register value) {
+    private void BIT(int bit, Register value) {
         F.set((F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) |
                 ((value.get() & (0x01 << bit)) > 0 ? FLAG_H : (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
-    void BIT7(Register value) {
+    private void BIT7(Register value) {
         F.set((F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) |
                 ((value.get() & 0x80) > 0 ? (FLAG_H | FLAG_S) :
                         (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
-    void CALL() {
+    private void CALL() {
         int calltempl = machine.readbyte(PC++);
         contend(PC, 1);
         int calltemph = machine.readbyte(PC++);
@@ -327,7 +318,7 @@ public final class Z80 {
         PC = calltempl + (calltemph << 8);
     }
 
-    void CP(int value) {
+    private void CP(int value) {
         int cptemp = A.value - value;
         int lookup = ((A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) |
                 ((cptemp & 0x88) >> 1);
@@ -349,40 +340,40 @@ public final class Z80 {
 //break
 //TODO: figure out how to implement this!
 
-    void DEC(Register reg) {
+    private void DEC(Register reg) {
         F.set((F.value & FLAG_C) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | FLAG_N);
         reg.dec();
         F.or((reg.get() == 0x7f ? FLAG_V : 0) | sz53_table[reg.get()]);
         //if( DEBUG && !reg.name.equals("value8")) System.out.print(" DEC "+reg.name+" ; "+reg);
     }
 
-    void IN(Register reg, RegisterPair rp) {
+    private void IN(Register reg, RegisterPair rp) {
         int port = rp.get();
         contend_io(port, 3);
         reg.set(machine.readport(port));
         F.set((F.value & FLAG_C) | sz53p_table[reg.get()]);
     }
 
-    void IN(Register reg, int port) {
+    private void IN(Register reg, int port) {
         contend_io(port, 3);
         reg.set(machine.readport(port));
         F.set((F.value & FLAG_C) | sz53p_table[reg.get()]);
     }
 
-    void IN(int value, RegisterPair rp) {
+    private void IN(int value, RegisterPair rp) {
         contend_io(rp, 3);
         machine.readport(rp.get());
         F.set((F.value & FLAG_C) | sz53p_table[value]);
     }
 
-    void INC(Register reg) {
+    private void INC(Register reg) {
         reg.inc();
         F.set((F.value & FLAG_C) | (reg.get() == 0x80 ? FLAG_V : 0) |
                 ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | sz53_table[reg.get()]);
         //if( DEBUG ) System.out.print(" INC "+reg.name+" ; "+reg);
     }
 
-    void LD16_NNRR(int value) {
+    private void LD16_NNRR(int value) {
         contend(PC, 3);
         int ldtemp = machine.readbyte(PC++);
         contend(PC, 3);
@@ -394,7 +385,7 @@ public final class Z80 {
         machine.writebyte(ldtemp, value >> 8);
     }
 
-    int LD16_RRNN() {
+    private int LD16_RRNN() {
         contend(PC, 3);
         int ldtemp = machine.readbyte(PC++);
         contend(PC, 3);
@@ -406,12 +397,12 @@ public final class Z80 {
         //if( DEBUG ) System.out.print(" ; "+regl.rp);
     }
 
-    void JP() {
+    private void JP() {
         int jptemp = PC;
         PC = machine.readbyte(jptemp++) + (machine.readbyte(jptemp) << 8);
     }
 
-    void JR() {
+    private void JR() {
         contend(PC, 1);
         contend(PC, 1);
         contend(PC, 1);
@@ -422,43 +413,38 @@ public final class Z80 {
         PC += dist;
     }
 
-    void OR(Register r) {
+    private void OR(Register r) {
         A.value |= r.get();
         F.set(sz53p_table[A.value]);
     }
 
-    void OR(int value) {
+    private void OR(int value) {
         A.value |= value;
         F.set(sz53p_table[A.value]);
     }
 
-    void OUT(RegisterPair rp, Register reg) {
+    private void OUT(RegisterPair rp, Register reg) {
         contend_io(rp.get(), 3);
         machine.writeport(rp.get(), reg.get());
     }
 
-    void OUT(RegisterPair rp, int value) {
+    private void OUT(RegisterPair rp, int value) {
         contend_io(rp.get(), 3);
         machine.writeport(rp.get(), value);
     }
 
-    void OUT(int port, Register reg) {
+    private void OUT(int port, Register reg) {
         contend_io(port, 3);
         machine.writeport(port, reg.get());
     }
 
-    void OUT(int port, int reg) {
-        contend_io(port, 3);
-        machine.writeport(port, reg);
-    }
-
-    int POP16() {
+    private int POP16() {
         contend(SP, 3);
         contend(SP, 3);
         return machine.readbyte(SP++) + (machine.readbyte(SP++) << 8);
     }
 
-    void PUSH16(int value) {
+    private void PUSH16(int value) {
         SP--;
         contend(SP, 3);
         machine.writebyte(SP, value >> 8);
@@ -468,18 +454,18 @@ public final class Z80 {
     }
 
 
-    void RET() {
+    private void RET() {
         PC = POP16();
     }
 
-    void RL(Register reg) {
+    private void RL(Register reg) {
         int rltemp = reg.get();
         reg.set((rltemp << 1) | (F.value & FLAG_C));
         F.set((rltemp >> 7) | sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" RL "+value.name+" ; "+value.get());
     }
 
-    void RLC(Register reg) {
+    private void RLC(Register reg) {
         int before = reg.get();
         int newValue = (before << 1) | (before >> 7);
         reg.set(newValue);
@@ -488,27 +474,27 @@ public final class Z80 {
         //if( DEBUG ) System.out.print(" RLC "+value.name+" ; "+value.get());
     }
 
-    void RR(Register reg) {
+    private void RR(Register reg) {
         int rrtemp = reg.get();
         reg.set((reg.get() >> 1) | (F.value << 7));
         F.set((rrtemp & FLAG_C) | sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" RR "+value.name+" ; "+value.get());
     }
 
-    void RRC(Register reg) {
+    private void RRC(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set((reg.get() >> 1) | (reg.get() << 7));
         F.or(sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" RRC "+value.name+" ; "+value.get());
     }
 
-    void RST(int value) {
+    private void RST(int value) {
         PUSH16(PC);
         PC = value;
         //if( DEBUG ) System.out.print(" RST "+toHex8(value));
     }
 
-    void SBC(int value) {
+    private void SBC(int value) {
         int sbctemp = A.value - (value) - (F.value & FLAG_C);
         int lookup = ((A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) |
                 ((sbctemp & 0x88) >> 1);
@@ -518,7 +504,7 @@ public final class Z80 {
                 sz53_table[A.value]);
     }
 
-    void SBC16(int value) {
+    private void SBC16(int value) {
         int sub16temp = HL.word - (value) - (F.value & FLAG_C);
         int lookup = ((HL.word & 0x8800) >> 11) |
                 (((value) & 0x8800) >> 10) |
@@ -531,35 +517,35 @@ public final class Z80 {
                 (HL.word > 0 ? 0 : FLAG_Z));
     }
 
-    void SLA(Register reg) {
+    private void SLA(Register reg) {
         F.set(reg.get() >> 7);
         reg.set(reg.get() << 1);
         F.or(sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" SLA "+value.name+" ; "+value.get());
     }
 
-    void SLL(Register reg) {
+    private void SLL(Register reg) {
         F.set(reg.get() >> 7);
         reg.set((reg.get() << 1) | 0x01);
         F.or(sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" SLL "+value.name+" ; "+value.get());
     }
 
-    void SRA(Register reg) {
+    private void SRA(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set((reg.get() & 0x80) | (reg.get() >> 1));
         F.or(sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" SRA "+value.name+" ; "+value.get());
     }
 
-    void SRL(Register reg) {
+    private void SRL(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set(reg.get() >> 1);
         F.or(sz53p_table[reg.get()]);
         //if( DEBUG ) System.out.print(" SRL "+value.name+" ; "+value.get());
     }
 
-    void SUB(int value) {
+    private void SUB(int value) {
         int subtemp = A.value - (value);
         int lookup = ((A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) |
                 ((subtemp & 0x88) >> 1);
@@ -569,12 +555,12 @@ public final class Z80 {
                 sz53_table[A.value]);
     }
 
-    void XOR(Register r) {
+    private void XOR(Register r) {
         A.set(A.value ^ r.get());
         F.set(sz53p_table[A.value]);
     }
 
-    void XOR(int value) {
+    private void XOR(int value) {
         A.set(A.value ^ (value));
         F.set(sz53p_table[A.value]);
     }
@@ -1858,7 +1844,7 @@ public final class Z80 {
     // From Z80_CB.
     //==========================================================================================
 
-    void do_opcode_CB(int opcode2) {
+    private void do_opcode_CB(int opcode2) {
 
         //if( DEBUG ) System.out.print(opToHex8(opcode2));
 
@@ -2193,9 +2179,8 @@ public final class Z80 {
 
             case 0x46:  /* BIT 0,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(0, bytetemp);
+                BIT(0, tempreg);
             }
             break;
 
@@ -2229,9 +2214,8 @@ public final class Z80 {
 
             case 0x4e:  /* BIT 1,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(1, bytetemp);
+                BIT(1, tempreg);
             }
             break;
 
@@ -2265,9 +2249,8 @@ public final class Z80 {
 
             case 0x56:  /* BIT 2,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(2, bytetemp);
+                BIT(2, tempreg);
             }
             break;
 
@@ -2301,9 +2284,8 @@ public final class Z80 {
 
             case 0x5e:  /* BIT 3,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(3, bytetemp);
+                BIT(3, tempreg);
             }
             break;
 
@@ -2337,9 +2319,8 @@ public final class Z80 {
 
             case 0x66:  /* BIT 4,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(4, bytetemp);
+                BIT(4, tempreg);
             }
             break;
 
@@ -2373,9 +2354,8 @@ public final class Z80 {
 
             case 0x6e:  /* BIT 5,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(5, bytetemp);
+                BIT(5, tempreg);
             }
             break;
 
@@ -2409,9 +2389,8 @@ public final class Z80 {
 
             case 0x76:  /* BIT 6,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT(6, bytetemp);
+                BIT(6, tempreg);
             }
             break;
 
@@ -2445,9 +2424,8 @@ public final class Z80 {
 
             case 0x7e:  /* BIT 7,(HL) */ {
                 tempreg.set(machine.readbyte(HL.word));
-                Register bytetemp = tempreg;
                 contend(HL, 4);
-                BIT7(bytetemp);
+                BIT7(tempreg);
             }
             break;
 
@@ -3005,7 +2983,7 @@ public final class Z80 {
     // From Z80_ED.
     //==========================================================================================
 
-    void do_opcode_ED(int opcode2) {
+    private void do_opcode_ED(int opcode2) {
 
 //if( DEBUG ) System.out.print(opToHex8(opcode2));
 
@@ -3395,11 +3373,8 @@ public final class Z80 {
                 F.set((F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (BC.word != 0 ? FLAG_V : 0) |
                         (bytetemp & FLAG_3) | ((bytetemp & 0x02) != 0 ? FLAG_5 : 0));
                 if (BC.word != 0) {
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(DE, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" LDIR repeating; BC = "+BC);
                 } //else
@@ -3412,11 +3387,8 @@ public final class Z80 {
                         lookup = ((A.value & 0x08) >> 3) | (((value) & 0x08) >> 2) |
                                 ((bytetemp & 0x08) >> 1);
                 contend(HL, 3);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
+                for (int i = 0; i < 5; ++i)
+                    contend(HL, 1);
                 HL.inc();
                 BC.dec();
                 F.set((F.value & FLAG_C) | (BC.word != 0 ? (FLAG_V | FLAG_N) : FLAG_N) |
@@ -3425,11 +3397,8 @@ public final class Z80 {
                 if ((F.value & FLAG_H) != 0) bytetemp--;
                 F.or((bytetemp & FLAG_3) | ((bytetemp & 0x02) != 0 ? FLAG_5 : 0));
                 if ((F.value & (FLAG_V | FLAG_Z)) == FLAG_V) {
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(HL, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" CPIR repeating; BC = "+BC);
                 }
@@ -3451,11 +3420,8 @@ public final class Z80 {
       /* C,H and P/V flags not implemented */
                 //if(B) {
                 if (B.get() != 0) {
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(HL, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" INIR repeating; BC = "+BC);
                 }
@@ -3475,12 +3441,8 @@ public final class Z80 {
                 //if(B) {
                 if (B.get() != 0) {
                     contend_io(BC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
+                    for (int i = 0; i < 6; ++i)
+                        contend(PC, 1);
                     contend(PC - 1, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" OTIR repeating; BC = "+BC);
@@ -3506,11 +3468,8 @@ public final class Z80 {
                         (bytetemp & FLAG_3) | ((bytetemp & 0x02) > 0 ? FLAG_5 : 0));
                 //if(BC) {
                 if (BC.word != 0) {
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
-                    contend(DE, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(DE, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" LDDR repeating; BC = "+BC);
                 } //else
@@ -3523,11 +3482,8 @@ public final class Z80 {
                         lookup = ((A.value & 0x08) >> 3) | (((value) & 0x08) >> 2) |
                                 ((bytetemp & 0x08) >> 1);
                 contend(HL, 3);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
-                contend(HL, 1);
+                for (int i = 0; i < 5; ++i)
+                    contend(HL, 1);
                 HL.dec();
                 BC.dec();
                 F.set((F.value & FLAG_C) | (BC.word != 0 ? (FLAG_V | FLAG_N) : FLAG_N) |
@@ -3536,11 +3492,8 @@ public final class Z80 {
                 if ((F.value & FLAG_H) != 0) bytetemp--;
                 F.or((bytetemp & FLAG_3) | ((bytetemp & 0x02) != 0 ? FLAG_5 : 0));
                 if ((F.value & (FLAG_V | FLAG_Z)) == FLAG_V) {
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(HL, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" CPDR repeating; BC = "+BC);
                 } //else
@@ -3558,11 +3511,8 @@ public final class Z80 {
                 HL.dec();
                 F.set(((initemp & 0x80) != 0 ? FLAG_N : 0) | sz53_table[B.get()]);
                 if (B.get() != 0) {
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
-                    contend(HL, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(HL, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" INDR repeating; BC = "+BC);
                 } //else
@@ -3580,12 +3530,8 @@ public final class Z80 {
                 F.set(((outitemp & 0x80) != 0 ? FLAG_N : 0) | sz53_table[B.get()]);
                 if (B.get() != 0) {
                     contend_io(BC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
-                    contend(PC, 1);
+                    for (int i = 0; i < 5; ++i)
+                        contend(PC, 1);
                     contend(PC - 1, 1);
                     PC -= 2;
                     //if( DEBUG ) System.out.print(" OTDR repeating; BC = "+BC);
@@ -3608,10 +3554,10 @@ public final class Z80 {
     // From Z80_DDFD
     //==========================================================================================
 
-    void do_opcode_DDFD(int opcode2,
-                        RegisterPair REGISTER,
-                        Register REGISTERL,
-                        Register REGISTERH) {
+    private void do_opcode_DDFD(int opcode2,
+                                RegisterPair REGISTER,
+                                Register REGISTERL,
+                                Register REGISTERH) {
 
         //if( DEBUG ) System.out.print(opToHex8(opcode2));
 
@@ -4100,7 +4046,7 @@ public final class Z80 {
     // From Z80_DDFDCB
     //==========================================================================================
 
-    void do_opcode_DDFDCB(int opcode3,
+    private void do_opcode_DDFDCB(int opcode3,
                           //RegisterPair REGISTER,
                           //Register REGISTERL,
                           //Register REGISTERH,
@@ -4597,8 +4543,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(0, bytetemp);
+                BIT(0, tempreg);
             }
             break;
 
@@ -4613,8 +4558,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(1, bytetemp);
+                BIT(1, tempreg);
             }
             break;
 
@@ -4629,8 +4573,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(2, bytetemp);
+                BIT(2, tempreg);
             }
             break;
 
@@ -4645,8 +4588,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(3, bytetemp);
+                BIT(3, tempreg);
             }
             break;
 
@@ -4661,8 +4603,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(4, bytetemp);
+                BIT(4, tempreg);
             }
             break;
 
@@ -4677,8 +4618,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(5, bytetemp);
+                BIT(5, tempreg);
             }
             break;
 
@@ -4693,8 +4633,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT(6, bytetemp);
+                BIT(6, tempreg);
             }
             break;
 
@@ -4709,8 +4648,7 @@ public final class Z80 {
                 tstates += 5;
             {
                 tempreg.set(machine.readbyte(tempaddr));
-                Register bytetemp = tempreg;
-                BIT7(bytetemp);
+                BIT7(tempreg);
             }
             break;
 
@@ -5467,25 +5405,5 @@ public final class Z80 {
                 machine.writebyte(tempaddr, A.value);
                 break;
         }
-    }
-
-    final String toHex8(Register r) {
-        return toHex8(r.get());
-    }
-
-    final String opToHex8(int value) {
-        return Integer.toHexString(value + 0x100).substring(1).toUpperCase();
-    }
-
-    final String toHex8(int value) {
-        return "$" + Integer.toHexString(value + 0x100).substring(1).toUpperCase();
-    }
-
-    final String toHex16(int value) {
-        return "$" + Integer.toHexString(value + 0x10000).substring(1).toUpperCase();
-    }
-
-    final String toBinary(int value) {
-        return Integer.toBinaryString(value + 0x100).substring(1);
     }
 }

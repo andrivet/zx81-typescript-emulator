@@ -49,10 +49,10 @@ import java.awt.image.DataBufferInt;
 public class AccDraw
         implements Runnable, ZX81ConfigDefs {
     // Here for convenience.
-    ZX81Options zx81opts;
-    TVOptions tv;
-    Machine machine;
-    boolean fullSpeed = true;
+    private ZX81Options zx81opts;
+    private TVOptions tv;
+    private Machine machine;
+    private boolean fullSpeed = true;
 
     private static final int HTOL = 405;
     private static final int VTOLMIN = 290;
@@ -91,34 +91,29 @@ public class AccDraw
     private static final int FuWinL = 0;
     private static final int FuWinR = (FuWinL + 413);
 
-    void Plot(int x, int c) {
-        mScreenImageBufferData[dest + RasterX + x] = Colours[c];
-    }
+    private int WinR = NoWinR;
+    private int WinL = NoWinL;
+    private int WinT = NoWinT;
+    private int WinB = NoWinB;
 
-    int WinR = NoWinR;
-    int WinL = NoWinL;
-    int WinT = NoWinT;
-    int WinB = NoWinB;
+    private int RasterX = 0, RasterY = 0;
+    private int TVH;
+    private int TVP;
+    private int BPP, ScanLen;
+    private int Scale;
 
-    int RasterX = 0, RasterY = 0;
-    int TVW, TVH, TVP;
-    int BPP, ScanLen;
-    int Paletteised, Scale;
+    private int[] Palette = new int[256], Colours = new int[256];
 
-    int noise;
-
-    int[] Palette = new int[256], Colours = new int[256], LetterBoxColour;
-
-    AccCanvas mCanvas;
-    Label mStatusLabel;
-    BufferedImage mScreenImage;
+    private AccCanvas mCanvas;
+    private Label mStatusLabel;
+    private BufferedImage mScreenImage;
     private int[] mScreenImageBufferData = null;
     private boolean mKeepGoing = true;
     private boolean mPaused = false;
 
-    int dest = 0;
+    private int dest = 0;
 
-    void AccurateInit(int canvasScale) {
+    private void AccurateInit(int canvasScale) {
         if (mCanvas.getWidth() == 0 || mCanvas.getHeight() == 0)
             mCanvas.setRequiredSize(new Dimension((NoWinR - NoWinL) * canvasScale, (NoWinB - NoWinT) * canvasScale));
 
@@ -130,9 +125,6 @@ public class AccDraw
 
         // Actually ints per pixel...
         BPP = 1;
-
-        //Paletteised = (BPP==1) ? true:false;
-        Paletteised = 0;
         Scale = tv.AdvancedEffects ? 2 : 1;
 
         ScanLen = (2 + machine.tperscanline * 2) * BPP;
@@ -186,6 +178,7 @@ public class AccDraw
                 break;
         }
 
+        int TVW;
         if (tv.AdvancedEffects) {
             WinL *= 2;
             WinR *= 2;
@@ -213,11 +206,9 @@ public class AccDraw
         //RecalcWinSize();
     }
 
-    long lastDisplayUpdate = 0;
-    int frameSkip = 0;
-    int lastFrameSkip = 0;
+    private long lastDisplayUpdate = 0;
 
-    void AccurateUpdateDisplay(boolean singlestep) {
+    private void AccurateUpdateDisplay() {
         long currentTime = System.currentTimeMillis();
         // Aim for 50Hz display
         if (currentTime - lastDisplayUpdate >= 1000 / tv.frequency) {
@@ -225,12 +216,8 @@ public class AccDraw
             int height = mCanvas.getHeight();
             mCanvas.getGraphics().drawImage(mScreenImage, 0, 0, width, height, WinL, WinT, WinR, WinB, null);
 
-            //try { System.in.read(); } catch(IOException exc) {}
             lastDisplayUpdate = currentTime;
-            lastFrameSkip = frameSkip;
-            frameSkip = 0;
-        } else
-            frameSkip++;
+        }
     }
 
     void RedrawDisplay(Graphics g) {
@@ -239,30 +226,15 @@ public class AccDraw
         g.drawImage(mScreenImage, 0, 0, width, height, WinL, WinT, WinR, WinB, null);
     }
 
-    int FrameNo = 0;
-    int LastVSyncLen = 0, Shade = 0;
+    private int FrameNo = 0;
+    private int LastVSyncLen = 0, Shade = 0;
 
-    int AccurateDraw(Scanline Line) {
+    private void AccurateDraw(Scanline Line) {
         int bufferPos = dest + FrameNo * TVP;
         for (int i = 0; i < Line.scanline_len; i++) {
             int c = Line.scanline[i];
 
             mScreenImageBufferData[bufferPos + RasterX] = Colours[c + Shade];
-
-            /* TODO:
-            if (tv.AdvancedEffects)
-            {
-                    if (!tv.Interlaced) Plot(TVP, c+8-Shade);                    
-
-                    if (zx81.machine!=MACHINESPEC48)
-                    {
-                            RasterX +=BPP;
-                            Plot(FrameNo*TVP, c+Shade);
-                            if (!tv.Interlaced) Plot(TVP, c+8-Shade);
-                    }
-
-            }
-            */
 
             RasterX += BPP;
             if (RasterX > ScanLen) {
@@ -306,7 +278,7 @@ public class AccDraw
                     FrameNo = 0;
                     Shade = 0;
                 }
-                AccurateUpdateDisplay(false);
+                AccurateUpdateDisplay();
             }
         }
 
@@ -314,20 +286,15 @@ public class AccDraw
             int i;
 
             for (i = 0; i < 8; i++) mScreenImageBufferData[dest + RasterX + i * BPP] = Colours[15];
-            AccurateUpdateDisplay(true);
+            AccurateUpdateDisplay();
         }
-
-        return (0);
     }
 
     private boolean dumpedscanlines = false;
-    private boolean dumpscanlines = false;
 
-    void CompleteFrame() {
-        dumpscanlines = false;
+    private void CompleteFrame() {
         if (!dumpedscanlines) {
             dumpedscanlines = true;
-            dumpscanlines = true;
         }
 
         int x = RasterX, y = RasterY;
@@ -348,7 +315,7 @@ public class AccDraw
         }
     }
 
-    void RecalcPalette() {
+    private void RecalcPalette() {
         int rsz, gsz, bsz;  //bitsize of field
         int rsh, gsh, bsh;  //0�s on left (the shift value)
         int CompiledPixel;
@@ -383,9 +350,6 @@ public class AccDraw
         }
     }
 
-    // Rest of this stuff doesn't actually belong here...
-    public int frametstates = 0;  // Actually from Sound
-
     public AccDraw(ZX81Config config, Label statusLabel, boolean fullSpeed, int scale) {
         zx81opts = config.zx81opts;
         machine = config.machine;
@@ -403,14 +367,14 @@ public class AccDraw
         return mCanvas;
     }
 
-    int DoPal(int r, int g, int b) {
+    private int DoPal(int r, int g, int b) {
         return ((((b > 255 ? 255 : (b < 0 ? 0 : b)) & 0xff) << 16)
                 | (((g > 255 ? 255 : (g < 0 ? 0 : g)) & 0xff) << 8)
                 | ((r > 255 ? 255 : (r < 0 ? 0 : r)) & 0xff));
     }
 
-    void InitializePalette() {
-        int NoiseLevel, GhostLevel, GhostLevel2, ScanLineLevel;
+    private void InitializePalette() {
+        int NoiseLevel, GhostLevel, GhostLevel2;
         int BrightnessLevel, ContrastLevel, ColourLevel;
         int HiBrightLevel;
         int r, g, b, colour, i, f;
@@ -419,8 +383,8 @@ public class AccDraw
 
         // TODO: VSYNC_TOLLERANCEMIN= 283 + VBias->Position;
         // TODO: VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + VGain->Position + 40;
-        VSYNC_TOLLERANCEMIN = 283 + 0;
-        VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + 0 + 40;
+        VSYNC_TOLLERANCEMIN = 283;
+        VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + 40;
 
         if (tv.AdvancedEffects) {
             VSYNC_TOLLERANCEMIN *= 2;
@@ -432,22 +396,12 @@ public class AccDraw
             VSYNC_TOLLERANCEMAX -= 60;
         }
 
-    /* TODO: 
-    NoiseLevel = - NoiseTrack->Position;
-    GhostLevel = - GhostTrack->Position;
-    ScanLineLevel = - ScanLineTrack->Position;
-    BrightnessLevel = BrightTrack->Max - BrightTrack->Position;
-    GhostLevel2 = GhostLevel/3;
-    ContrastLevel = ContrastTrack->Max - ContrastTrack->Position;
-    ColourLevel = ColourTrack->Max - ColourTrack->Position;
-    */
         NoiseLevel = -20;
         GhostLevel = -40;
-        ScanLineLevel = -1;
         BrightnessLevel = 255 - 188;
         GhostLevel2 = GhostLevel / 3;
         ContrastLevel = 255 - 125;
-        ColourLevel = 255 - 0;
+        ColourLevel = 255;
 
         BrightnessLevel -= ContrastLevel;
         HiBrightLevel = BrightnessLevel + (ContrastLevel / 2) + 2 * ContrastLevel;
@@ -461,16 +415,9 @@ public class AccDraw
             basecolour = (difference * ((colour & 7) + 9)) / 1000;
             if (colour == 0 || colour == 8) basecolour = BrightnessLevel;
 
-            //TODO: if (Vibrant->Checked)
-            if (false) {
-                colb = (colour & 1) != 0 ? ((i > 7) ? HiBrightLevel : ContrastLevel) : BrightnessLevel;
-                colg = (colour & 4) != 0 ? ((i > 7) ? HiBrightLevel : ContrastLevel) : BrightnessLevel;
-                colr = (colour & 2) != 0 ? ((i > 7) ? HiBrightLevel : ContrastLevel) : BrightnessLevel;
-            } else {
-                colb = BrightnessLevel + ((colour & 1) != 0 ? basecolour : 0);
-                colg = BrightnessLevel + ((colour & 4) != 0 ? basecolour : 0);
-                colr = BrightnessLevel + ((colour & 2) != 0 ? basecolour : 0);
-            }
+            colb = BrightnessLevel + ((colour & 1) != 0 ? basecolour : 0);
+            colg = BrightnessLevel + ((colour & 4) != 0 ? basecolour : 0);
+            colr = BrightnessLevel + ((colour & 2) != 0 ? basecolour : 0);
 
             bwb = BrightnessLevel + basecolour;
             bwg = BrightnessLevel + basecolour;
@@ -510,12 +457,6 @@ public class AccDraw
                 g = ((colour & 0x0000ff00) >> 8);
                 r = (colour & 0xff);
 
-                // TODO: if (ArtEnabled->Checked)
-                if (false) {
-                    b += ScanLineLevel;
-                    g += ScanLineLevel;
-                    r += ScanLineLevel;
-                }
                 Palette[i * 16 + f + 8] = DoPal(r, g, b);
             }
         }
@@ -523,26 +464,21 @@ public class AccDraw
         RecalcPalette();
     }
 
-    public Scanline BuildLine;
-    int fps;
+    private Scanline BuildLine;
+    private int fps;
+    private int borrow;
+    private static int scanLineNumber = 0;
 
-    int j, borrow, Drive;
+    private void AnimTimer1Timer() {
 
-    public static int scanLineNumber = 0;
-
-    void AnimTimer1Timer() {
-
-        // TODO: if (!nosound) sound_frame();
-        //if (zx81_stop)
         if (machine.stop()) {
-            AccurateUpdateDisplay(false);
+            AccurateUpdateDisplay();
             return;
         }
 
         fps++;
-        frametstates = 0;
 
-        j = zx81opts.single_step ? 1 : (machine.tperframe + borrow);
+        int j = zx81opts.single_step ? 1 : (machine.tperframe + borrow);
 
         if (j != 1) {
             j += (zx81opts.speedup * machine.tperframe) / machine.tperscanline;

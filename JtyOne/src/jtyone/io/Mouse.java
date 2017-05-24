@@ -22,20 +22,7 @@
 
 package jtyone.io;
 
-
-/*
-#include <string.h>
-#include <dir.h>
-
-#include "zx81config.h"
-
-*/
-
-// From zx81config.h...
-
-//typedef struct
 public class Mouse {
     public int x, y, lastx, lasty;
     public int buttons;
-    //} MOUSE;
 }

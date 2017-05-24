@@ -26,7 +26,7 @@ import jtyone.config.Machine;
 import jtyone.z80.Z80;
 
 
-public class ROMPatch {
+class ROMPatch {
 
     private static int pop16(Machine machine, Z80 z80) {
         int h, l;
@@ -36,7 +36,7 @@ public class ROMPatch {
         return ((h << 8) | l);
     }
 
-    public static int PatchTest(Machine machine, Z80 z80) {
+    static int PatchTest(Machine machine, Z80 z80) {
         int b = machine.memory[z80.PC];
 
         if (z80.PC == 0x0356 && b == 0x1f)  // ZX81, start loading
@@ -47,7 +47,7 @@ public class ROMPatch {
                 // TODO: really ought to compare the ZX81 program name with that being
                 // loaded (if any).
                 int pos = 0;
-                while ((currentProgram[pos++] & 0x80) == 0) ;
+                while ((currentProgram[pos++] & 0x80) == 0) /* empty*/;
                 for (int i = pos; i < currentProgram.length; i++)
                     machine.memory[0x4009 + i - pos] = currentProgram[i] & 0xff;
                 // Note: can't do arraycopy as memory is ints, currentProgram is bytes...
@@ -71,24 +71,5 @@ public class ROMPatch {
         }
 
         return (z80.PC);
-    }
-
-    // TODO: Stub methods
-    public static final int TZX_BYTE_EMPTY = -1;
-
-    public static void WavStop() {
-    }
-
-    public static void WavStart() {
-    }
-
-    public static void WavStartRec() {
-    }
-
-    public static void WavRecordByte(int b) {
-    }
-
-    public static boolean FlashSaveable() {
-        return false;
     }
 }

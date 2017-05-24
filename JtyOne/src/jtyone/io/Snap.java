@@ -25,9 +25,6 @@ package jtyone.io;
 import jtyone.config.ZX81Config;
 import jtyone.z80.Z80;
 import jtyone.zx81.ZX81;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -39,27 +36,26 @@ public class Snap {
         mConfig = config;
     }
 
-    String get_token(InputStream f)
+    private String get_token(InputStream f)
             throws IOException {
-        char c;
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
 
-        c = (char) f.read();
-        while (c != -1 && Character.isWhitespace(c)) c = (char) f.read();
-
+        int c = f.read();
+        while (c != -1 && Character.isWhitespace(c))
+            c = f.read();
 
         buffer.append(c);
 
-        c = (char) f.read();
+        c = f.read();
         while (c != -1 && !Character.isWhitespace(c)) {
             buffer.append(c);
-            c = (char) f.read();
+            c = f.read();
         }
 
         return buffer.toString();
     }
 
-    public int hex2dec(String str) {
+    private int hex2dec(String str) {
         int num;
 
         num = 0;
@@ -76,7 +72,7 @@ public class Snap {
         return (num);
     }
 
-    public void load_snap_cpu(InputStream f, Z80 z80)
+    private void load_snap_cpu(InputStream f, Z80 z80)
             throws IOException {
         String tok;
 
@@ -120,7 +116,7 @@ public class Snap {
         }
     }
 
-    public void load_snap_zx81(InputStream f, Z80 z80)
+    private void load_snap_zx81(InputStream f, Z80 z80)
             throws IOException {
         String tok;
 
@@ -141,7 +137,7 @@ public class Snap {
         }
     }
 
-    public void load_snap_mem(InputStream f, Z80 z80)
+    private void load_snap_mem(InputStream f, Z80 z80)
             throws IOException {
         int Addr, Count, Chr;
         String tok;
@@ -168,45 +164,8 @@ public class Snap {
         }
     }
 
-    public int load_snap(String filename, Z80 z80)
-            throws IOException {
-        String p;
-        FileInputStream f;
-
-        p = filename.substring(filename.length() - 4);
-
-        if (!p.equals(".Z81") && !p.equals(".z81")
-                && !p.equals(".ace") && !p.equals(".ACE")) return (0);
-
-
-        f = new FileInputStream(new File(filename));
-
-        while (f.available() > 0) {
-            if (get_token(f).equals("[CPU]")) load_snap_cpu(f, z80);
-            if (get_token(f).equals("[MEMORY]")) load_snap_mem(f, z80);
-            if (get_token(f).equals("[ZX81]")) load_snap_zx81(f, z80);
-        }
-
-        f.close();
-        // TODO: DebugUpdate();
-        return (1);
-    }
-
-    public int save_snap(String filename) {
-        return (0);
-    }
-
-
     public int memory_load(String filename, int address, int length)
             throws IOException {
-        String file;
-        if (filename.indexOf('\\') != -1 || filename.indexOf('/') != -1)
-            file = filename;
-        else {
-            file = mConfig.zx81opts.cwd;
-            if (!file.endsWith("\\")) file += "\\";
-            file += "ROM\\";
-        }
 
         InputStream is = Snap.class.getClassLoader().getResourceAsStream(filename);
         int val = is.read();
@@ -224,10 +183,6 @@ public class Snap {
 
     public int font_load(String filename, int[] font, int length)
             throws IOException {
-        String file = mConfig.zx81opts.cwd;
-        if (!file.endsWith("\\")) file += "\\";
-        file += "ROM\\";
-        file += filename;
 
         InputStream is = Snap.class.getClassLoader().getResourceAsStream(filename);
         int val = is.read();

@@ -168,6 +168,10 @@ public class Snap {
             throws IOException {
 
         InputStream is = Snap.class.getClassLoader().getResourceAsStream(filename);
+        if (is == null) {
+            throw new IOException("could not get resource: " + filename);
+        }
+
         int val = is.read();
         int len = 0;
         while (len < length && val != -1) {
@@ -185,6 +189,10 @@ public class Snap {
             throws IOException {
 
         InputStream is = Snap.class.getClassLoader().getResourceAsStream(filename);
+        if (is == null) {
+            throw new IOException("could not get resource: " + filename);
+        }
+
         int val = is.read();
         int len = 0;
         while (len < length && val != -1) {

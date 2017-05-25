@@ -27,6 +27,7 @@ import zx81emulator.zx81.ZX81;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 
 /**
  * This class allows display of the emulator as an application or
@@ -46,14 +47,21 @@ public class Emulator
     private Button mResetButton;
 
     public static void main(String[] args) {
-        Emulator emulator = new Emulator();
-        Frame f = new Frame("ZX81 Emulator");
-        emulator.init(args, f);
-        f.addWindowListener(emulator);
-        f.addKeyListener(emulator);
-        f.pack();
-        f.setVisible(true);
-        emulator.start();
+
+        try {
+            Emulator emulator = new Emulator();
+            Frame f = new Frame("ZX81 Emulator");
+            emulator.init(args, f);
+            f.addWindowListener(emulator);
+            f.addKeyListener(emulator);
+            f.pack();
+            f.setVisible(true);
+            emulator.start();
+        }
+        catch (Exception exc) {
+            System.out.println("Error: " + exc);
+            exc.printStackTrace();
+        }
     }
 
     private Emulator() {
@@ -65,7 +73,7 @@ public class Emulator
         mConfig.zx81opts.m1not = 32768;
     }
 
-    private void init(String[] args, Container container) {
+    private void init(String[] args, Container container) throws IOException {
         String tzxFileName = (args.length > 0 && !args[0].startsWith("-")) ? args[0] : null;
         String scale = null;
         String hires = null;
@@ -82,7 +90,7 @@ public class Emulator
         init(tzxFileName, hires, scale, container);
     }
 
-    private void init(String tzxFileName, String hires, String scale, Container container) {
+    private void init(String tzxFileName, String hires, String scale, Container container)  throws IOException {
         mConfig.machine.CurRom = mConfig.zx81opts.ROM81;
 
         int scaleCanvas = 2;
@@ -126,22 +134,17 @@ public class Emulator
         container.add(mCanvas, "Center");
 
         // Load the .TZX file.
-        try {
-            if (tzxFileName != null) {
-                String tzxEntry;
-                int entryNum = 0;
-                int atPos = tzxFileName.indexOf('@');
-                if (atPos != -1) {
-                    tzxEntry = tzxFileName.substring(atPos + 1);
-                    tzxFileName = tzxFileName.substring(0, atPos);
-                    entryNum = Integer.parseInt(tzxEntry);
-                }
-
-                mConfig.machine.getTape().loadTZX(mConfig, mKeyboard, tzxFileName, entryNum);
+        if (tzxFileName != null) {
+            String tzxEntry;
+            int entryNum = 0;
+            int atPos = tzxFileName.indexOf('@');
+            if (atPos != -1) {
+                tzxEntry = tzxFileName.substring(atPos + 1);
+                tzxFileName = tzxFileName.substring(0, atPos);
+                entryNum = Integer.parseInt(tzxEntry);
             }
-        } catch (Exception exc) {
-            System.out.println("Error: " + exc);
-            exc.printStackTrace();
+
+            mConfig.machine.getTape().loadTZX(mConfig, mKeyboard, tzxFileName, entryNum);
         }
     }
 
@@ -203,9 +206,14 @@ public class Emulator
             else if (button.getLabel().equals("Start"))
                 windowActive(true);
             else if (button.getLabel().equals("Reset")) {
-                mConfig.machine.initialise(mConfig);
-                mCanvas.requestFocus();
-                windowActive(true);
+                try {
+                    mConfig.machine.initialise(mConfig);
+                    mCanvas.requestFocus();
+                    windowActive(true);
+                } catch (IOException e1) {
+                    System.err.println("Reset failed");
+                    e1.printStackTrace();
+                }
             }
         }
     }

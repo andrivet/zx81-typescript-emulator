@@ -88,7 +88,7 @@ public final class ZX81
     private ZX81Options zx81opts;
     private Tape mTape;
 
-    public void initialise(ZX81Config config) {
+    public void initialise(ZX81Config config) throws IOException {
         zx81opts = config.zx81opts;
         z80 = new Z80(this);
         Snap snap = new Snap(config);
@@ -96,38 +96,34 @@ public final class ZX81
 
         memory = new int[64 * 1024];
 
-        try {
-            int i, romlen;
-            //z80_init();
+        int i, romlen;
+        //z80_init();
 
-            for (i = 0; i < 65536; i++) memory[i] = 7;
+        for (i = 0; i < 65536; i++) memory[i] = 7;
 
-            romlen = snap.memory_load(CurRom, 0, 65536);
-            zx81opts.romcrc = CRC32Block(memory, romlen);
+        romlen = snap.memory_load("ROM/" + CurRom, 0, 65536);
+        zx81opts.romcrc = CRC32Block(memory, romlen);
 
-            if (zx81opts.extfont) snap.font_load("lmbfnt.rom", font, 512);
-            if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
+        if (zx81opts.extfont) snap.font_load("lmbfnt.rom", font, 512);
+        if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
 
-            if (zx81opts.shadowROM && romlen <= 8192) {
-                for (i = 0; i < 8192; i++) memory[i + 8192] = memory[i];
-                zx81opts.ROMTOP = 16383;
-            } else zx81opts.ROMTOP = romlen - 1;
+        if (zx81opts.shadowROM && romlen <= 8192) {
+            for (i = 0; i < 8192; i++) memory[i + 8192] = memory[i];
+            zx81opts.ROMTOP = 16383;
+        } else zx81opts.ROMTOP = romlen - 1;
 
-            if (zx81opts.truehires == HIRESMEMOTECH) snap.memory_load("memohrg.rom", 8192, 2048);
-            if (zx81opts.truehires == HIRESG007) snap.memory_load("g007hrg.rom", 10240, 2048);
+        if (zx81opts.truehires == HIRESMEMOTECH) snap.memory_load("memohrg.rom", 8192, 2048);
+        if (zx81opts.truehires == HIRESG007) snap.memory_load("g007hrg.rom", 10240, 2048);
 
-            else {
-                ink = 0;
-                paper = border = 7;
-            }
-
-            NMI_generator = false;
-            HSYNC_generator = false;
-
-            z80.reset();
-        } catch (IOException exc) {
-            exc.printStackTrace();
+        else {
+            ink = 0;
+            paper = border = 7;
         }
+
+        NMI_generator = false;
+        HSYNC_generator = false;
+
+        z80.reset();
     }
 
     public void writebyte(int Address, int Data) {

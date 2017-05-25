@@ -25,8 +25,10 @@ package zx81emulator.config;
 import zx81emulator.display.Scanline;
 import zx81emulator.io.Tape;
 
+import java.io.IOException;
+
 public abstract class Machine {
-    public abstract void initialise(ZX81Config config);
+    public abstract void initialise(ZX81Config config) throws IOException;
 
     public abstract int do_scanline(Scanline line);
 

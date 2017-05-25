@@ -38,58 +38,53 @@ public class Tape {
     /**
      * Load data from a .TZX file.
      */
-    public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum) {
+    public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum) throws IOException {
         mPrograms.clear();
         mCurrentProgram = 0;
-        try {
-            InputStream is = new FileInputStream(fileName);
-            if (is == null) {
-                System.err.println("Error - could not get resource: " + fileName);
-                return;
-            }
 
-            // Process each TZX file in turn insize a .ZIP file.
-            if (fileName.toLowerCase().endsWith(".zip")) {
-                ZipInputStream zis = new ZipInputStream(is);
-                ZipEntry ze = zis.getNextEntry();
-                while (ze != null) {
-                    // If its a .TZX file, add the entries from it.
-                    if (ze.getName().toLowerCase().endsWith(".tzx")) {
-                        // Read in the .ZIP entry, and create a byte array input stream
-                        // with the same bytes.  That's necessary to allow mark/reset
-                        // on the input stream which is not supported by the ZIPInputStream.
-                        byte[] data = new byte[65536];
-                        int len = zis.read(data);
-                        int total = 0;
-                        while (len > 0) {
-                            total += len;
-                            len = zis.read(data, total, data.length - total);
-                        }
-
-                        byte[] newData = new byte[total];
-                        System.arraycopy(data, 0, newData, 0, total);
-                        ByteArrayInputStream bis = new ByteArrayInputStream(newData);
-
-                        // Not sure why we can't just do the following, but it doesn't
-                        // work...
-                        //BufferedInputStream bis = new BufferedInputStream(zis);
-                        addTZXEntries(bis);
-                    }
-                    ze = zis.getNextEntry();
-                }
-            }
-
-            // Load directly from the file.
-            // Use a buffered input stream filter to allow mark/reset to work.
-            else {
-                addTZXEntries(new BufferedInputStream(is));
-            }
-
-            is.close();
-        } catch (IOException exc) {
-            exc.printStackTrace();
-            return;
+        InputStream is = Snap.class.getClassLoader().getResourceAsStream("Tapes/" + fileName);
+        if (is == null) {
+            throw new IOException("Error - could not get resource: " + fileName);
         }
+
+        // Process each TZX file in turn insize a .ZIP file.
+        if (fileName.toLowerCase().endsWith(".zip")) {
+            ZipInputStream zis = new ZipInputStream(is);
+            ZipEntry ze = zis.getNextEntry();
+            while (ze != null) {
+                // If its a .TZX file, add the entries from it.
+                if (ze.getName().toLowerCase().endsWith(".tzx")) {
+                    // Read in the .ZIP entry, and create a byte array input stream
+                    // with the same bytes.  That's necessary to allow mark/reset
+                    // on the input stream which is not supported by the ZIPInputStream.
+                    byte[] data = new byte[65536];
+                    int len = zis.read(data);
+                    int total = 0;
+                    while (len > 0) {
+                        total += len;
+                        len = zis.read(data, total, data.length - total);
+                    }
+
+                    byte[] newData = new byte[total];
+                    System.arraycopy(data, 0, newData, 0, total);
+                    ByteArrayInputStream bis = new ByteArrayInputStream(newData);
+
+                    // Not sure why we can't just do the following, but it doesn't
+                    // work...
+                    //BufferedInputStream bis = new BufferedInputStream(zis);
+                    addTZXEntries(bis);
+                }
+                ze = zis.getNextEntry();
+            }
+        }
+
+        // Load directly from the file.
+        // Use a buffered input stream filter to allow mark/reset to work.
+        else {
+            addTZXEntries(new BufferedInputStream(is));
+        }
+
+        is.close();
 
         mCurrentProgram = entryNum;
         if (config.autoload) {
@@ -102,19 +97,16 @@ public class Tape {
     /**
      * Add all ZX81 file entries from the .TZX file to the current list.
      */
-    private void addTZXEntries(InputStream is) {
-        try {
-            // Parse through the .TZX file, looking for ZX81 file entries.
-            TZXFile.LoadFile(is, false);
-            //System.out.println("Number of blocks: "+TZXFile.Blocks);
-            for (int i = 0; i < TZXFile.Blocks; i++) {
-                if (TZXFile.Tape[i].BlockID == TZXFileDefs.TZX_BLOCK_GENERAL) {
-                    mPrograms.add(TZXFile.Tape[i].Data.Data);
-                    //System.out.println("Adding General block; data length = "+TZXFile.Tape[i].Data.Data.length+" now got "+mPrograms.size()+" data="+TZXFile.Tape[i].Data.Data);
-                }
+    private void addTZXEntries(InputStream is) throws IOException {
+
+        // Parse through the .TZX file, looking for ZX81 file entries.
+        TZXFile.LoadFile(is, false);
+        //System.out.println("Number of blocks: "+TZXFile.Blocks);
+        for (int i = 0; i < TZXFile.Blocks; i++) {
+            if (TZXFile.Tape[i].BlockID == TZXFileDefs.TZX_BLOCK_GENERAL) {
+                mPrograms.add(TZXFile.Tape[i].Data.Data);
+                //System.out.println("Adding General block; data length = "+TZXFile.Tape[i].Data.Data.length+" now got "+mPrograms.size()+" data="+TZXFile.Tape[i].Data.Data);
             }
-        } catch (IOException exc) {
-            exc.printStackTrace();
         }
     }
 
@@ -168,6 +160,7 @@ class AutoLoader implements Runnable {
             Thread.sleep(200);
             mKeyboard.PCKeyUp(KeyEvent.VK_ENTER);
         } catch (Throwable exc) {
+            System.err.println("Autoload failed");
             exc.printStackTrace();
         }
     }

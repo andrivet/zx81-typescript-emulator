@@ -35,15 +35,6 @@ public interface ZX81ConfigDefs {
     int BORDERLARGE = 3;
     int BORDERFULL = 4;
 
-    //int MACHINEZX80   = 0;
-    int MACHINEZX81 = 1;
-    //int MACHINEACE    = 2;
-    //int MACHINETS1500 = 3;
-    //int MACHINELAMBDA = 4;
-    //int MACHINEZX97LE = 5;
-    //int MACHINESPEC48 = 6;
-    //int MACHINEQL     = 7;
-
     int HIRESDISABLED = 0;
     int HIRESWRX = 1;
     int HIRESG007 = 2;

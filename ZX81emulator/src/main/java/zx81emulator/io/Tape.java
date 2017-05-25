@@ -92,9 +92,7 @@ public class Tape {
 
         mCurrentProgram = entryNum;
         if (config.autoload) {
-            //System.out.println("Autoloading");
-            if (config.zx81opts.machine == ZX81ConfigDefs.MACHINEZX81)
-                autoload(keyboard);
+            autoload(keyboard);
         }
     }
 

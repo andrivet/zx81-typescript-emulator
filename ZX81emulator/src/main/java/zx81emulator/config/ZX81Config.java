@@ -37,7 +37,6 @@ public class ZX81Config
         zx81opts.minor = MINORVERSION;
         zx81opts.testver = 0;
 
-        zx81opts.machine = MACHINEZX81;
         zx81opts.dirtydisplay = false;
         zx81opts.shadowROM = false;
         zx81opts.RAM816k = 1;

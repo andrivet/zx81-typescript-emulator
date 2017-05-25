@@ -23,7 +23,6 @@ package zx81emulator.config;
 public class ZX81Options {
     public int emuid, major, minor, testver;
     public boolean dirtydisplay;
-    public int machine;
     public boolean extfont;
     public boolean shadowROM;
     public int RAM816k;

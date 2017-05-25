@@ -168,8 +168,6 @@ public class KBStatus
     // For convenience in the code below.
     public static int[] ZXKeyboard = new int[8];
 
-    private static kb[] KBZX81 = intTokb(KBZX81_ints);
-
     private static kb[] intTokb(int[][] ints) {
         kb[] kbs = new kb[ints.length];
         for (int i = 0; i < ints.length; i++)
@@ -179,13 +177,9 @@ public class KBStatus
 
     public KBStatus(ZX81Config config) {
 
-        for (int i = 0; i < 8; i++) ZXKeyboard[i] = 0;
-
-        switch (config.zx81opts.machine) {
-            default:
-                KeyMap = KBZX81;
-                break;
-        }
+        for (int i = 0; i < 8; i++)
+            ZXKeyboard[i] = 0;
+        KeyMap = intTokb(KBZX81_ints);
     }
 
     public void PCKeyDown(int key) {

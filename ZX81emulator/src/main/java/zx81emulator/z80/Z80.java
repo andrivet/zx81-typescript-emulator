@@ -1,29 +1,23 @@
-/* z80.c: z80 supplementary functions
-   Copyright (c) 1999, 2000, 2002 Philip Kendall
-   EightyOne Modifications (c) 2003-2006 Michael D Wynne
-   Java translation (C) 2006 Simon Holdsworth
-  
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
-
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
-
-   You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-   Author contact information:
-
-   E-mail: pak21-fuse@srcf.ucam.org
-   Postal address: 15 Crescent Road, Wokingham, Berks, RG40 2DB, England
-
-*/
-
+/* ZX81emulator  - A ZX81 emulator.
+ * EightyOne Copyright (C) 2003-2006 Michael D Wynne
+ * JtyOne Java translation (C) 2006 Simon Holdsworth and others.
+ * ZX81emulator Javascript JSweet transcompilation (C) 2017 Sebastien Andrivet.
+ *
+ * This file is part of ZX81emulator.
+ *
+ * ZX81emulator is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * ZX81emulator is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package zx81emulator.z80;
 
 

@@ -1,25 +1,23 @@
-/* EightyOne  - A Windows ZX80/81/clone emulator.
- * Copyright (C) 2003-2006 Michael D Wynne
- * Java translation (C) 2006 Simon Holdsworth
+/* ZX81emulator  - A ZX81 emulator.
+ * EightyOne Copyright (C) 2003-2006 Michael D Wynne
+ * JtyOne Java translation (C) 2006 Simon Holdsworth and others.
+ * ZX81emulator Javascript JSweet transcompilation (C) 2017 Sebastien Andrivet.
  *
- * This program is free software; you can redistribute it and/or modify
+ * This file is part of ZX81emulator.
+ *
+ * ZX81emulator is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * ZX81emulator is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
- *
- * zx81config.c
- *
+ * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package zx81emulator.config;
 
 public class TVOptions {

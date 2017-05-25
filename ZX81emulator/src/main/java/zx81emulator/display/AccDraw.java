@@ -20,10 +20,17 @@
  */
 package zx81emulator.display;
 
-import zx81emulator.config.*;
+import zx81emulator.config.Machine;
+import zx81emulator.config.TVOptions;
+import zx81emulator.config.ZX81Config;
+import zx81emulator.config.ZX81ConfigDefs;
+import zx81emulator.config.ZX81Options;
 import zx81emulator.zx81.ZX81;
 
-import java.awt.*;
+import java.awt.Canvas;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Label;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 

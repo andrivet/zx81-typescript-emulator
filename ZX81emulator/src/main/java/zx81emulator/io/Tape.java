@@ -26,7 +26,10 @@ import zx81emulator.tzx.TZXFile;
 import zx81emulator.tzx.TZXFileDefs;
 
 import java.awt.event.KeyEvent;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;

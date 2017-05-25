@@ -26,8 +26,22 @@ import zx81emulator.display.AccDraw;
 import zx81emulator.io.KBStatus;
 import zx81emulator.zx81.ZX81;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Canvas;
+import java.awt.Button;
+import java.awt.Frame;
+import java.awt.Container;
+import java.awt.BorderLayout;
+import java.awt.Panel;
+import java.awt.FlowLayout;
+import java.awt.Label;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyListener;
+import java.awt.event.WindowListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.ActionEvent;
+import java.awt.event.FocusEvent;
 import java.io.IOException;
 
 /**

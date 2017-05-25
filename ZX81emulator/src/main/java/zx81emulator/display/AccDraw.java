@@ -93,7 +93,6 @@ public class AccDraw
     private int[] Palette = new int[256], Colours = new int[256];
 
     private AccCanvas mCanvas;
-    private Label mStatusLabel;
     private BufferedImage mScreenImage;
     private int[] mScreenImageBufferData = null;
     private boolean mKeepGoing = true;
@@ -338,7 +337,7 @@ public class AccDraw
         }
     }
 
-    public AccDraw(ZX81Config config, Label statusLabel, boolean fullSpeed, int scale) {
+    public AccDraw(ZX81Config config, boolean fullSpeed, int scale) {
         zx81opts = config.zx81opts;
         machine = config.machine;
         tv = config.tv;
@@ -346,7 +345,6 @@ public class AccDraw
 
         InitializePalette();
         mCanvas = new AccCanvas(this);
-        mStatusLabel = statusLabel;
         AccurateInit(scale);
         //comp.setSize(WinR-WinL,WinB-WinT);
     }
@@ -532,13 +530,11 @@ public class AccDraw
                 }
 
                 if (fps == 100) {
-                    mStatusLabel.setText("FPS: " + (fps * 1000 / (currentTime - framesStartTime)));
                     framesStartTime = System.currentTimeMillis();
                     fps = 0;
                 }
             }
         }
-        mStatusLabel.setText("Stopped");
     }
 
     /**
@@ -550,11 +546,6 @@ public class AccDraw
     }
 
     public void setPaused(boolean paused) {
-        if (paused)
-            mStatusLabel.setText("Paused");
-        else
-            mStatusLabel.setText("Running");
-
         mPaused = paused;
     }
 }

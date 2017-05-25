@@ -51,15 +51,13 @@ import java.io.IOException;
  * @author Simon Holdsworth
  */
 public class Emulator
-        implements KeyListener, WindowListener, ActionListener, FocusListener {
+        implements KeyListener, WindowListener, FocusListener {
     private AccDraw mDisplayDrawer;
     private KBStatus mKeyboard;
     private ZX81Config mConfig;
 
     private Canvas mCanvas;
     private Thread mDisplayThread;
-    private Button mPauseButton;
-    private Button mResetButton;
 
     public static void main(String[] args) {
 
@@ -126,23 +124,9 @@ public class Emulator
         container.setLayout(new BorderLayout());
         container.addKeyListener(this);
         container.addFocusListener(this);
-        Panel bottomPanel = new Panel();
-        bottomPanel.setLayout(new BorderLayout());
-        container.add(bottomPanel, "South");
-        Panel buttonPanel = new Panel();
-        buttonPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        bottomPanel.add(buttonPanel, "East");
-        mPauseButton = new Button("Pause");
-        mPauseButton.addActionListener(this);
-        buttonPanel.add(mPauseButton);
-        mResetButton = new Button("Reset");
-        mResetButton.addActionListener(this);
-        buttonPanel.add(mResetButton);
-        Label mStatusLabel = new Label("status");
-        bottomPanel.add(mStatusLabel, "Center");
 
         // Set up the display.
-        mDisplayDrawer = new AccDraw(mConfig, mStatusLabel, false, scaleCanvas);
+        mDisplayDrawer = new AccDraw(mConfig, false, scaleCanvas);
         mCanvas = mDisplayDrawer.getCanvas();
         mCanvas.addFocusListener(this);
         mCanvas.addKeyListener(this);
@@ -213,29 +197,8 @@ public class Emulator
     public void windowDeactivated(WindowEvent e) {
     }
 
-    public void actionPerformed(ActionEvent e) {
-        if (e.getSource() instanceof Button) {
-            Button button = (Button) e.getSource();
-            if (button.getLabel().equals("Pause"))
-                windowActive(false);
-            else if (button.getLabel().equals("Start"))
-                windowActive(true);
-            else if (button.getLabel().equals("Reset")) {
-                try {
-                    mConfig.machine.initialise(mConfig);
-                    mCanvas.requestFocus();
-                    windowActive(true);
-                } catch (IOException e1) {
-                    System.err.println("Reset failed");
-                    e1.printStackTrace();
-                }
-            }
-        }
-    }
-
     private void windowActive(boolean active) {
         mDisplayDrawer.setPaused(!active);
-        mPauseButton.setLabel(active ? "Pause" : "Start");
     }
 
     public void focusGained(FocusEvent e) {
@@ -243,9 +206,6 @@ public class Emulator
     }
 
     public void focusLost(FocusEvent e) {
-        if (e.getOppositeComponent() != mPauseButton &&
-                e.getOppositeComponent() != mResetButton &&
-                e.getOppositeComponent() != mCanvas)
-            windowActive(false);
+        windowActive(false);
     }
 }

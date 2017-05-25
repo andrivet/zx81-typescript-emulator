@@ -79,43 +79,43 @@ public class KBStatus
                     {0, VK_RETURN, kbA14, kbD0, 255, 255},
                     {0, VK_SPACE, kbA15, kbD0, 255, 255},
 
-                    {0, 'A', kbA9, kbD0, 255, 255},
-                    {0, 'B', kbA15, kbD4, 255, 255},
-                    {0, 'C', kbA8, kbD3, 255, 255},
-                    {0, 'D', kbA9, kbD2, 255, 255},
-                    {0, 'E', kbA10, kbD2, 255, 255},
-                    {0, 'F', kbA9, kbD3, 255, 255},
-                    {0, 'G', kbA9, kbD4, 255, 255},
-                    {0, 'H', kbA14, kbD4, 255, 255},
-                    {0, 'I', kbA13, kbD2, 255, 255},
-                    {0, 'J', kbA14, kbD3, 255, 255},
-                    {0, 'K', kbA14, kbD2, 255, 255},
-                    {0, 'L', kbA14, kbD1, 255, 255},
-                    {0, 'M', kbA15, kbD2, 255, 255},
-                    {0, 'N', kbA15, kbD3, 255, 255},
-                    {0, 'O', kbA13, kbD1, 255, 255},
-                    {0, 'P', kbA13, kbD0, 255, 255},
-                    {0, 'Q', kbA10, kbD0, 255, 255},
-                    {0, 'R', kbA10, kbD3, 255, 255},
-                    {0, 'S', kbA9, kbD1, 255, 255},
-                    {0, 'T', kbA10, kbD4, 255, 255},
-                    {0, 'U', kbA13, kbD3, 255, 255},
-                    {0, 'V', kbA8, kbD4, 255, 255},
-                    {0, 'W', kbA10, kbD1, 255, 255},
-                    {0, 'X', kbA8, kbD2, 255, 255},
-                    {0, 'Y', kbA13, kbD4, 255, 255},
-                    {0, 'Z', kbA8, kbD1, 255, 255},
+                    {0, 65, kbA9, kbD0, 255, 255},      // A
+                    {0, 66, kbA15, kbD4, 255, 255},     // B
+                    {0, 67, kbA8, kbD3, 255, 255},      // C
+                    {0, 68, kbA9, kbD2, 255, 255},      // D
+                    {0, 69, kbA10, kbD2, 255, 255},     // E
+                    {0, 70, kbA9, kbD3, 255, 255},      // F
+                    {0, 71, kbA9, kbD4, 255, 255},      // G
+                    {0, 72, kbA14, kbD4, 255, 255},     // H
+                    {0, 73, kbA13, kbD2, 255, 255},     // I
+                    {0, 74, kbA14, kbD3, 255, 255},     // J
+                    {0, 75, kbA14, kbD2, 255, 255},     // K
+                    {0, 76, kbA14, kbD1, 255, 255},     // L
+                    {0, 77, kbA15, kbD2, 255, 255},     // M
+                    {0, 78, kbA15, kbD3, 255, 255},     // N
+                    {0, 79, kbA13, kbD1, 255, 255},     // O
+                    {0, 80, kbA13, kbD0, 255, 255},     // P
+                    {0, 81, kbA10, kbD0, 255, 255},     // Q
+                    {0, 82, kbA10, kbD3, 255, 255},     // R
+                    {0, 83, kbA9, kbD1, 255, 255},      // S
+                    {0, 84, kbA10, kbD4, 255, 255},     // T
+                    {0, 85, kbA13, kbD3, 255, 255},     // U
+                    {0, 86, kbA8, kbD4, 255, 255},      // V
+                    {0, 87, kbA10, kbD1, 255, 255},     // W
+                    {0, 88, kbA8, kbD2, 255, 255},      // X
+                    {0, 89, kbA13, kbD4, 255, 255},     // Y
+                    {0, 90, kbA8, kbD1, 255, 255},      // Z
 
-                    {0, '1', kbA11, kbD0, 255, 255},
-                    {0, '2', kbA11, kbD1, 255, 255},
-                    {0, '3', kbA11, kbD2, 255, 255},
-                    {0, '4', kbA11, kbD3, 255, 255},
-                    {0, '5', kbA11, kbD4, 255, 255},
-                    {0, '6', kbA12, kbD4, 255, 255},
-                    {0, '7', kbA12, kbD3, 255, 255},
-                    {0, '8', kbA12, kbD2, 255, 255},
-                    {0, '9', kbA12, kbD1, 255, 255},
-                    {0, '0', kbA12, kbD0, 255, 255},
+                    {0, 49, kbA11, kbD0, 255, 255},     // 1
+                    {0, 50, kbA11, kbD1, 255, 255},     // 2
+                    {0, 51, kbA11, kbD2, 255, 255},     // 3
+                    {0, 52, kbA11, kbD3, 255, 255},     // 4
+                    {0, 53, kbA11, kbD4, 255, 255},     // 5
+                    {0, 54, kbA12, kbD4, 255, 255},     // 6
+                    {0, 55, kbA12, kbD3, 255, 255},     // 7
+                    {0, 56, kbA12, kbD2, 255, 255},     // 8
+                    {0, 57, kbA12, kbD1, 255, 255},     // 9
+                    {0, 48, kbA12, kbD0, 255, 255},     // 0
 
                     {0, VK_NUMPAD1, kbA11, kbD0, 255, 255},
                     {0, VK_NUMPAD2, kbA11, kbD1, 255, 255},
@@ -131,27 +131,27 @@ public class KBStatus
                     {0, VK_MULTIPLY, kbA15, kbD4, kbA8, kbD0},
                     {0, VK_DIVIDE, kbA8, kbD4, kbA8, kbD0},
 
-                    {1, ';', kbA8, kbD2, kbA8, kbD0},           // ;
-                    {2, ';', kbA8, kbD1, kbA8, kbD0},           // : (Shift ;)
-                    {1, '-', kbA14, kbD3, kbA8, kbD0},          // -
+                    {1, 59, kbA8, kbD2, kbA8, kbD0},           // ;
+                    {2, 59, kbA8, kbD1, kbA8, kbD0},           // : (Shift ;)
+                    {1, 45, kbA14, kbD3, kbA8, kbD0},          // -
                     {0, VK_SUBTRACT, kbA14, kbD3, kbA8, kbD0},
 
-                    {1, '=', kbA14, kbD1, kbA8, kbD0},          // =
-                    {2, '=', kbA14, kbD2, kbA8, kbD0},          // + (Shift =)
+                    {1, 61, kbA14, kbD1, kbA8, kbD0},           // =
+                    {2, 61, kbA14, kbD2, kbA8, kbD0},           // + (Shift =)
                     {0, VK_ADD, kbA14, kbD2, kbA8, kbD0},       // + (numpad+)
 
-                    {1, ',', kbA15, kbD1, kbA8, kbD0},          // ,
-                    {2, ',', kbA15, kbD3, kbA8, kbD0},          // < (Shift ,)
+                    {1, 44, kbA15, kbD1, kbA8, kbD0},           // ,
+                    {2, 44, kbA15, kbD3, kbA8, kbD0},           // < (Shift ,)
 
-                    {1, '.', kbA15, kbD1, 255, 255},            // .
+                    {1, 46, kbA15, kbD1, 255, 255},             // .
                     {0, VK_DECIMAL, kbA15, kbD1, 255, 255},     // . (numpad.)
-                    {2, '.', kbA15, kbD2, kbA8, kbD0},         // > (Shift .)
-                    {1, '/', kbA8, kbD4, kbA8, kbD0},          // /
-                    {2, '/', kbA8, kbD3, kbA8, kbD0},          // ? (Shift /)
-                    {0, '[', kbA13, kbD2, kbA8, kbD0},         // ( ([ or { these are not in ZX81 character set)
-                    {0, ']', kbA13, kbD1, kbA8, kbD0},         // ) (] or } these are not in ZX81 character set)
-                    {1, 520, kbA13, kbD0, kbA8, kbD0},         // " (# or ~ these are not in ZX81 character set)
-                    {0, VK_QUOTE, kbA13, kbD0, kbA8, kbD0},    // " (' or @ these are not in ZX81 character set)
+                    {2, 46, kbA15, kbD2, kbA8, kbD0},           // > (Shift .)
+                    {1, 47, kbA8, kbD4, kbA8, kbD0},            // /
+                    {2, 47, kbA8, kbD3, kbA8, kbD0},            // ? (Shift /)
+                    {0, 91, kbA13, kbD2, kbA8, kbD0},           // ( ([ or { these are not in ZX81 character set)
+                    {0, 93, kbA13, kbD1, kbA8, kbD0},           // ) (] or } these are not in ZX81 character set)
+                    {1, 520, kbA13, kbD0, kbA8, kbD0},          // " (# or ~ these are not in ZX81 character set)
+                    {0, VK_QUOTE, kbA13, kbD0, kbA8, kbD0},     // " (' or @ these are not in ZX81 character set)
 
                     {0, VK_BACK, kbA12, kbD0, kbA8, kbD0},
                     {0, VK_LEFT, kbA11, kbD4, kbA8, kbD0},
@@ -171,10 +171,10 @@ public class KBStatus
     private static kb[] KBZX81 = intTokb(KBZX81_ints);
 
     private static kb[] intTokb(int[][] ints) {
-        kb[] kb = new kb[ints.length];
+        kb[] kbs = new kb[ints.length];
         for (int i = 0; i < ints.length; i++)
-            kb[i] = new kb(ints[i][0], ints[i][1], ints[i][2], ints[i][3], ints[i][4], ints[i][5]);
-        return kb;
+            kbs[i] = new kb(ints[i][0], ints[i][1], ints[i][2], ints[i][3], ints[i][4], ints[i][5]);
+        return kbs;
     }
 
     public KBStatus(ZX81Config config) {

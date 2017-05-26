@@ -115,10 +115,10 @@ public class AccDraw
 
         ScanLen = (2 + machine.tperscanline * 2) * BPP;
 
-        WinL = BlWinL;
-        WinR = BlWinR;
-        WinT = BlWinT;
-        WinB = BlWinB;
+        WinL = NoWinL;
+        WinR = NoWinR;
+        WinT = NoWinT;
+        WinB = NoWinB;
         if (zx81opts.NTSC) {
             WinT -= 24;
             WinB -= 24;

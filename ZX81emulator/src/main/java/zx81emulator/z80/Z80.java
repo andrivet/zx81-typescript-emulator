@@ -102,7 +102,6 @@ public final class Z80 {
     }
 
     /* Initalise the tables used to set flags */
-    //void z80_init_tables(void)
     private void init_tables() {
         int i, j, k;
         int parity;

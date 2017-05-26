@@ -443,16 +443,6 @@ public final class ZX81
         return (tstotal);
     }
 
-    // From Machine
-    public void reset() {
-    }
-
-    public void nmi() {
-    }
-
-    public void exit() {
-    }
-
     public boolean stop() {
         return zx81_stop;
     }

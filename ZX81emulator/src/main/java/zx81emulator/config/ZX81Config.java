@@ -20,14 +20,11 @@
  */
 package zx81emulator.config;
 
-import zx81emulator.io.Mouse;
-
 
 public class ZX81Config
         implements ZX81ConfigDefs {
     public ZX81Options zx81opts = new ZX81Options();
     public Machine machine;
-    public Mouse mouse = new Mouse();
     public boolean autoload;
 
     public void load_config() {
@@ -42,13 +39,7 @@ public class ZX81Config
         machine.tperframe = 312 * 207;
 
         zx81opts.ROM81 = "zx81.rom";
-
-        mouse.x = 0;
-        mouse.y = 0;
-        mouse.buttons = 0;
-        mouse.lastx = 0;
-        mouse.lasty = 0;
-
+        
         autoload = true;
     }
 }

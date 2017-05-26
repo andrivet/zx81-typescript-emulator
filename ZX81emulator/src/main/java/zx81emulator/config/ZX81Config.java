@@ -74,7 +74,6 @@ public class ZX81Config
         machine.tperframe = 312 * 207;
         machine.intposition = 0;
 
-        zx81opts.bordersize = BORDERNORMAL;
         zx81opts.debug1 = zx81opts.debug2 = 0;
         zx81opts.single_step = false;
         zx81opts.ROM81 = "zx81.rom";

@@ -45,7 +45,6 @@ public class ZX81Options {
     public int wobble;
     public int chrgen;
     public boolean enableqschrgen;
-    public int bordersize;
     public boolean simpleghost;
     public int maxireg;
     public boolean zxprinter;

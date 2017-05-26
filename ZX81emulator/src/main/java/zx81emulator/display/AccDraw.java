@@ -30,7 +30,6 @@ import zx81emulator.zx81.ZX81;
 import java.awt.Canvas;
 import java.awt.Dimension;
 import java.awt.Graphics;
-import java.awt.Label;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 
@@ -116,53 +115,13 @@ public class AccDraw
 
         ScanLen = (2 + machine.tperscanline * 2) * BPP;
 
-        switch (zx81opts.bordersize) {
-            case BORDERNONE:
-                WinL = BlWinL;
-                WinR = BlWinR;
-                WinT = BlWinT;
-                WinB = BlWinB;
-                if (zx81opts.NTSC) {
-                    WinT -= 24;
-                    WinB -= 24;
-                }
-                break;
-            case BORDERSMALL:
-                WinL = SmWinL;
-                WinR = SmWinR;
-                WinT = SmWinT;
-                WinB = SmWinB;
-                if (zx81opts.NTSC) {
-                    WinT -= 24;
-                    WinB -= 24;
-                }
-                break;
-            case BORDERNORMAL:
-                WinL = NoWinL;
-                WinR = NoWinR;
-                WinT = NoWinT;
-                WinB = NoWinB;
-                if (zx81opts.NTSC) {
-                    WinT -= 24;
-                    WinB -= 24;
-                }
-                break;
-            case BORDERLARGE:
-                WinL = LaWinL;
-                WinR = LaWinR;
-                WinT = LaWinT;
-                WinB = LaWinB;
-                if (zx81opts.NTSC) {
-                    WinB -= 24;
-                }
-                break;
-            case BORDERFULL:
-                WinL = FuWinL;
-                WinR = FuWinR;
-                WinT = FuWinT;
-                WinB = FuWinB;
-                if (zx81opts.NTSC) WinB -= 51;
-                break;
+        WinL = BlWinL;
+        WinR = BlWinR;
+        WinT = BlWinT;
+        WinB = BlWinB;
+        if (zx81opts.NTSC) {
+            WinT -= 24;
+            WinB -= 24;
         }
 
         int TVW;

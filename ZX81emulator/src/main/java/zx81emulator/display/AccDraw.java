@@ -119,10 +119,6 @@ public class AccDraw
         WinR = NoWinR;
         WinT = NoWinT;
         WinB = NoWinB;
-        if (zx81opts.NTSC) {
-            WinT -= 24;
-            WinB -= 24;
-        }
 
         int TVW;
         if (tv.AdvancedEffects) {
@@ -227,13 +223,6 @@ public class AccDraw
                 AccurateUpdateDisplay();
             }
         }
-
-        if (zx81opts.single_step) {
-            int i;
-
-            for (i = 0; i < 8; i++) mScreenImageBufferData[dest + RasterX + i * BPP] = Colours[15];
-            AccurateUpdateDisplay();
-        }
     }
 
     private boolean dumpedscanlines = false;
@@ -336,11 +325,6 @@ public class AccDraw
             VSYNC_TOLLERANCEMAX *= 2;
         }
 
-        if (zx81opts.NTSC) {
-            VSYNC_TOLLERANCEMIN -= 60;
-            VSYNC_TOLLERANCEMAX -= 60;
-        }
-
         NoiseLevel = -20;
         GhostLevel = -40;
         BrightnessLevel = 255 - 188;
@@ -354,7 +338,6 @@ public class AccDraw
 
         for (i = 0; i < 16; i++) {
             colour = i;
-            if (zx81opts.inverse != 0) colour = (i & 8) + (7 - (colour & 7));
 
             difference = (1000 * (((colour > 7) ? HiBrightLevel : ContrastLevel) - BrightnessLevel)) / 16;
             basecolour = (difference * ((colour & 7) + 9)) / 1000;
@@ -423,11 +406,7 @@ public class AccDraw
 
         fps++;
 
-        int j = zx81opts.single_step ? 1 : (machine.tperframe + borrow);
-
-        if (j != 1) {
-            j += (zx81opts.speedup * machine.tperframe) / machine.tperscanline;
-        }
+        int j = machine.tperframe + borrow;
 
         while (j > 0 && !machine.stop()) {
             j -= machine.do_scanline(BuildLine);

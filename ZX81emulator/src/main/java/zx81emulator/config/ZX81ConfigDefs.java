@@ -22,9 +22,6 @@ package zx81emulator.config;
 
 
 public interface ZX81ConfigDefs {
-    int EMUID = 0x85;
-    int MAJORVERSION = 0;
-    int MINORVERSION = 5;
 
     int SYNCTYPEH = 1;
     int SYNCTYPEV = 2;

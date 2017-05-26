@@ -82,23 +82,13 @@ public final class ZX81
         for (i = 0; i < 65536; i++) memory[i] = 7;
 
         romlen = snap.memory_load("ROM/" + CurRom, 0, 65536);
-        zx81opts.romcrc = CRC32Block(memory, romlen);
 
-        if (zx81opts.extfont) snap.font_load("lmbfnt.rom", font, 512);
         if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
 
-        if (zx81opts.shadowROM && romlen <= 8192) {
-            for (i = 0; i < 8192; i++) memory[i + 8192] = memory[i];
-            zx81opts.ROMTOP = 16383;
-        } else zx81opts.ROMTOP = romlen - 1;
+        zx81opts.ROMTOP = romlen - 1;
 
-        if (zx81opts.truehires == HIRESMEMOTECH) snap.memory_load("memohrg.rom", 8192, 2048);
-        if (zx81opts.truehires == HIRESG007) snap.memory_load("g007hrg.rom", 10240, 2048);
-
-        else {
-            ink = 0;
-            paper = border = 7;
-        }
+        ink = 0;
+        paper = border = 7;
 
         NMI_generator = false;
         HSYNC_generator = false;
@@ -118,14 +108,8 @@ public final class ZX81
         if (Address > zx81opts.RAMTOP) Address = (Address & (zx81opts.RAMTOP));
 
         if (Address <= zx81opts.ROMTOP && zx81opts.protectROM) {
-            if ((zx81opts.truehires == HIRESMEMOTECH) && (Address < 1024))
-                memhrg[Address] = Data;
             return;
         }
-
-        if (Address > 8191 && Address < 16384 && zx81opts.shadowROM && zx81opts.protectROM) return;
-        if (Address < 10240 && zx81opts.truehires == HIRESMEMOTECH) return;
-        if (Address >= 10240 && Address < 12288 && zx81opts.truehires == HIRESG007) return;
 
         memory[Address] = Data;
     }
@@ -201,10 +185,7 @@ public final class ZX81
         // First check for WRX graphics.  This is easy, we just create a
         // 16 bit Address from the IR Register pair and fetch that byte
         // loading it into the video shift register.
-        if (zx81opts.truehires == HIRESWRX && z80.I >= zx81opts.maxireg && !bit6) {
-            data = readbyte((z80.I << 8) | (z80.R7 & 128) | ((z80.R - 1) & 127));
-            update = true;
-        } else if (!bit6) {
+        if (!bit6) {
             // If we get here, we're generating normal Characters
             // (or pseudo Hi-Res), but we still need to figure out
             // where to get the bitmap for the character from
@@ -229,7 +210,7 @@ public final class ZX81
             // display 11111111 (??What does a real ZX81 do?).
 
             if (z80.I < 64 || (z80.I >= 128 && z80.I < 192 && zx81opts.chrgen == CHRGENCHR16)) {
-                if (zx81opts.extfont || (zx81opts.chrgen == CHRGENQS && zx81opts.enableqschrgen))
+                if ((zx81opts.chrgen == CHRGENQS && zx81opts.enableqschrgen))
                     data = font[(data << 3) | rowcounter];
                 else data = readbyte(((z80.I & 254) << 8) + (data << 3) | rowcounter);
             } else data = 255;
@@ -276,8 +257,6 @@ public final class ZX81
         }
 
         if (LastInstruction == 0) LastInstruction = LASTINSTOUTFF;
-        if (zx81opts.vsyncsound)
-            sound_beeper(1);
     }
 
     private int beeper = 0;
@@ -286,9 +265,6 @@ public final class ZX81
         if ((Address & 1) == 0) {
             int keyb, data = 0;
             int i;
-            if (zx81opts.vsyncsound)
-                sound_beeper(0);
-            if (zx81opts.NTSC) data |= 64;
             if (!GetEarState()) data |= 128;
 
             LastInstruction = LASTINSTINFE;
@@ -309,17 +285,10 @@ public final class ZX81
                 case 0x5f:
                     return (255);
 
-                case 0x73:
-                    if (zx81opts.ts2050) return (d8251readDATA());
-
-                case 0x77:
-                    if (zx81opts.ts2050) return (d8251readCTRL());
-
                 case 0xf5:
                     beeper = 1 - beeper;
                     return (255);
-                case 0xfb:
-                    if (zx81opts.zxprinter) return (ZXPrinterReadPort());
+
                 default:
                     break;
             }
@@ -338,7 +307,7 @@ public final class ZX81
         int tstotal = 0;
         CurScanLine.scanline_len = 0;
 
-        int MaxScanLen = (zx81opts.single_step ? 1 : 420);
+        int MaxScanLen = 420;
 
         if (CurScanLine.sync_valid != 0) {
             CurScanLine.add_blank(borrow, HSYNC_generator ? (16 * paper) : VBLANKCOLOUR);
@@ -359,7 +328,6 @@ public final class ZX81
 
             // TODO: AccDraw.frametstates += ts;
             WavClockTick(ts, !HSYNC_generator);
-            if (zx81opts.zxprinter) ZXPrinterClockTick(ts);
 
             int pixels = ts << 1;
 
@@ -451,32 +419,10 @@ public final class ZX81
         return mTape;
     }
 
-    private int CRC32Block(int[] memory, int romlen) {
-        return 0;
-    }
-
-    private int ZXPrinterReadPort() {
-        return 0;
-    }
-
-    private void sound_beeper(int a) {
-    }
-
     private boolean GetEarState() {
         return false;
     }
 
-    private int d8251readDATA() {
-        return 0;
-    }
-
-    private int d8251readCTRL() {
-        return 0;
-    }
-
     private void WavClockTick(int a, boolean b) {
-    }
-
-    private void ZXPrinterClockTick(int a) {
     }
 }

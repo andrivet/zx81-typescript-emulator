@@ -26,17 +26,6 @@ public interface ZX81ConfigDefs {
     int SYNCTYPEH = 1;
     int SYNCTYPEV = 2;
 
-    int BORDERNONE = 0;
-    int BORDERSMALL = 1;
-    int BORDERNORMAL = 2;
-    int BORDERLARGE = 3;
-    int BORDERFULL = 4;
-
-    int HIRESDISABLED = 0;
-    int HIRESWRX = 1;
-    int HIRESG007 = 2;
-    int HIRESMEMOTECH = 3;
-
     int CHRGENSINCLAIR = 0;
     int CHRGENDK = 1;
     int CHRGENQS = 2;

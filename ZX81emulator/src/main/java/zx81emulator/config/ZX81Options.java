@@ -22,16 +22,12 @@ package zx81emulator.config;
 
 public class ZX81Options {
     public boolean protectROM;
-    public int autoload;
     public int chrgen;
     public boolean enableqschrgen;
-    public int maxireg;
 
     public int RAMTOP;
     public int ROMTOP;
     public int m1not;
 
     public String ROM81;
-    public String cwd;
-    public String machinename;
 }

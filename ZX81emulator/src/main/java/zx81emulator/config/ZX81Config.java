@@ -35,16 +35,13 @@ public class ZX81Config
         zx81opts.protectROM = true;
         zx81opts.RAMTOP = 32767;
         zx81opts.ROMTOP = 8191;
-        zx81opts.autoload = 0;
         zx81opts.chrgen = CHRGENSINCLAIR;
         zx81opts.enableqschrgen = false;
-        zx81opts.maxireg = 32;
 
         machine.tperscanline = 207;
         machine.tperframe = 312 * 207;
 
         zx81opts.ROM81 = "zx81.rom";
-        zx81opts.machinename = "ZX81";
 
         mouse.x = 0;
         mouse.y = 0;

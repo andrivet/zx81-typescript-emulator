@@ -82,7 +82,6 @@ public class Emulator
         mConfig = new ZX81Config();
         mConfig.machine = new ZX81();
         mConfig.load_config();
-        mConfig.zx81opts.cwd = ".";
         mConfig.zx81opts.m1not = 32768;
     }
 

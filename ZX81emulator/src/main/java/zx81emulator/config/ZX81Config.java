@@ -26,7 +26,6 @@ import zx81emulator.io.Mouse;
 public class ZX81Config
         implements ZX81ConfigDefs {
     public ZX81Options zx81opts = new ZX81Options();
-    public TVOptions tv = new TVOptions();
     public Machine machine;
     public Mouse mouse = new Mouse();
     public boolean autoload;
@@ -40,20 +39,12 @@ public class ZX81Config
         zx81opts.chrgen = CHRGENSINCLAIR;
         zx81opts.enableqschrgen = false;
         zx81opts.maxireg = 32;
-        machine.clockspeed = 3250000;
 
         machine.tperscanline = 207;
         machine.tperframe = 312 * 207;
-        machine.intposition = 0;
 
         zx81opts.ROM81 = "zx81.rom";
         zx81opts.machinename = "ZX81";
-
-        tv.AdvancedEffects = false;
-        tv.DotCrawl = false;
-        tv.Interlaced = false;
-        tv.DisableAdvanced = false;
-        tv.frequency = 50;
 
         mouse.x = 0;
         mouse.y = 0;

@@ -48,10 +48,8 @@ public abstract class Machine {
 
     public abstract Tape getTape();
 
-    public int clockspeed;
     public int tperscanline;
     public int tperframe;
-    public int intposition;
     public String CurRom;
 
     public int[] memory;

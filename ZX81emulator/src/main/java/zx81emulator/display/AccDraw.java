@@ -21,7 +21,6 @@
 package zx81emulator.display;
 
 import zx81emulator.config.Machine;
-import zx81emulator.config.TVOptions;
 import zx81emulator.config.ZX81Config;
 import zx81emulator.config.ZX81ConfigDefs;
 import zx81emulator.config.ZX81Options;
@@ -37,7 +36,6 @@ public class AccDraw
         implements Runnable, ZX81ConfigDefs {
     // Here for convenience.
     private ZX81Options zx81opts;
-    private TVOptions tv;
     private Machine machine;
     private boolean fullSpeed = true;
 
@@ -111,7 +109,7 @@ public class AccDraw
 
         // Actually ints per pixel...
         BPP = 1;
-        Scale = tv.AdvancedEffects ? 2 : 1;
+        Scale = 1;
 
         ScanLen = (2 + machine.tperscanline * 2) * BPP;
 
@@ -121,22 +119,10 @@ public class AccDraw
         WinB = NoWinB;
 
         int TVW;
-        if (tv.AdvancedEffects) {
-            WinL *= 2;
-            WinR *= 2;
-            WinT *= 2;
-            WinB *= 2;
-            ScanLen *= 2;
-            TVW = 1024;
-            TVH = 768;
-            HSYNC_TOLLERANCE = HTOL * 2;
-            HSYNC_MINLEN = 10;
-        } else {
-            TVW = 520;
-            TVH = 380;
-            HSYNC_TOLLERANCE = HTOL;
-            HSYNC_MINLEN = 10;
-        }
+        TVW = 520;
+        TVH = 380;
+        HSYNC_TOLLERANCE = HTOL;
+        HSYNC_MINLEN = 10;
 
         mScreenImage = new BufferedImage(TVW, TVH, BufferedImage.TYPE_INT_RGB);
         mScreenImageBufferData = ((DataBufferInt) mScreenImage.getRaster().getDataBuffer()).getData();
@@ -153,7 +139,7 @@ public class AccDraw
     private void AccurateUpdateDisplay() {
         long currentTime = System.currentTimeMillis();
         // Aim for 50Hz display
-        if (currentTime - lastDisplayUpdate >= 1000 / tv.frequency) {
+        if (currentTime - lastDisplayUpdate >= 1000 / 50) {
             int width = mCanvas.getWidth();
             int height = mCanvas.getHeight();
             mCanvas.getGraphics().drawImage(mScreenImage, 0, 0, width, height, WinL, WinT, WinR, WinB, null);
@@ -184,7 +170,7 @@ public class AccDraw
                 dest += TVP * Scale;
                 bufferPos = dest + FrameNo * TVP;
                 RasterY += Scale;
-                if (!tv.AdvancedEffects) Shade = 8 - Shade;
+                Shade = 8 - Shade;
 
                 if (RasterY >= TVH) {
                     i = Line.scanline_len + 1;
@@ -199,7 +185,7 @@ public class AccDraw
             if (RasterX > (HSYNC_TOLLERANCE * BPP)) {
                 RasterX = 0;
                 RasterY += Scale;
-                if (!tv.AdvancedEffects) Shade = 8 - Shade;
+                Shade = 8 - Shade;
                 dest += TVP * Scale;
             }
 
@@ -210,16 +196,9 @@ public class AccDraw
                 RasterX = RasterY = 0;
                 dest = 0;
 
-                if (tv.Interlaced) {
-                    FrameNo = 1 - FrameNo;
-                    Shade = FrameNo * 8;
+                FrameNo = 0;
+                Shade = 0;
 
-                    if (Line.scanline_len >= ((LastVSyncLen * 5) / 4)) FrameNo = 0;
-                    LastVSyncLen = Line.scanline_len;
-                } else {
-                    FrameNo = 0;
-                    Shade = 0;
-                }
                 AccurateUpdateDisplay();
             }
         }
@@ -288,7 +267,6 @@ public class AccDraw
     public AccDraw(ZX81Config config, boolean fullSpeed, int scale) {
         zx81opts = config.zx81opts;
         machine = config.machine;
-        tv = config.tv;
         this.fullSpeed = fullSpeed;
 
         InitializePalette();
@@ -319,11 +297,6 @@ public class AccDraw
         // TODO: VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + VGain->Position + 40;
         VSYNC_TOLLERANCEMIN = 283;
         VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + 40;
-
-        if (tv.AdvancedEffects) {
-            VSYNC_TOLLERANCEMIN *= 2;
-            VSYNC_TOLLERANCEMAX *= 2;
-        }
 
         NoiseLevel = -20;
         GhostLevel = -40;
@@ -441,7 +414,7 @@ public class AccDraw
         long framesStartTime = System.currentTimeMillis();
 
         // Target frame time should result in 50Hz display.
-        int targetFrameTime = 1000 / tv.frequency;
+        int targetFrameTime = 1000 / 50;
         mKeepGoing = true;
         while (mKeepGoing) {
             if (mPaused) {

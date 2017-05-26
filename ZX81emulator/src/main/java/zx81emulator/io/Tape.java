@@ -21,7 +21,6 @@
 package zx81emulator.io;
 
 import zx81emulator.config.ZX81Config;
-import zx81emulator.config.ZX81ConfigDefs;
 import zx81emulator.tzx.TZXFile;
 import zx81emulator.tzx.TZXFileDefs;
 
@@ -36,7 +35,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class Tape {
-    private List mPrograms = new ArrayList();
+    private List<byte[]> mPrograms = new ArrayList<>();
     private int mCurrentProgram = 0;
 
     /**
@@ -117,7 +116,7 @@ public class Tape {
      */
     public byte[] getNextEntry() {
         if (mCurrentProgram < mPrograms.size())
-            return (byte[]) mPrograms.get(mCurrentProgram++);
+            return mPrograms.get(mCurrentProgram++);
 
         return null;
     }

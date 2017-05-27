@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.tzx;
 
@@ -35,7 +35,8 @@ public class TZXFile
             Tape[i] = new TZXBlock();
     }
 
-    public static int Blocks, CurBlock;
+    public static int Blocks;
+    private static int CurBlock;
 
     private static void EraseAll() {
         int i;
@@ -242,7 +243,6 @@ public class TZXFile
                 for (j = 0; j < (NPP - 1); j++) {
                     k = ReadWord(f);
                     SymDefP[i * NPP + j + 1] = k;
-                    //if (k==0) j=NPP;
                 }
             }
             for (i = 0; i < TOTP; i++) {
@@ -274,7 +274,6 @@ public class TZXFile
                 for (j = 0; j < (NPD - 1); j++) {
                     k = ReadWord(f);
                     SymDefD[i * NPD + j + 1] = k;
-                    //if (k==0) j=NPP;
                 }
             }
 
@@ -494,7 +493,7 @@ public class TZXFile
         return (false);
     }
 
-    private static boolean LoadGEndBlock(InputStream f)
+    private static boolean LoadGEndBlock()
             throws IOException {
         Tape[CurBlock].BlockID = TZX_BLOCK_GEND;
         return (false);
@@ -525,7 +524,7 @@ public class TZXFile
         return (false);
     }
 
-    private static boolean LoadLEndBlock(InputStream f)
+    private static boolean LoadLEndBlock()
             throws IOException {
         Tape[CurBlock].BlockID = TZX_BLOCK_LEND;
         return (false);
@@ -710,7 +709,6 @@ public class TZXFile
         head.minor = ReadByte(f);
 
         if (!new String(head.id).equals(TZX_ID)) {
-            //f.close();
             return (false);
         }
 
@@ -758,7 +756,7 @@ public class TZXFile
                     error = LoadGStartBlock(f);
                     break;
                 case TZX_BLOCK_GEND:
-                    error = LoadGEndBlock(f);
+                    error = LoadGEndBlock();
                     break;
                 case TZX_BLOCK_JUMP:
                     error = LoadJumpBlock(f);
@@ -767,7 +765,7 @@ public class TZXFile
                     error = LoadLStartBlock(f);
                     break;
                 case TZX_BLOCK_LEND:
-                    error = LoadLEndBlock(f);
+                    error = LoadLEndBlock();
                     break;
                 case TZX_BLOCK_SBLOCK:
                     error = LoadSBlock(f);
@@ -813,7 +811,6 @@ public class TZXFile
             }
         }
 
-        //f.close();
         GroupCount();
         return (true);
     }

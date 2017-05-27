@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.zx81;
 
@@ -77,7 +77,6 @@ public final class ZX81
         memory = new int[64 * 1024];
 
         int i, romlen;
-        //z80_init();
 
         for (i = 0; i < 65536; i++) memory[i] = 7;
 
@@ -97,8 +96,6 @@ public final class ZX81
     }
 
     public void writebyte(int Address, int Data) {
-        //noise = (noise<<8) | Data;
-        // TODO: AccDraw.noise = (AccDraw.noise<<8) | Data;
 
         if (zx81opts.chrgen == CHRGENQS && Address >= 0x8400 && Address <= 0x87ff) {
             font[Address - 0x8400] = Data;
@@ -120,7 +117,6 @@ public final class ZX81
         if (Address <= zx81opts.RAMTOP) data = memory[Address];
         else data = memory[(Address & (zx81opts.RAMTOP - 16384)) + 16384];
 
-        // TODO: AccDraw.noise = (AccDraw.noise<<8) | data;
         return (data);
     }
 
@@ -158,7 +154,6 @@ public final class ZX81
             //data = zx81_readbyte(Address);
             //noise |= data;
             data = readbyte(Address);
-            // TODO: AccDraw.noise |= data;
             return (data);
         }
 
@@ -228,18 +223,11 @@ public final class ZX81
 
             shift_register |= data;
             shift_reg_inv |= inv ? 255 : 0;
-            //if (zx81.machine==MACHINELAMBDA) noise |= (Address>>8);
-            //else noise |= z80.i;
-            // TODO: if (zx81.machine==MACHINELAMBDA) AccDraw.noise |= (Address>>8);
-            // TODO: else AccDraw.noise |= z80.i.get();
             return (0);
         } else {
             // This is the fallthrough for when we found an opcode with
             // bit 6 set in the display file.  We actually execute these
             // opcodes, and generate the noise.
-
-            //noise |= data;
-            // TODO: AccDraw.noise |= data;
             return (opcode);
         }
     }
@@ -265,7 +253,7 @@ public final class ZX81
         if ((Address & 1) == 0) {
             int keyb, data = 0;
             int i;
-            if (!GetEarState()) data |= 128;
+            data |= 128;
 
             LastInstruction = LASTINSTINFE;
 
@@ -277,10 +265,8 @@ public final class ZX81
 
         } else
             switch (Address & 255) {
-                case 0x01: {
-                    // TODO: what's this about?!?!
+                case 0x01:
                     return (0);
-                }
 
                 case 0x5f:
                     return (255);
@@ -325,9 +311,6 @@ public final class ZX81
                 paper = border;
                 int_pending = false;
             }
-
-            // TODO: AccDraw.frametstates += ts;
-            WavClockTick(ts, !HSYNC_generator);
 
             int pixels = ts << 1;
 
@@ -399,13 +382,10 @@ public final class ZX81
 
             tstotal += ts;
 
-            // TODO: DebugUpdate();
-
         } while (CurScanLine.scanline_len < MaxScanLen && CurScanLine.sync_valid == 0 && !zx81_stop);
 
         if (CurScanLine.sync_valid == SYNCTYPEV) {
             hsync_counter = tperscanline;
-            //borrow=0;
         }
 
         return (tstotal);
@@ -417,12 +397,5 @@ public final class ZX81
 
     public Tape getTape() {
         return mTape;
-    }
-
-    private boolean GetEarState() {
-        return false;
-    }
-
-    private void WavClockTick(int a, boolean b) {
     }
 }

@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.zx81;
 
@@ -42,7 +42,6 @@ class ROMPatch {
             byte[] currentProgram = machine.getTape().getNextEntry();
             if (currentProgram != null) {
                 // Skip the ZX81 program name.
-                // TODO: really ought to compare the ZX81 program name with that being
                 // loaded (if any).
                 int pos = 0;
                 while ((currentProgram[pos++] & 0x80) == 0) /* empty*/;

@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.display;
 
@@ -199,7 +199,7 @@ public class AccDraw
 
     private void RecalcPalette() {
         int rsz, gsz, bsz;  //bitsize of field
-        int rsh, gsh, bsh;  //0�s on left (the shift value)
+        int rsh, gsh, bsh;  //0's on left (the shift value)
         int CompiledPixel;
         int i, r, g, b;
 

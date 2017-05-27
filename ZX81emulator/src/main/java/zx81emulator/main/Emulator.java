@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.main;
 
@@ -71,7 +71,6 @@ public class Emulator
         mConfig = new ZX81Config();
         mConfig.machine = new ZX81();
         mConfig.load_config();
-        mConfig.zx81opts.m1not = 32768;
     }
 
     private void init(String[] args, Container container) throws IOException {
@@ -106,7 +105,7 @@ public class Emulator
         mConfig.machine.initialise(mConfig);
 
         // Set up keyboard.
-        mKeyboard = new KBStatus(mConfig);
+        mKeyboard = new KBStatus();
 
         // Set up the various components.
         container.setLayout(new BorderLayout());
@@ -163,31 +162,24 @@ public class Emulator
         mKeyboard.PCKeyUp(e.getKeyCode());
     }
 
-    public void keyTyped(KeyEvent e) {
-    }
+    public void keyTyped(KeyEvent e) { }
 
-    public void windowOpened(WindowEvent e) {
-    }
+    public void windowOpened(WindowEvent e) { }
 
     public void windowClosing(WindowEvent e) {
         stop();
         System.exit(0);
     }
 
-    public void windowClosed(WindowEvent e) {
-    }
+    public void windowClosed(WindowEvent e) { }
 
-    public void windowIconified(WindowEvent e) {
-    }
+    public void windowIconified(WindowEvent e) { }
 
-    public void windowDeiconified(WindowEvent e) {
-    }
+    public void windowDeiconified(WindowEvent e) { }
 
-    public void windowActivated(WindowEvent e) {
-    }
+    public void windowActivated(WindowEvent e) { }
 
-    public void windowDeactivated(WindowEvent e) {
-    }
+    public void windowDeactivated(WindowEvent e) { }
 
     private void windowActive(boolean active) {
         mDisplayDrawer.setPaused(!active);

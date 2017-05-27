@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.z80;
 
@@ -29,10 +29,6 @@ public abstract class Register {
     public abstract void set(int v);
 
     public abstract void set(Register r);
-
-    public abstract int postInc();
-
-    public abstract int postDec();
 
     public abstract void inc();
 
@@ -69,18 +65,6 @@ final class RegisterHigh extends Register {
         rp.setHi(r.get());
     }
 
-    public int postInc() {
-        int val = rp.hi();
-        rp.setHi(val + 1);
-        return val;
-    }
-
-    public int postDec() {
-        int val = rp.hi();
-        rp.setHi(val - 1);
-        return val;
-    }
-
     public void inc() {
         rp.setHi(rp.hi() + 1);
     }
@@ -88,8 +72,6 @@ final class RegisterHigh extends Register {
     public void dec() {
         rp.setHi(rp.hi() - 1);
     }
-
-    // TODO:  BUG FIX!!!!!
 
     public void and(int a) {
         rp.word &= ((a << 8) | 0xff);
@@ -124,18 +106,6 @@ final class RegisterLow extends Register {
         rp.setLo(r.get());
     }
 
-    public int postInc() {
-        int val = rp.lo();
-        rp.setLo(val + 1);
-        return val;
-    }
-
-    public int postDec() {
-        int val = rp.lo();
-        rp.setLo(val - 1);
-        return val;
-    }
-
     public void inc() {
         rp.setLo(rp.lo() + 1);
     }
@@ -143,8 +113,6 @@ final class RegisterLow extends Register {
     public void dec() {
         rp.setLo(rp.lo() - 1);
     }
-
-    // TODO:  BUG FIX!!!!!
 
     public void and(int a) {
         rp.word &= (a | 0xff00);
@@ -179,18 +147,6 @@ final class value8 extends Register {
 
     public void set(Register r) {
         value = r.get();
-    }
-
-    public int postInc() {
-        int val = value;
-        value = (value + 1) & 0xff;
-        return val;
-    }
-
-    public int postDec() {
-        int val = value;
-        value = (value - 1) & 0xff;
-        return val;
     }
 
     public void inc() {
@@ -232,18 +188,6 @@ final class MasterRegister extends Register {
 
     public void set(Register r) {
         value = r.get();
-    }
-
-    public int postInc() {
-        int val = value;
-        value = (value + 1) & 0xff;
-        return val;
-    }
-
-    public int postDec() {
-        int val = value;
-        value = (value - 1) & 0xff;
-        return val;
     }
 
     public void inc() {

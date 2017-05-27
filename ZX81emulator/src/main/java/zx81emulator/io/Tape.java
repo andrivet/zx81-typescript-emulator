@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.io;
 
@@ -72,9 +72,6 @@ public class Tape {
                     System.arraycopy(data, 0, newData, 0, total);
                     ByteArrayInputStream bis = new ByteArrayInputStream(newData);
 
-                    // Not sure why we can't just do the following, but it doesn't
-                    // work...
-                    //BufferedInputStream bis = new BufferedInputStream(zis);
                     addTZXEntries(bis);
                 }
                 ze = zis.getNextEntry();
@@ -102,11 +99,9 @@ public class Tape {
 
         // Parse through the .TZX file, looking for ZX81 file entries.
         TZXFile.LoadFile(is, false);
-        //System.out.println("Number of blocks: "+TZXFile.Blocks);
         for (int i = 0; i < TZXFile.Blocks; i++) {
             if (TZXFile.Tape[i].BlockID == TZXFileDefs.TZX_BLOCK_GENERAL) {
                 mPrograms.add(TZXFile.Tape[i].Data.Data);
-                //System.out.println("Adding General block; data length = "+TZXFile.Tape[i].Data.Data.length+" now got "+mPrograms.size()+" data="+TZXFile.Tape[i].Data.Data);
             }
         }
     }
@@ -140,8 +135,6 @@ class AutoLoader implements Runnable {
         try {
             char key = 'J';
 
-            // TODO: need to trigger autoload by when the Z80 gets to a particular
-            // address, in case it takes longer than 4 seconds to start up.
             Thread.sleep(5000);
             mKeyboard.PCKeyDown(key);
             Thread.sleep(200);

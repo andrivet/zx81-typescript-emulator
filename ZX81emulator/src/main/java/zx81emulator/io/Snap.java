@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.io;
 
@@ -87,9 +87,6 @@ public class Snap {
 
             if (tok.equals("PC")) z80.PC = hex2dec(get_token(f));
             if (tok.equals("SP")) z80.SP = hex2dec(get_token(f));
-            // TODO: if (tok.equals("HL")) z80.HL.set(hex2dec(get_token(f)));
-            // TODO: if (tok.equals("DE")) z80.DE.set(hex2dec(get_token(f)));
-            // TODO: if (tok.equals("BC")) z80.BC.set(hex2dec(get_token(f)));
             if (tok.equals("AF")) z80.AF.set(hex2dec(get_token(f)));
             if (tok.equals("HL_")) z80.HL_ = hex2dec(get_token(f));
             if (tok.equals("DE_")) z80.DE_ = hex2dec(get_token(f));

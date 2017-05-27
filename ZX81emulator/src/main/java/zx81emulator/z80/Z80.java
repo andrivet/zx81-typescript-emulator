@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.z80;
 
@@ -55,8 +55,6 @@ public final class Z80 {
 
     private Machine machine;
 
-    /* This is what everything acts on! */
-    //processor z80;
     public final MasterRegisterPair BC, DE, HL;
     public final RegisterPair AF;
     public final MasterRegister A, F;
@@ -152,7 +150,6 @@ public final class Z80 {
             machine.writebyte(--SP, PC >> 8);
             machine.writebyte(--SP, PC & 0xff);
 
-            //R++;
             R = (R + 1) & 0xff;
 
             switch (IM) {
@@ -197,10 +194,6 @@ public final class Z80 {
 
         return (4 + waitstates);
     }
-
-    //==========================================================================================
-    // From Z80Macros.
-    //==========================================================================================
 
     private int tstates;
 
@@ -322,22 +315,10 @@ public final class Z80 {
                 (cptemp & FLAG_S));
     }
 
-/* Macro for the {DD,FD} CB dd xx rotate/shift instructions */
-//#define DDFDCB_ROTATESHIFT(time, target, instruction)\
-//tstates+=(time);\
-//{\
-// (target) = machine.readbyte( tempaddr );\
-// instruction( (target) );\
-// writebyte( tempaddr, (target) );\
-//}\
-//break
-//TODO: figure out how to implement this!
-
     private void DEC(Register reg) {
         F.set((F.value & FLAG_C) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | FLAG_N);
         reg.dec();
         F.or((reg.get() == 0x7f ? FLAG_V : 0) | sz53_table[reg.get()]);
-        //if( DEBUG && !reg.name.equals("value8")) System.out.print(" DEC "+reg.name+" ; "+reg);
     }
 
     private void IN(Register reg, RegisterPair rp) {
@@ -363,7 +344,6 @@ public final class Z80 {
         reg.inc();
         F.set((F.value & FLAG_C) | (reg.get() == 0x80 ? FLAG_V : 0) |
                 ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | sz53_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" INC "+reg.name+" ; "+reg);
     }
 
     private void LD16_NNRR(int value) {
@@ -371,7 +351,6 @@ public final class Z80 {
         int ldtemp = machine.readbyte(PC++);
         contend(PC, 3);
         ldtemp |= machine.readbyte(PC++) << 8;
-        //if( DEBUG ) System.out.print(" LD ("+toHex16(ldtemp)+"),"+regl.rp.name+" ; "+regl.rp);
         contend(ldtemp, 3);
         machine.writebyte(ldtemp++, value & 0xff);
         contend(ldtemp, 3);
@@ -383,11 +362,9 @@ public final class Z80 {
         int ldtemp = machine.readbyte(PC++);
         contend(PC, 3);
         ldtemp |= machine.readbyte(PC++) << 8;
-        //if( DEBUG ) System.out.print(" LD "+regl.rp.name+",("+toHex16(ldtemp)+")");
         contend(ldtemp, 3);
         contend(ldtemp, 3);
         return machine.readbyte(ldtemp++) + (machine.readbyte(ldtemp) << 8);
-        //if( DEBUG ) System.out.print(" ; "+regl.rp);
     }
 
     private void JP() {
@@ -455,7 +432,6 @@ public final class Z80 {
         int rltemp = reg.get();
         reg.set((rltemp << 1) | (F.value & FLAG_C));
         F.set((rltemp >> 7) | sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" RL "+value.name+" ; "+value.get());
     }
 
     private void RLC(Register reg) {
@@ -464,27 +440,23 @@ public final class Z80 {
         reg.set(newValue);
         int after = reg.get();
         F.set((after & FLAG_C) | sz53p_table[after]);
-        //if( DEBUG ) System.out.print(" RLC "+value.name+" ; "+value.get());
     }
 
     private void RR(Register reg) {
         int rrtemp = reg.get();
         reg.set((reg.get() >> 1) | (F.value << 7));
         F.set((rrtemp & FLAG_C) | sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" RR "+value.name+" ; "+value.get());
     }
 
     private void RRC(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set((reg.get() >> 1) | (reg.get() << 7));
         F.or(sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" RRC "+value.name+" ; "+value.get());
     }
 
     private void RST(int value) {
         PUSH16(PC);
         PC = value;
-        //if( DEBUG ) System.out.print(" RST "+toHex8(value));
     }
 
     private void SBC(int value) {
@@ -514,28 +486,24 @@ public final class Z80 {
         F.set(reg.get() >> 7);
         reg.set(reg.get() << 1);
         F.or(sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" SLA "+value.name+" ; "+value.get());
     }
 
     private void SLL(Register reg) {
         F.set(reg.get() >> 7);
         reg.set((reg.get() << 1) | 0x01);
         F.or(sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" SLL "+value.name+" ; "+value.get());
     }
 
     private void SRA(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set((reg.get() & 0x80) | (reg.get() >> 1));
         F.or(sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" SRA "+value.name+" ; "+value.get());
     }
 
     private void SRL(Register reg) {
         F.set(reg.get() & FLAG_C);
         reg.set(reg.get() >> 1);
         F.or(sz53p_table[reg.get()]);
-        //if( DEBUG ) System.out.print(" SRL "+value.name+" ; "+value.get());
     }
 
     private void SUB(int value) {
@@ -558,11 +526,6 @@ public final class Z80 {
         F.set(sz53p_table[A.value]);
     }
 
-
-    //==========================================================================================
-    // From Z80_Ops.
-    //==========================================================================================
-
     public int do_opcode() {
         tstates = 0;
 
@@ -574,8 +537,6 @@ public final class Z80 {
 
         int opcode = machine.opcode_fetch(PC++);
 
-        //if( DEBUG ) System.out.print(": "+opToHex8(opcode));
-
         switch (opcode) {
             case 0x00:    /* NOP */
                 break;
@@ -584,7 +545,6 @@ public final class Z80 {
                 C.set(machine.readbyte(PC++));
                 contend(PC, 3);
                 B.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD BC,"+BC);
                 break;
             case 0x02:    /* LD (BC),A */
                 contend(BC, 3);
@@ -593,7 +553,6 @@ public final class Z80 {
             case 0x03:    /* INC BC */
                 tstates += 2;
                 BC.inc();
-                //if( DEBUG ) System.out.print(" INC BC ; "+BC);
                 break;
             case 0x04:    /* INC B */
                 INC(B);
@@ -604,7 +563,6 @@ public final class Z80 {
             case 0x06:    /* LD B,nn */
                 contend(PC, 3);
                 B.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD B,"+B);
                 break;
             case 0x07:    /* RLCA */
                 A.set((A.value << 1) | (A.value >> 7));
@@ -615,13 +573,11 @@ public final class Z80 {
                 int wordtemp = AF.get();
                 AF.set(AF_);
                 AF_ = wordtemp;
-                //if( DEBUG ) System.out.print(" EX AF,AF'");
             }
 
             break;
             case 0x09:    /* ADD HL,BC */
                 ADD16(HL, BC);
-                //if( DEBUG ) System.out.print(" ADD HL,BC ; "+HL);
                 break;
             case 0x0a:    /* LD A,(BC) */
                 contend(BC, 3);
@@ -640,7 +596,6 @@ public final class Z80 {
             case 0x0e:    /* LD C,nn */
                 contend(PC, 3);
                 C.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD C,"+C);
                 break;
             case 0x0f:    /* RRCA */
                 F.set((F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (A.value & FLAG_C));
@@ -651,19 +606,15 @@ public final class Z80 {
                 tstates++;
                 contend(PC, 3);
                 B.dec();
-                //if( DEBUG ) System.out.print(" DJNZ B now "+B);
-
                 if (B.get() != 0) {
                     JR();
                 }
                 PC++;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0x11:    /* LD DE,nnnn */
                 contend(PC, 3);
                 E.set(machine.readbyte(PC++));
                 contend(PC, 3);
-                //D=machine.readbyte(PC++);
                 D.set(machine.readbyte(PC++));
                 break;
             case 0x12:    /* LD (DE),A */
@@ -689,14 +640,12 @@ public final class Z80 {
                 A.set((A.value << 1) | (F.value & FLAG_C));
                 F.set((F.value & (FLAG_P | FLAG_Z | FLAG_S)) |
                         (A.value & (FLAG_3 | FLAG_5)) | (bytetemp >> 7));
-                //if( DEBUG ) System.out.print(" RLA ; "+A);
             }
             break;
             case 0x18:    /* JR offset */
                 contend(PC, 3);
                 JR();
                 PC++;
-                //if( DEBUG ) System.out.print(" JR "+PC);
                 break;
             case 0x19:    /* ADD HL,DE */
                 ADD16(HL, DE);
@@ -728,19 +677,16 @@ public final class Z80 {
             break;
             case 0x20:    /* JR NZ,offset */
                 contend(PC, 3);
-                //if( DEBUG ) System.out.print(" JR NZ will jump: "+((F.value & FLAG_Z)==0));
                 if ((F.value & FLAG_Z) == 0) {
                     JR();
                 }
                 PC++;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0x21:    /* LD HL,nnnn */
                 contend(PC, 3);
                 L.set(machine.readbyte(PC++));
                 contend(PC, 3);
                 H.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD HL,"+HL);
                 break;
             case 0x22:    /* LD (nnnn),HL */
                 LD16_NNRR(HL.word);
@@ -748,7 +694,6 @@ public final class Z80 {
             case 0x23:    /* INC HL */
                 tstates += 2;
                 HL.inc();
-                //if( DEBUG ) System.out.print(" INC HL ; "+HL);
                 break;
             case 0x24:    /* INC H */
                 INC(H);
@@ -758,7 +703,6 @@ public final class Z80 {
                 break;
             case 0x26:    /* LD H,nn */
                 contend(PC, 3);
-                //H=machine.readbyte(PC++);
                 H.set(machine.readbyte(PC++));
                 break;
             case 0x27:    /* DAA */ {
@@ -777,12 +721,10 @@ public final class Z80 {
             break;
             case 0x28:    /* JR Z,offset */
                 contend(PC, 3);
-                //if( DEBUG ) System.out.print(" JR Z will jump: "+((F.value & FLAG_Z)!=0));
                 if ((F.value & FLAG_Z) != 0) {
                     JR();
                 }
                 PC++;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0x29:    /* ADD HL,HL */
                 ADD16(HL, HL);
@@ -793,7 +735,6 @@ public final class Z80 {
             case 0x2b:    /* DEC HL */
                 tstates += 2;
                 HL.dec();
-                //if( DEBUG ) System.out.print(" DEC HL ; "+HL);
                 break;
             case 0x2c:    /* INC L */
                 INC(L);
@@ -812,18 +753,15 @@ public final class Z80 {
                 break;
             case 0x30:    /* JR NC,offset */
                 contend(PC, 3);
-                //if( DEBUG ) System.out.print(" JR NC will jump: "+((F.value & FLAG_C)==0));
                 if ((F.value & FLAG_C) == 0) {
                     JR();
                 }
                 PC++;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0x31:    /* LD SP,nnnn */
                 contend(PC, 3);
                 contend(PC, 3);
                 SP = machine.readbyte(PC++) + (machine.readbyte(PC++) << 8);
-                //if( DEBUG ) System.out.print(" LD SP,"+SP);
                 break;
             case 0x32:    /* LD (nnnn),A */
                 contend(PC, 3);
@@ -857,28 +795,23 @@ public final class Z80 {
                 DEC(bytetemp);
                 contend(HL, 3);
                 machine.writebyte(HL.word, bytetemp.get());
-                //if( DEBUG ) System.out.print(" DEC (HL) ; $"+toHex8(bytetemp));
             }
             break;
             case 0x36:    /* LD (HL),nn */
                 contend(PC, 3);
                 contend(HL, 3);
                 machine.writebyte(HL.word, machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD (HL),"+toHex8((ZX81.memory[HL()])&0xff));
                 break;
             case 0x37:    /* SCF */
                 F.and(~(FLAG_N | FLAG_H));
                 F.or((A.value & (FLAG_3 | FLAG_5)) | FLAG_C);
-                //if( DEBUG ) System.out.print(" SCF ; "+F.toBinaryString());
                 break;
             case 0x38:    /* JR C,offset */
                 contend(PC, 3);
-                //if( DEBUG ) System.out.print(" JR C will jump: "+((F.value & FLAG_C)!=0));
                 if ((F.value & FLAG_C) != 0) {
                     JR();
                 }
                 PC++;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0x39:    /* ADD HL,SP */
                 ADD16(HL, SP);
@@ -891,7 +824,6 @@ public final class Z80 {
                 wordtemp |= (machine.readbyte(PC++) << 8);
                 contend(wordtemp, 3);
                 A.set(machine.readbyte(wordtemp));
-                //if( DEBUG ) System.out.print(" LD A,("+toHex16(wordtemp)+") ; "+A);
             }
             break;
             case 0x3b:    /* DEC SP */
@@ -907,7 +839,6 @@ public final class Z80 {
             case 0x3e:    /* LD A,nn */
                 contend(PC, 3);
                 A.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD A,"+A);
                 break;
             case 0x3f:    /* CCF */
                 F.set((F.value & (FLAG_P | FLAG_Z | FLAG_S)) |
@@ -917,132 +848,100 @@ public final class Z80 {
                 break;
             case 0x41:    /* LD B,C */
                 B.set(C);
-                //if( DEBUG ) System.out.print(" LD B,C ; "+B);
                 break;
             case 0x42:    /* LD B,D */
                 B.set(D);
-                //if( DEBUG ) System.out.print(" LD B,D ; "+B);
                 break;
             case 0x43:    /* LD B,E */
                 B.set(E);
-                //if( DEBUG ) System.out.print(" LD B,E ; "+B);
                 break;
             case 0x44:    /* LD B,H */
                 B.set(H);
-                //if( DEBUG ) System.out.print(" LD B,H ; "+B);
                 break;
             case 0x45:    /* LD B,L */
                 B.set(L);
-                //if( DEBUG ) System.out.print(" LD B,L ; "+B);
                 break;
             case 0x46:    /* LD B,(HL) */
                 contend(HL, 3);
                 B.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" LD B,(HL) ; "+B);
                 break;
             case 0x47:    /* LD B,A */
                 B.set(A);
-                //if( DEBUG ) System.out.print(" LD B,A ; "+B);
                 break;
             case 0x48:    /* LD C,B */
                 C.set(B);
-                //if( DEBUG ) System.out.print(" LD C,B ; "+C);
                 break;
             case 0x49:    /* LD C,C */
-                //if( DEBUG ) System.out.print(" LD C,C ; "+C);
                 break;
             case 0x4a:    /* LD C,D */
                 C.set(D);
-                //if( DEBUG ) System.out.print(" LD C,D ; "+C);
                 break;
             case 0x4b:    /* LD C,E */
                 C.set(E);
-                //if( DEBUG ) System.out.print(" LD C,E ; "+C);
                 break;
             case 0x4c:    /* LD C,H */
                 C.set(H);
-                //if( DEBUG ) System.out.print(" LD C,H ; "+C);
                 break;
             case 0x4d:    /* LD C,L */
                 C.set(L);
-                //if( DEBUG ) System.out.print(" LD C,L ; "+C);
                 break;
             case 0x4e:    /* LD C,(HL) */
                 contend(HL, 3);
                 C.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" LD C,(HL) ; "+C);
                 break;
             case 0x4f:    /* LD C,A */
                 C.set(A);
-                //if( DEBUG ) System.out.print(" LD C,A ; "+C);
                 break;
             case 0x50:    /* LD D,B */
                 D.set(B);
-                //if( DEBUG ) System.out.print(" LD D,B ; "+D);
                 break;
             case 0x51:    /* LD D,C */
                 D.set(C);
-                //if( DEBUG ) System.out.print(" LD D,C ; "+D);
                 break;
             case 0x52:    /* LD D,D */
-                //if( DEBUG ) System.out.print(" LD D,D ; "+D);
                 break;
             case 0x53:    /* LD D,E */
                 D.set(E);
-                //if( DEBUG ) System.out.print(" LD D,E ; "+D);
                 break;
             case 0x54:    /* LD D,H */
                 D.set(H);
-                //if( DEBUG ) System.out.print(" LD D,H ; "+D);
                 break;
             case 0x55:    /* LD D,L */
                 D.set(L);
-                //if( DEBUG ) System.out.print(" LD D,L ; "+D);
                 break;
             case 0x56:    /* LD D,(HL) */
                 contend(HL, 3);
                 D.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" LD D,(HL) ; "+D);
                 break;
             case 0x57:    /* LD D,A */
                 D.set(A);
-                //if( DEBUG ) System.out.print(" LD D,A ; "+D);
                 break;
             case 0x58:    /* LD E,B */
                 E.set(B);
-                //if( DEBUG ) System.out.print(" LD E,B ; "+E);
                 break;
             case 0x59:    /* LD E,C */
                 E.set(C);
-                //if( DEBUG ) System.out.print(" LD E,C ; "+E);
                 break;
             case 0x5a:    /* LD E,D */
                 E.set(D);
-                //if( DEBUG ) System.out.print(" LD E,D ; "+E);
                 break;
             case 0x5b:    /* LD E,E */
-                //if( DEBUG ) System.out.print(" LD E,E ; "+E);
                 break;
             case 0x5c:    /* LD E,H */
                 E.set(H);
-                //if( DEBUG ) System.out.print(" LD E,H ; "+E);
                 break;
             case 0x5d:    /* LD E,L */
                 E.set(L);
-                //if( DEBUG ) System.out.print(" LD E,L ; "+E);
                 break;
             case 0x5e:    /* LD E,(HL) */
                 contend(HL, 3);
                 E.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" LD E,(HL) ; "+E);
                 break;
             case 0x5f:    /* LD E,A */
                 E.set(A);
-                //if( DEBUG ) System.out.print(" LD E,A ; "+E);
                 break;
             case 0x60:    /* LD H,B */
                 H.set(B);
-                //if( DEBUG ) System.out.print(" LD H,B ; "+H);
                 break;
             case 0x61:    /* LD H,C */
                 H.set(C);
@@ -1070,103 +969,80 @@ public final class Z80 {
                 break;
             case 0x69:    /* LD L,C */
                 L.set(C);
-                //if( DEBUG ) System.out.print(" LD L,C ; "+L);
                 break;
             case 0x6a:    /* LD L,D */
                 L.set(D);
-                //if( DEBUG ) System.out.print(" L,D ; "+L);
                 break;
             case 0x6b:    /* LD L,E */
                 L.set(E);
-                //if( DEBUG ) System.out.print(" L,E ; "+L);
                 break;
             case 0x6c:    /* LD L,H */
                 L.set(H);
-                //if( DEBUG ) System.out.print(" L,H ; "+L);
                 break;
             case 0x6d:    /* LD L,L */
-                //if( DEBUG ) System.out.print(" L,L ; "+L);
                 break;
             case 0x6e:    /* LD L,(HL) */
                 contend(HL, 3);
                 L.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" L,(HL) ; "+L);
                 break;
             case 0x6f:    /* LD L,A */
                 L.set(A);
-                //if( DEBUG ) System.out.print(" L,A ; "+L);
                 break;
             case 0x70:    /* LD (HL),B */
                 contend(HL, 3);
                 machine.writebyte(HL.word, B.get());
-                //if( DEBUG ) System.out.print(" LD (HL),B ; "+B);
                 break;
             case 0x71:    /* LD (HL),C */
                 contend(HL, 3);
                 machine.writebyte(HL.word, C.get());
-                //if( DEBUG ) System.out.print(" LD (HL),C ; "+C);
                 break;
             case 0x72:    /* LD (HL),D */
                 contend(HL, 3);
                 machine.writebyte(HL.word, D.get());
-                //if( DEBUG ) System.out.print(" LD (HL),D ; "+D);
                 break;
             case 0x73:    /* LD (HL),E */
                 contend(HL, 3);
                 machine.writebyte(HL.word, E.get());
-                //if( DEBUG ) System.out.print(" LD (HL),E ; "+E);
                 break;
             case 0x74:    /* LD (HL),H */
                 contend(HL, 3);
                 machine.writebyte(HL.word, H.get());
-                //if( DEBUG ) System.out.print(" LD (HL),H ; "+H);
                 break;
             case 0x75:    /* LD (HL),L */
                 contend(HL, 3);
                 machine.writebyte(HL.word, L.get());
-                //if( DEBUG ) System.out.print(" LD (HL),L ; "+L);
                 break;
             case 0x76:    /* HALT */
                 halted = 1;
                 PC--;
-                //if( DEBUG ) System.out.print(" HALT");
                 break;
             case 0x77:    /* LD (HL),A */
                 contend(HL, 3);
                 machine.writebyte(HL.word, A.value);
-                //if( DEBUG ) System.out.print(" LD (HL),A ; "+A);
                 break;
             case 0x78:    /* LD A,B */
                 A.set(B);
-                //if( DEBUG ) System.out.print(" LD A,B ; "+A);
                 break;
             case 0x79:    /* LD A,C */
                 A.set(C);
-                //if( DEBUG ) System.out.print(" LD A,C ; "+A);
                 break;
             case 0x7a:    /* LD A,D */
                 A.set(D);
-                //if( DEBUG ) System.out.print(" LD A,D ; "+A);
                 break;
             case 0x7b:    /* LD A,E */
                 A.set(E);
-                //if( DEBUG ) System.out.print(" LD A,E ; "+A);
                 break;
             case 0x7c:    /* LD A,H */
                 A.set(H);
-                //if( DEBUG ) System.out.print(" LD A,H ; "+A);
                 break;
             case 0x7d:    /* LD A,L */
                 A.set(L);
-                //if( DEBUG ) System.out.print(" LD A,L ; "+A);
                 break;
             case 0x7e:    /* LD A,(HL) */
                 contend(HL, 3);
                 A.set(machine.readbyte(HL.word));
-                //if( DEBUG ) System.out.print(" LD A,(HL) ; "+A);
                 break;
             case 0x7f:    /* LD A,A */
-                //if( DEBUG ) System.out.print(" LD A,A ; "+A);
                 break;
             case 0x80:    /* ADD A,B */
                 ADD(B.get());
@@ -1188,11 +1064,8 @@ public final class Z80 {
                 break;
             case 0x86:    /* ADD A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                ADD(bytetemp);
-            }
-            break;
+                ADD(machine.readbyte(HL.word));
+                break;
             case 0x87:    /* ADD A,A */
                 ADD(A.get());
                 break;
@@ -1216,11 +1089,8 @@ public final class Z80 {
                 break;
             case 0x8e:    /* ADC A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                ADC(bytetemp);
-            }
-            break;
+                ADC(machine.readbyte(HL.word));
+                break;
             case 0x8f:    /* ADC A,A */
                 ADC(A.get());
                 break;
@@ -1244,11 +1114,8 @@ public final class Z80 {
                 break;
             case 0x96:    /* SUB A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                SUB(bytetemp);
-            }
-            break;
+                SUB(machine.readbyte(HL.word));
+                break;
             case 0x97:    /* SUB A,A */
                 SUB(A.get());
                 break;
@@ -1272,11 +1139,8 @@ public final class Z80 {
                 break;
             case 0x9e:    /* SBC A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                SBC(bytetemp);
-            }
-            break;
+                SBC(machine.readbyte(HL.word));
+                break;
             case 0x9f:    /* SBC A,A */
                 SBC(A.get());
                 break;
@@ -1300,11 +1164,8 @@ public final class Z80 {
                 break;
             case 0xa6:    /* AND A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                AND(bytetemp);
-            }
-            break;
+                AND(machine.readbyte(HL.word));
+                break;
             case 0xa7:    /* AND A,A */
                 AND(A.get());
                 break;
@@ -1328,12 +1189,8 @@ public final class Z80 {
                 break;
             case 0xae:    /* XOR A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                XOR(bytetemp);
-            }
-            //if( DEBUG ) System.out.print(" XOR A,(HL) ; "+A);
-            break;
+                XOR(machine.readbyte(HL.word));
+                break;
             case 0xaf:    /* XOR A,A */
                 XOR(A);
                 break;
@@ -1357,11 +1214,8 @@ public final class Z80 {
                 break;
             case 0xb6:    /* OR A,(HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                OR(bytetemp);
-            }
-            break;
+                OR(machine.readbyte(HL.word));
+                break;
             case 0xb7:    /* OR A,A */
                 OR(A);
                 break;
@@ -1385,41 +1239,31 @@ public final class Z80 {
                 break;
             case 0xbe:    /* CP (HL) */
                 contend(HL, 3);
-            {
-                int bytetemp = machine.readbyte(HL.word);
-                CP(bytetemp);
-                //if( DEBUG ) System.out.print(" CP (HL) ; "+toHex8(bytetemp)+", "+F.toBinaryString());
-            }
-            break;
+                CP(machine.readbyte(HL.word));
+               break;
             case 0xbf:    /* CP A */
                 CP(A.get());
                 break;
             case 0xc0:    /* RET NZ */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET NZ returning "+((F.value & FLAG_Z)==0));
                 if ((F.value & FLAG_Z) == 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xc1:    /* POP BC */
                 BC.set(POP16());
-                //if( DEBUG ) System.out.print(" POP BC ; "+BC);
                 break;
             case 0xc2:    /* JP NZ,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP NZ jumping "+((F.value & FLAG_Z)==0));
                 if ((F.value & FLAG_Z) == 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xc3:    /* JP nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
                 JP();
-                //if( DEBUG ) System.out.print(" JP to "+PC);
                 break;
             case 0xc4:    /* CALL NZ,nnnn */
                 contend(PC, 3);
@@ -1427,50 +1271,39 @@ public final class Z80 {
                 if ((F.value & FLAG_Z) == 0) {
                     CALL();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xc5:    /* PUSH BC */
                 tstates++;
                 PUSH16(BC.word);
-                //if( DEBUG ) System.out.print(" PUSH BC ; "+BC);
                 break;
             case 0xc6:    /* ADD A,nn */
                 contend(PC, 3);
-            {
-                int bytetemp = machine.readbyte(PC++);
-                ADD(bytetemp);
-            }
-            break;
+                ADD(machine.readbyte(PC++));
+                break;
             case 0xc7:    /* RST 00 */
                 tstates++;
                 RST(0x00);
                 break;
             case 0xc8:    /* RET Z */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET Z returning "+((F.value & FLAG_Z)!=0));
                 if ((F.value & FLAG_Z) != 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xc9:    /* RET */
                 RET();
-                //if( DEBUG ) System.out.print(" RET to "+PC);
                 break;
             case 0xca:    /* JP Z,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP Z jumping "+((F.value & FLAG_Z)!=0));
                 if ((F.value & FLAG_Z) > 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xcb:    /* CBxx opcodes */ {
                 contend(PC, 4);
                 int opcode2 = machine.opcode_fetch(PC++);
                 R = (R + 1) & 0xff;
-
                 do_opcode_CB(opcode2);
             }
             break;
@@ -1485,46 +1318,35 @@ public final class Z80 {
                 contend(PC, 3);
                 contend(PC + 1, 3);
                 CALL();
-                //if( DEBUG ) System.out.print(" CALL "+PC);
                 break;
             case 0xce:    /* ADC A,nn */
                 contend(PC, 3);
-            {
-                int bytetemp = machine.readbyte(PC++);
-                ADC(bytetemp);
-            }
-            break;
+                ADC(machine.readbyte(PC++));
+                break;
             case 0xcf:    /* RST 8 */
                 tstates++;
                 RST(0x08);
                 break;
             case 0xd0:    /* RET NC */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET NC returning "+((F.value & FLAG_C)==0));
                 if ((F.value & FLAG_C) == 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xd1:    /* POP DE */
                 DE.set(POP16());
-                //if( DEBUG ) System.out.print(" POP DE ; "+DE);
                 break;
             case 0xd2:    /* JP NC,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP NC jumping "+((F.value & FLAG_C)==0));
                 if ((F.value & FLAG_C) == 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
-            case 0xd3:    /* OUT (nn),A */ {
+            case 0xd3:    /* OUT (nn),A */
                 contend(PC, 4);
-                int outtemp = machine.readbyte(PC++) + (A.value << 8);
-                OUT(outtemp, A);
-            }
-            break;
+                OUT(machine.readbyte(PC++) + (A.value << 8), A);
+                break;
             case 0xd4:    /* CALL NC,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
@@ -1535,26 +1357,20 @@ public final class Z80 {
             case 0xd5:    /* PUSH DE */
                 tstates++;
                 PUSH16(DE.word);
-                //if( DEBUG ) System.out.print(" PUSH DE ; "+DE);
                 break;
             case 0xd6:    /* SUB nn */
                 contend(PC, 3);
-            {
-                int bytetemp = machine.readbyte(PC++);
-                SUB(bytetemp);
-            }
-            break;
+                SUB(machine.readbyte(PC++));
+                break;
             case 0xd7:    /* RST 10 */
                 tstates++;
                 RST(0x10);
                 break;
             case 0xd8:    /* RET C */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET C returning "+((F.value & FLAG_C)>0));
                 if ((F.value & FLAG_C) > 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xd9:    /* EXX */ {
                 int wordtemp = BC.word;
@@ -1566,17 +1382,14 @@ public final class Z80 {
                 wordtemp = HL.word;
                 HL.set(HL_);
                 HL_ = wordtemp;
-                //if( DEBUG ) System.out.print(" EXX");
             }
             break;
             case 0xda:    /* JP C,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP M jumping "+((F.value & FLAG_C)>0));
                 if ((F.value & FLAG_C) > 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xdb:    /* IN A,(nn) */ {
                 contend(PC, 4);
@@ -1601,35 +1414,27 @@ public final class Z80 {
             break;
             case 0xde:    /* SBC A,nn */
                 contend(PC, 3);
-            {
-                int bytetemp = machine.readbyte(PC++);
-                SBC(bytetemp);
-            }
-            break;
+                SBC(machine.readbyte(PC++));
+                break;
             case 0xdf:    /* RST 18 */
                 tstates++;
                 RST(0x18);
                 break;
             case 0xe0:    /* RET PO */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET PO returning "+((F.value & FLAG_P)==0));
                 if ((F.value & FLAG_P) == 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xe1:    /* POP HL */
                 HL.set(POP16());
-                //if( DEBUG ) System.out.print(" POP HL ; "+HL);
                 break;
             case 0xe2:    /* JP PO,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP PO jumping "+((F.value & FLAG_P)==0));
                 if ((F.value & FLAG_P) == 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xe3:    /* EX (SP),HL */ {
                 int bytetempl = machine.readbyte(SP), bytetemph = machine.readbyte(SP + 1);
@@ -1641,7 +1446,6 @@ public final class Z80 {
                 machine.writebyte(SP + 1, H.get());
                 L.set(bytetempl);
                 H.set(bytetemph);
-                //if( DEBUG ) System.out.print(" EX (SP),HL ; "+HL);
             }
             break;
             case 0xe4:    /* CALL PO,nnnn */
@@ -1654,46 +1458,36 @@ public final class Z80 {
             case 0xe5:    /* PUSH HL */
                 tstates++;
                 PUSH16(HL.word);
-                //if( DEBUG ) System.out.print(" PUSH HL ; "+HL);
                 break;
             case 0xe6:    /* AND nn */
                 contend(PC, 3);
-            {
-                int bytetemp = machine.readbyte(PC++);
-                AND(bytetemp);
-                //if( DEBUG ) System.out.print(" AND "+toHex8(bytetemp)+" ; "+A);
-            }
-            break;
+
+                AND(machine.readbyte(PC++));
+                break;
             case 0xe7:    /* RST 20 */
                 tstates++;
                 RST(0x20);
                 break;
             case 0xe8:    /* RET PE */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET PE returning "+((F.value & FLAG_P)>0));
                 if ((F.value & FLAG_P) > 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xe9:    /* JP HL */
                 PC = HL.word;
-                //if( DEBUG ) System.out.print("JP (HL) to "+PC);
                 break;
             case 0xea:    /* JP PE,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP PE jumping "+((F.value & FLAG_P)>0));
                 if ((F.value & FLAG_P) > 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xeb:    /* EX DE,HL */ {
                 int wordtemp = DE.word;
                 DE.set(HL);
                 HL.set(wordtemp);
-                //if( DEBUG ) System.out.print(" EX DE,HL");
             }
             break;
             case 0xec:    /* CALL PE,nnnn */
@@ -1724,24 +1518,19 @@ public final class Z80 {
                 break;
             case 0xf0:    /* RET P */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET P returning "+((F.value & FLAG_S)==0));
                 if ((F.value & FLAG_S) == 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xf1:    /* POP AF */
                 AF.set(POP16());
-                //if( DEBUG ) System.out.print(" POP AF ; "+AF);
                 break;
             case 0xf2:    /* JP P,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP P jumping "+((F.value & FLAG_S)==0));
                 if ((F.value & FLAG_S) == 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xf3:    /* DI */
                 IFF1 = IFF2 = 0;
@@ -1756,7 +1545,6 @@ public final class Z80 {
             case 0xf5:    /* PUSH AF */
                 tstates++;
                 PUSH16(AF.get());
-                //if( DEBUG ) System.out.print(" PUSH AF ; "+AF);
                 break;
             case 0xf6:    /* OR nn */
                 contend(PC, 3);
@@ -1771,25 +1559,20 @@ public final class Z80 {
                 break;
             case 0xf8:    /* RET M */
                 tstates++;
-                //if( DEBUG ) System.out.print(" RET M returning "+((F.value & FLAG_S)!=0));
                 if ((F.value & FLAG_S) != 0) {
                     RET();
                 }
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xf9:    /* LD SP,HL */
                 tstates += 2;
                 SP = HL.word;
-                //if( DEBUG ) System.out.print(" LD SP,HL ; "+HL);
                 break;
             case 0xfa:    /* JP M,nnnn */
                 contend(PC, 3);
                 contend(PC + 1, 3);
-                //if( DEBUG ) System.out.print(" JP M jumping "+((F.value & FLAG_S)>0));
                 if ((F.value & FLAG_S) > 0) {
                     JP();
                 } else PC += 2;
-                //if( DEBUG ) System.out.print(" to "+PC);
                 break;
             case 0xfb:    /* EI */
                 IFF1 = IFF2 = 1;
@@ -1813,7 +1596,6 @@ public final class Z80 {
             {
                 int bytetemp = machine.readbyte(PC++);
                 CP(bytetemp);
-                //if( DEBUG ) System.out.print(" CP "+toHex8(bytetemp)+" ; "+F.toBinaryString());
             }
             break;
             case 0xff:    /* RST 38 */
@@ -1824,22 +1606,10 @@ public final class Z80 {
 
         R = R & 127;
 
-        //if( DEBUG ) System.out.println(" T: "+tstates+" row: "+ZX81.rowcounter+" Memory[$4028]="+toHex8(ZX81.memory[0x4028]));
-        //if( DEBUG ) System.out.println("      HL :"+HL+ " BC :"+BC+ " DE :"+DE+" A :"+A+" F :"+F.toBinaryString());
-        //if( DEBUG ) System.out.println("      HL':"+HL_+" BC':"+BC_+" DE':"+DE_+" A':"+A_+" F':"+F_.toBinaryString());
-        //if( DEBUG ) System.out.println("      IX :"+IX+ " IY :"+IY+ " IR :"+toHex16(IR())+" SP:"+SP+" PC:"+PC);
-
         return (tstates);
     }
 
-
-    //==========================================================================================
-    // From Z80_CB.
-    //==========================================================================================
-
     private void do_opcode_CB(int opcode2) {
-
-        //if( DEBUG ) System.out.print(opToHex8(opcode2));
 
         switch (opcode2) {
             case 0x00:  /* RLC B */
@@ -2240,12 +2010,11 @@ public final class Z80 {
                 BIT(2, L);
                 break;
 
-            case 0x56:  /* BIT 2,(HL) */ {
+            case 0x56:  /* BIT 2,(HL) */
                 tempreg.set(machine.readbyte(HL.word));
                 contend(HL, 4);
                 BIT(2, tempreg);
-            }
-            break;
+                break;
 
             case 0x57:  /* BIT 2,A */
                 BIT(2, A);
@@ -2511,12 +2280,10 @@ public final class Z80 {
                 break;
 
             case 0x94:  /* RES 2,H */
-                //H &= 0xfb;
                 H.and(0xfb);
                 break;
 
             case 0x95:  /* RES 2,L */
-                //L &= 0xfb;
                 break;
 
             case 0x96:  /* RES 2,(HL) */
@@ -2972,32 +2739,24 @@ public final class Z80 {
                 break;
         }
     }
-    //==========================================================================================
-    // From Z80_ED.
-    //==========================================================================================
 
     private void do_opcode_ED(int opcode2) {
-
-//if( DEBUG ) System.out.print(opToHex8(opcode2));
 
         switch (opcode2) {
 
             case 0x40:  /* IN B,(C) */
                 tstates += 1;
                 IN(B, BC);
-                //if( DEBUG ) System.out.print(" IN B,(C)");
                 break;
 
             case 0x41:  /* OUT (C),B */
                 tstates += 1;
                 OUT(BC, B);
-                //if( DEBUG ) System.out.print(" OUT (C),B");
                 break;
 
             case 0x42:  /* SBC HL,BC */
                 tstates += 7;
                 SBC16(BC.word);
-                //if( DEBUG ) System.out.print(" SBC HL,BC ; "+HL);
                 break;
 
             case 0x43:  /* LD (nnnn),BC */
@@ -3040,7 +2799,6 @@ public final class Z80 {
             case 0x47:  /* LD I,A */
                 tstates += 1;
                 I = A.value;
-                //if( DEBUG ) System.out.print(" LD I,A ; "+A);
                 break;
 
             case 0x48:  /* IN C,(C) */
@@ -3089,7 +2847,6 @@ public final class Z80 {
             case 0x56:
             case 0x76:  /* IM 1 */
                 IM = 1;
-                //if( DEBUG ) System.out.print(" IM 1");
                 break;
 
             case 0x57:  /* LD A,I */
@@ -3369,9 +3126,7 @@ public final class Z80 {
                     for (int i = 0; i < 5; ++i)
                         contend(DE, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" LDIR repeating; BC = "+BC);
-                } //else
-                //if( DEBUG ) System.out.print(" LDIR completed");
+                }
             }
             break;
 
@@ -3393,9 +3148,7 @@ public final class Z80 {
                     for (int i = 0; i < 5; ++i)
                         contend(HL, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" CPIR repeating; BC = "+BC);
                 }
-                //if( DEBUG ) System.out.print(" CPIR finished");
             }
             break;
 
@@ -3405,20 +3158,15 @@ public final class Z80 {
                 contend_io(BC, 3);
                 contend(HL, 3);
                 machine.writebyte(HL.word, initemp);
-                //B--; HL++;
-                //F = (initemp & 0x80 ? FLAG_N : 0 ) | sz53_table[B];
                 B.dec();
                 HL.inc();
                 F.set(((initemp & 0x80) != 0 ? FLAG_N : 0) | sz53_table[B.get()]);
       /* C,H and P/V flags not implemented */
-                //if(B) {
                 if (B.get() != 0) {
                     for (int i = 0; i < 5; ++i)
                         contend(HL, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" INIR repeating; BC = "+BC);
                 }
-                //if( DEBUG ) System.out.print(" INIR completed");
             }
             break;
 
@@ -3431,17 +3179,14 @@ public final class Z80 {
                 machine.writeport(BC.word, outitemp);
                 F.set(((outitemp & 0x80) != 0 ? FLAG_N : 0) | sz53_table[B.get()]);
       /* C,H and P/V flags not implemented */
-                //if(B) {
                 if (B.get() != 0) {
                     contend_io(BC, 1);
                     for (int i = 0; i < 6; ++i)
                         contend(PC, 1);
                     contend(PC - 1, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" OTIR repeating; BC = "+BC);
                 } else {
                     contend_io(BC, 3);
-                    //if( DEBUG ) System.out.print(" OTIR completed");
                 }
             }
             break;
@@ -3459,14 +3204,11 @@ public final class Z80 {
                 bytetemp += A.value;
                 F.set((F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (BC.word != 0 ? FLAG_V : 0) |
                         (bytetemp & FLAG_3) | ((bytetemp & 0x02) > 0 ? FLAG_5 : 0));
-                //if(BC) {
                 if (BC.word != 0) {
                     for (int i = 0; i < 5; ++i)
                         contend(DE, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" LDDR repeating; BC = "+BC);
-                } //else
-                //if( DEBUG ) System.out.print(" LDDR completed");
+                }
             }
             break;
 
@@ -3488,9 +3230,7 @@ public final class Z80 {
                     for (int i = 0; i < 5; ++i)
                         contend(HL, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" CPDR repeating; BC = "+BC);
-                } //else
-                //if( DEBUG ) System.out.print(" CPDR completed");
+                }
             }
             break;
 
@@ -3507,9 +3247,7 @@ public final class Z80 {
                     for (int i = 0; i < 5; ++i)
                         contend(HL, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" INDR repeating; BC = "+BC);
-                } //else
-                //if( DEBUG ) System.out.print(" INDR completed");
+                }
             }
             break;
 
@@ -3527,10 +3265,8 @@ public final class Z80 {
                         contend(PC, 1);
                     contend(PC - 1, 1);
                     PC -= 2;
-                    //if( DEBUG ) System.out.print(" OTDR repeating; BC = "+BC);
                 } else {
                     contend_io(BC, 3);
-                    //if( DEBUG ) System.out.print(" OTDR completed");
                 }
             }
             break;
@@ -3543,16 +3279,10 @@ public final class Z80 {
         }
     }
 
-    //==========================================================================================
-    // From Z80_DDFD
-    //==========================================================================================
-
     private void do_opcode_DDFD(int opcode2,
                                 RegisterPair REGISTER,
                                 Register REGISTERL,
                                 Register REGISTERH) {
-
-        //if( DEBUG ) System.out.print(opToHex8(opcode2));
 
         switch (opcode2) {
             case 0x09:    /* ADD REGISTER,BC */
@@ -3568,7 +3298,6 @@ public final class Z80 {
                 REGISTERL.set(machine.readbyte(PC++));
                 contend(PC, 3);
                 REGISTERH.set(machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD "+REGISTER.name+","+REGISTER);
                 break;
 
             case 0x22:    /* LD (nnnn),REGISTER */
@@ -3620,7 +3349,7 @@ public final class Z80 {
                 break;
 
             case 0x34:    /* INC (REGISTER+dd) */
-                tstates += 15;    /* FIXME: how is this contended? */
+                tstates += 15;
             {
                 int dist = machine.readbyte(PC++);
                 dist = (dist < 128 ? dist : dist - 256);
@@ -3633,7 +3362,7 @@ public final class Z80 {
             break;
 
             case 0x35:    /* DEC (REGISTER+dd) */
-                tstates += 15;    /* FIXME: how is this contended? */
+                tstates += 15;
             {
                 int dist = machine.readbyte(PC++);
                 int wordtemp = REGISTER.get() + (dist < 128 ? dist : dist - 256);
@@ -3645,12 +3374,11 @@ public final class Z80 {
             break;
 
             case 0x36:    /* LD (REGISTER+dd),nn */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 int dist = machine.readbyte(PC++);
                 int wordtemp = REGISTER.get() + (dist < 128 ? dist : dist - 256);
                 machine.writebyte(wordtemp, machine.readbyte(PC++));
-                //if( DEBUG ) System.out.print(" LD ("+REGISTER.name+"+"+toHex8(dist)+"),"+toHex8(ZX81.memory[wordtemp]));
             }
             break;
 
@@ -3667,7 +3395,7 @@ public final class Z80 {
                 break;
 
             case 0x46:    /* LD B,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 int dist = machine.readbyte(PC++);
                 B.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3681,7 +3409,7 @@ public final class Z80 {
                 break;
 
             case 0x4e:    /* LD C,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 C.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
 
@@ -3696,7 +3424,7 @@ public final class Z80 {
                 break;
 
             case 0x56:    /* LD D,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 D.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3710,7 +3438,7 @@ public final class Z80 {
                 break;
 
             case 0x5e:    /* LD E,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 E.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3739,7 +3467,7 @@ public final class Z80 {
                 break;
 
             case 0x66:    /* LD H,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 H.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3772,7 +3500,7 @@ public final class Z80 {
                 break;
 
             case 0x6e:    /* LD L,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 L.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3782,43 +3510,43 @@ public final class Z80 {
                 break;
 
             case 0x70:    /* LD (REGISTER+dd),B */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), B.get());
                 break;
 
             case 0x71:    /* LD (REGISTER+dd),C */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), C.get());
                 break;
 
             case 0x72:    /* LD (REGISTER+dd),D */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), D.get());
                 break;
 
             case 0x73:    /* LD (REGISTER+dd),E */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), E.get());
                 break;
 
             case 0x74:    /* LD (REGISTER+dd),H */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), H.get());
                 break;
 
             case 0x75:    /* LD (REGISTER+dd),L */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), L.get());
                 break;
 
             case 0x77:    /* LD (REGISTER+dd),A */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), A.value);
                 break;
@@ -3832,7 +3560,7 @@ public final class Z80 {
                 break;
 
             case 0x7e:    /* LD A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
                 dist = machine.readbyte(PC++);
                 A.set(machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
                 break;
@@ -3846,7 +3574,7 @@ public final class Z80 {
                 break;
 
             case 0x86:    /* ADD A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3863,7 +3591,7 @@ public final class Z80 {
                 break;
 
             case 0x8e:    /* ADC A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3880,7 +3608,7 @@ public final class Z80 {
                 break;
 
             case 0x96:    /* SUB A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3897,7 +3625,7 @@ public final class Z80 {
                 break;
 
             case 0x9e:    /* SBC A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3914,7 +3642,7 @@ public final class Z80 {
                 break;
 
             case 0xa6:    /* AND A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3931,7 +3659,7 @@ public final class Z80 {
                 break;
 
             case 0xae:    /* XOR A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3948,7 +3676,7 @@ public final class Z80 {
                 break;
 
             case 0xb6:    /* OR A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3965,7 +3693,7 @@ public final class Z80 {
                 break;
 
             case 0xbe:    /* CP A,(REGISTER+dd) */
-                tstates += 11;    /* FIXME: how is this contended? */
+                tstates += 11;
             {
                 dist = machine.readbyte(PC++);
                 int bytetemp = machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
@@ -3973,7 +3701,6 @@ public final class Z80 {
             }
             break;
 
-      /* FIXME: contention here is just a guess */
             case 0xcb:    /* {DD,FD}CBxx opcodes */ {
                 contend(PC, 3);
                 dist = machine.readbyte(PC++);
@@ -3987,7 +3714,6 @@ public final class Z80 {
 
             case 0xe1:    /* POP REGISTER */
                 REGISTER.set(POP16());
-                //if( DEBUG ) System.out.print(" POP "+REGISTER.name+" ; "+REGISTER);
                 break;
 
             case 0xe3:    /* EX (SP),REGISTER */ {
@@ -4010,7 +3736,6 @@ public final class Z80 {
                 break;
 
             case 0xe9:    /* JP REGISTER */
-                //PC=REGISTER;    /* NB: NOT INDIRECT! */
                 PC = REGISTER.get();
 
                 break;
@@ -4035,23 +3760,9 @@ public final class Z80 {
         }
     }
 
-    //==========================================================================================
-    // From Z80_DDFDCB
-    //==========================================================================================
-
-    private void do_opcode_DDFDCB(int opcode3,
-                          //RegisterPair REGISTER,
-                          //Register REGISTERL,
-                          //Register REGISTERH,
-                          int tempaddr
-                          //int dist )
-    ) {
-
-        //if( DEBUG ) System.out.print(opToHex8(opcode3));
+    private void do_opcode_DDFDCB(int opcode3, int tempaddr) {
 
         switch (opcode3) {
-
-/* FIXME: Contention details are unknown */
 
             case 0x00:  /* LD B,RLC (REGISTER+dd) */
                 tstates += 8;
@@ -4731,7 +4442,6 @@ public final class Z80 {
             case 0x8e:  /* RES 1,(REGISTER+dd) */
                 tstates += 8;
                 machine.writebyte(tempaddr, machine.readbyte(tempaddr) & 0xfd);
-                //if( DEBUG ) System.out.print(" RES 1,("+REGISTER.name+"+$"+toHex8(dist)+")");
                 break;
 
             case 0x8f:  /* LD A,RES 1,(REGISTER+dd) */

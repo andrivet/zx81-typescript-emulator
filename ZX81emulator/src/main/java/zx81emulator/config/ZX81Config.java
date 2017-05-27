@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.config;
 
@@ -34,6 +34,7 @@ public class ZX81Config
         zx81opts.ROMTOP = 8191;
         zx81opts.chrgen = CHRGENSINCLAIR;
         zx81opts.enableqschrgen = false;
+        zx81opts.m1not = 32768;
 
         machine.tperscanline = 207;
         machine.tperframe = 312 * 207;

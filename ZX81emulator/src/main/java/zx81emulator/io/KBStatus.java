@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.io;
 
@@ -175,7 +175,7 @@ public class KBStatus
         return kbs;
     }
 
-    public KBStatus(ZX81Config config) {
+    public KBStatus() {
 
         for (int i = 0; i < 8; i++)
             ZXKeyboard[i] = 0;

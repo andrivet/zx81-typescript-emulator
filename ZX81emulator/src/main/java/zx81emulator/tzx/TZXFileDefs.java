@@ -16,15 +16,13 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.tzx;
 
 public class TZXFileDefs {
 
     public static final int TZX_MAX_BLOCKS = 2000;
-
-    //TODO: public static float TZXSCALE(int x,int clockSpeed) { return (((float)x)/(((float)3500000)/((float)clockSpeed))); }
 
     public static final int TZX_BLOCK_ROM = 0x10;
     public static final int TZX_BLOCK_TURBO = 0x11;

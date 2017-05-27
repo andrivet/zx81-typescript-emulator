@@ -16,7 +16,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with Foobar.  If not, see <http://www.gnu.org/licenses/>.
+ * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 package zx81emulator.z80;
 
@@ -28,13 +28,7 @@ public interface RegisterPair {
 
     void set(RegisterPair rp);
 
-    int postInc();
-
     void inc();
-
-    int postDec();
-
-    int preDec();
 
     void dec();
 
@@ -86,25 +80,8 @@ final class MasterRegisterPair
         word = rp.get();
     }
 
-    public int postInc() {
-        int oldVal = word;
-        word = (word + 1) & 0xffff;
-        return oldVal;
-    }
-
     public void inc() {
         word = (word + 1) & 0xffff;
-    }
-
-    public int postDec() {
-        int oldVal = word;
-        word = (word - 1) & 0xffff;
-        return oldVal;
-    }
-
-    public int preDec() {
-        word = (word - 1) & 0xffff;
-        return word;
     }
 
     public void dec() {
@@ -157,33 +134,10 @@ final class SlaveRegisterPair
         low.value = word & 0xff;
     }
 
-    public int postInc() {
-        int oldVal = (hi.value << 8) + low.value;
-        int word = (oldVal + 1) & 0xffff;
-        hi.value = word >> 8;
-        low.value = word & 0xff;
-        return oldVal;
-    }
-
     public void inc() {
         int word = ((hi.value << 8) + low.value + 1) & 0xffff;
         hi.value = word >> 8;
         low.value = word & 0xff;
-    }
-
-    public int postDec() {
-        int oldVal = (hi.value << 8) + low.value;
-        int word = (oldVal - 1) & 0xffff;
-        hi.value = word >> 8;
-        low.value = word & 0xff;
-        return oldVal;
-    }
-
-    public int preDec() {
-        int word = ((hi.value << 8) + low.value - 1) & 0xffff;
-        hi.value = word >> 8;
-        low.value = word & 0xff;
-        return word;
     }
 
     public void dec() {

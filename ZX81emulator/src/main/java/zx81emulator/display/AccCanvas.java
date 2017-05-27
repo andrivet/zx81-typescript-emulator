@@ -26,15 +26,13 @@ import java.awt.Graphics;
 
 public class AccCanvas
         extends Canvas {
-    private Dimension mSize;
     private AccDraw mDisplayDrawer;
 
-    public AccCanvas(AccDraw dd) {
+    AccCanvas(AccDraw dd) {
         mDisplayDrawer = dd;
     }
 
-    public void setRequiredSize(Dimension size) {
-        mSize = size;
+    void setRequiredSize(Dimension size) {
         setSize(size);
     }
 

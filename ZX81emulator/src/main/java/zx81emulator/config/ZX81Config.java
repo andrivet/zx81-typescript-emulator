@@ -39,7 +39,7 @@ public class ZX81Config
         machine.tperframe = 312 * 207;
 
         zx81opts.ROM81 = "zx81.rom";
-        
+
         autoload = true;
     }
 }

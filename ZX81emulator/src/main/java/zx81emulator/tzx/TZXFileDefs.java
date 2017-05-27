@@ -49,9 +49,6 @@ public class TZXFileDefs {
     public static final int TZX_BLOCK_HWTYPE = 0x33;
     public static final int TZX_BLOCK_CUSTOM = 0x35;
     public static final int TZX_BLOCK_GLUE = 0x5a;
-
-    public static final String T81_HEADER_ID = "EO81";
-    public static final int TZX_BYTE_EMPTY = -1;
 }
 
 class TZXHeader {
@@ -113,25 +110,11 @@ class TZXCSW extends TZXBlockInfo {
 class TZXGeneral extends TZXBlockInfo {
     int TOTP, NPP, ASP, TOTD, NPD, ASD;
     int DataLen;
-
-    //int Flags, DataLen;
-    //int PilotLen;
-    //int PilotPulses;
-    //int SyncPulses;
-    //int MaxPulsesBit;
-    //int NoSymbols;
-    //int FinalBits;
-}
-
-class TZXPause extends TZXBlockInfo {
 }
 
 class TZXGStart extends TZXBlockInfo {
     int NameLen;
 }
-
-class TZXGEnd extends TZXBlockInfo {
-};
 
 class TZXJump extends TZXBlockInfo {
     int JumpRel;
@@ -141,21 +124,9 @@ class TZXLStart extends TZXBlockInfo {
     int Repeats;
 }
 
-class TZXLEend extends TZXBlockInfo {
-}
-
-class TZXSelect extends TZXBlockInfo {
-    int Offset;
-    int TextLen;
-}
-
 class TZXSBlock extends TZXBlockInfo {
     int BlockLen;
     int NoSelections;
-}
-
-class TZXStop48K extends TZXBlockInfo {
-    int BlockLen;
 }
 
 class TZXSetLevel extends TZXBlockInfo {
@@ -168,11 +139,6 @@ class TZXText extends TZXBlockInfo {
 
 class TZXMessage extends TZXBlockInfo {
     int Time;
-    int TextLen;
-}
-
-class TZXArchiveText extends TZXBlockInfo {
-    int TextID;
     int TextLen;
 }
 
@@ -194,9 +160,6 @@ class TZXHWType extends TZXBlockInfo {
 class TZXCustom extends TZXBlockInfo {
     String IDString;
     int Length;
-}
-
-class TZXGlue extends TZXBlockInfo {
 }
 
 class TZXBlockInfo {

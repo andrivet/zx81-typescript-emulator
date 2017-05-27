@@ -34,8 +34,6 @@ import java.awt.image.DataBufferInt;
 
 public class AccDraw
         implements Runnable, ZX81ConfigDefs {
-    // Here for convenience.
-    private ZX81Options zx81opts;
     private Machine machine;
     private boolean fullSpeed = true;
 
@@ -265,7 +263,6 @@ public class AccDraw
     }
 
     public AccDraw(ZX81Config config, boolean fullSpeed, int scale) {
-        zx81opts = config.zx81opts;
         machine = config.machine;
         this.fullSpeed = fullSpeed;
 

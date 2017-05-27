@@ -23,8 +23,5 @@ package zx81emulator.tzx;
 public class TZXBlockData {
     public byte[] Data;
     public int[] Pulses;
-    public TZXSelect[] Selections;
-    public TZXArchiveText[] Strings;
     public TZXHWInfo[] HWTypes;
-    public String CustomInfo;
 }

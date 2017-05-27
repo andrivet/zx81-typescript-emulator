@@ -35,20 +35,12 @@ public class TZXFile
             Tape[i] = new TZXBlock();
     }
 
-    private static String FileName;
     public static int Blocks, CurBlock;
 
     private static void EraseAll() {
         int i;
         for (i = 0; i < Blocks; i++) EraseBlock(i);
         Blocks = CurBlock = 0;
-    }
-
-    private static void NewTZX() {
-        EraseAll();
-        AddTextBlock("Created with EightyOneTZX");
-        //AddHWTypeBlock(0x00, 0x0c);
-        CurBlock = 0;
     }
 
     private static void EraseBlock(int BlockNo) {
@@ -96,28 +88,6 @@ public class TZXFile
         Tape[Position] = new TZXBlock();
         if (Position <= CurBlock) CurBlock++;
         Blocks++;
-    }
-
-    private static void MergeBlocks() {
-        int i;
-        if (Blocks == 0) return;
-
-        for (i = 0; i < Blocks; i++) {
-            while ((Tape[i].BlockID == TZX_BLOCK_GENERAL
-                    || Tape[i].BlockID == TZX_BLOCK_PAUSE)
-                    && Tape[i + 1].BlockID == TZX_BLOCK_PAUSE) {
-                Tape[i].Pause += Tape[i + 1].Pause;
-                DeleteBlock(i + 1);
-            }
-        }
-
-        i = 0;
-        while (Tape[i].BlockID == TZX_BLOCK_TEXT
-                || Tape[i].BlockID == TZX_BLOCK_MESSAGE
-                || Tape[i].BlockID == TZX_BLOCK_ARCHIVE
-                || Tape[i].BlockID == TZX_BLOCK_HWTYPE) i++;
-
-        if (Tape[i].BlockID == TZX_BLOCK_PAUSE) DeleteBlock(i);
     }
 
     private static int ReadByte(InputStream f)
@@ -864,15 +834,5 @@ public class TZXFile
                     || Tape[i].BlockID == TZX_BLOCK_LSTART)
                 GroupCount++;
         }
-    }
-
-    private static int AddTextBlock(String str) {
-        byte[] data = str.getBytes();
-
-        Tape[Blocks].BlockID = TZX_BLOCK_TEXT;
-        Tape[Blocks].Head = new TZXText();
-        Tape[Blocks].Data.Data = data;
-        ((TZXText) Tape[Blocks].Head).TextLen = str.length();
-        return (Blocks++);
     }
 }

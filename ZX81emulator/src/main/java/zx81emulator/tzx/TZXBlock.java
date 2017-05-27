@@ -28,7 +28,7 @@ public class TZXBlock {
     public TZXBlockData Data;
     public int[] SymDefP, SymDefD, PRLE;
 
-    public TZXBlock() {
+    TZXBlock() {
         Data = new TZXBlockData();
     }
 }

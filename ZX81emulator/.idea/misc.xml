@@ -3,10 +3,6 @@
   <component name="MavenCompilerTasksManager">
     <option name="beforeCompileTasks">
       <set>
-        <MavenCompilerTask>
-          <option name="goal" value="generate-sources" />
-          <option name="projectPath" value="$PROJECT_DIR$/pom.xml" />
-        </MavenCompilerTask>
       </set>
     </option>
   </component>

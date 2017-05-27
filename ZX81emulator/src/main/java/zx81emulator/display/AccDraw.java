@@ -23,7 +23,6 @@ package zx81emulator.display;
 import zx81emulator.config.Machine;
 import zx81emulator.config.ZX81Config;
 import zx81emulator.config.ZX81ConfigDefs;
-import zx81emulator.config.ZX81Options;
 import zx81emulator.zx81.ZX81;
 
 import java.awt.Canvas;
@@ -49,30 +48,10 @@ public class AccDraw
     private static int HSYNC_MINLEN = HMIN;
     private static int VSYNC_MINLEN = VMIN;
 
-    private static final int BlWinT = 56;
-    private static final int BlWinB = (BlWinT + 192);
-    private static final int BlWinL = 74;
-    private static final int BlWinR = (BlWinL + 256);
-
-    private static final int SmWinT = 52;
-    private static final int SmWinB = (SmWinT + 200);
-    private static final int SmWinL = 70;
-    private static final int SmWinR = (SmWinL + 264);
-
     private static final int NoWinT = 32;
     private static final int NoWinB = (NoWinT + 240);
     private static final int NoWinL = 42;
     private static final int NoWinR = (NoWinL + 320);
-
-    private static final int LaWinT = 0;
-    private static final int LaWinB = (LaWinT + 300);
-    private static final int LaWinL = 0;
-    private static final int LaWinR = (LaWinL + 400);
-
-    private static final int FuWinT = 0;
-    private static final int FuWinB = (FuWinT + 312);
-    private static final int FuWinL = 0;
-    private static final int FuWinR = (FuWinL + 413);
 
     private int WinR = NoWinR;
     private int WinL = NoWinL;
@@ -82,7 +61,7 @@ public class AccDraw
     private int RasterX = 0, RasterY = 0;
     private int TVH;
     private int TVP;
-    private int BPP, ScanLen;
+    private int ScanLen;
     private int Scale;
 
     private int[] Palette = new int[256], Colours = new int[256];
@@ -100,16 +79,11 @@ public class AccDraw
             mCanvas.setRequiredSize(new Dimension((NoWinR - NoWinL) * canvasScale, (NoWinB - NoWinT) * canvasScale));
 
         RasterX = 0;
-        //RasterY=random(256);
-        // TODO: this causes problems....
-        //RasterY=new Random().nextInt()%256;
         RasterY = 0;
 
-        // Actually ints per pixel...
-        BPP = 1;
         Scale = 1;
 
-        ScanLen = (2 + machine.tperscanline * 2) * BPP;
+        ScanLen = 2 + machine.tperscanline * 2;
 
         WinL = NoWinL;
         WinR = NoWinR;
@@ -129,7 +103,6 @@ public class AccDraw
         TVP = TVW;
 
         RecalcPalette();
-        //RecalcWinSize();
     }
 
     private long lastDisplayUpdate = 0;
@@ -153,7 +126,7 @@ public class AccDraw
     }
 
     private int FrameNo = 0;
-    private int LastVSyncLen = 0, Shade = 0;
+    private int Shade = 0;
 
     private void AccurateDraw(Scanline Line) {
         int bufferPos = dest + FrameNo * TVP;
@@ -162,7 +135,7 @@ public class AccDraw
 
             mScreenImageBufferData[bufferPos + RasterX] = Colours[c + Shade];
 
-            RasterX += BPP;
+            RasterX += 1;
             if (RasterX > ScanLen) {
                 RasterX = 0;
                 dest += TVP * Scale;
@@ -180,7 +153,7 @@ public class AccDraw
         if (Line.sync_len < HSYNC_MINLEN)
             Line.sync_valid = 0;
         if (Line.sync_valid != 0) {
-            if (RasterX > (HSYNC_TOLLERANCE * BPP)) {
+            if (RasterX > HSYNC_TOLLERANCE) {
                 RasterX = 0;
                 RasterY += Scale;
                 Shade = 8 - Shade;
@@ -213,13 +186,10 @@ public class AccDraw
         int dest = y * TVP;
 
         while (y <= WinB) {
-            while (x <= (WinR * BPP)) {
-                if (BPP == 1)
+            while (x <= WinR) {
                     mScreenImageBufferData[dest + x] = 0;
-                else
-                    mScreenImageBufferData[dest + x] = Colours[0];
 
-                x += BPP;
+                x += 1;
             }
             x = 0;
             y++;
@@ -254,11 +224,6 @@ public class AccDraw
 
             CompiledPixel = r | g | b;
             Colours[i] = CompiledPixel;
-                  /* TODO:
-                  if (i==0 && !FScreen.WhiteLetterbox) LetterBoxColour=CompiledPixel;
-                  if (i==(7*16) && FScreen.WhiteLetterbox) LetterBoxColour=CompiledPixel;
-                  */
-
         }
     }
 
@@ -269,7 +234,6 @@ public class AccDraw
         InitializePalette();
         mCanvas = new AccCanvas(this);
         AccurateInit(scale);
-        //comp.setSize(WinR-WinL,WinB-WinT);
     }
 
     public Canvas getCanvas() {
@@ -290,8 +254,6 @@ public class AccDraw
         int basecolour, difference;
         int colr, colg, colb, bwr, bwg, bwb;
 
-        // TODO: VSYNC_TOLLERANCEMIN= 283 + VBias->Position;
-        // TODO: VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + VGain->Position + 40;
         VSYNC_TOLLERANCEMIN = 283;
         VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + 40;
 
@@ -397,9 +359,6 @@ public class AccDraw
         if (!machine.stop()) borrow = j;
     }
 
-//---------------------------------------------------------------------------
-//---------------------------------------------------------------------------
-
     /**
      * Main routine to draw frames.
      */
@@ -430,7 +389,6 @@ public class AccDraw
                 long currentTime = System.currentTimeMillis();
                 long delay = (targetFrameTime * fps) - (currentTime - framesStartTime);
                 if (!fullSpeed && delay > 0) {
-                    //System.out.println("Sleeping for "+delay);
                     try {
                         Thread.sleep(delay);
                     } catch (InterruptedException exc) {

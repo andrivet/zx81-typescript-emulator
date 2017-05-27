@@ -38,12 +38,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.FocusEvent;
 import java.io.IOException;
 
-/**
- * This class allows display of the emulator as an application or
- * applet.
- *
- * @author Simon Holdsworth
- */
+
 public class Emulator
         implements KeyListener, WindowListener, FocusListener {
     private AccDraw mDisplayDrawer;

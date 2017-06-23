@@ -54,9 +54,10 @@ namespace zx81emulator.z80
         public set(r: Register): void;
         public set(p: number | Register): void
         {
-            return (p instanceof Register)
-                ? this.rp.setHi(p.get())
-                : this.rp.setHi(p);
+            if(p instanceof Register)
+                this.rp.setHi(p.get());
+            else
+                this.rp.setHi(p);
         }
 
         public inc(): void          { this.rp.setHi(this.rp.hi() + 1); }
@@ -84,37 +85,18 @@ namespace zx81emulator.z80
         public set(r: Register): void;
         public set(p: number | Register): void
         {
-            return (p instanceof Register)
-                ? this.rp.setLo(p.get())
-                : this.rp.setLo(p);
+            if(p instanceof Register)
+                this.rp.setLo(p.get());
+            else
+                this.rp.setLo(p);
         }
 
-        public inc(): void
-        {
-            this.rp.setLo(this.rp.lo() + 1);
-        }
-
-        public dec(): void
-        {
-            this.rp.setLo(this.rp.lo() - 1);
-        }
-
-        public and(a: number): void
-        {
-            this.rp.word &= (a | 65280);
-        }
-
-        public or(o: number): void
-        {
-            this.rp.word |= o;
-        }
-
-        public add(a: number): void
-        {
-            this.rp.setLo(this.rp.lo() + a);
-        }
+        public inc(): void              { this.rp.setLo(this.rp.lo() + 1); }
+        public dec(): void              { this.rp.setLo(this.rp.lo() - 1); }
+        public and(a: number): void     { this.rp.word &= (a | 0xff00); }
+        public or(o: number): void      { this.rp.word |= o; }
+        public add(a: number): void     { this.rp.setLo(this.rp.lo() + a); }
     }
-    RegisterLow["__class"] = "zx81emulator.z80.RegisterLow";
 
 
     export class value8 extends Register
@@ -129,57 +111,24 @@ namespace zx81emulator.z80
             this.name = name;
         }
 
-        public get(): number
+        public get(): number { return this.value; }
+
+        public set(v: number): void;
+        public set(r: Register): void;
+        public set(p: number | Register): void
         {
-            return this.value;
+            if(p instanceof Register)
+                this.value = p.get();
+            else
+                this.value = p & 0xFF;
         }
 
-        public set$int(v: number)
-        {
-            this.value = v & 255;
-        }
-
-        public set(r?: any): any
-        {
-            if (((r != null && r instanceof zx81emulator.z80.Register) || r === null))
-            {
-                let __args = Array.prototype.slice.call(arguments);
-                return <any>(() =>
-                {
-                    this.value = r.get();
-                })();
-            } else if (((typeof r === 'number') || r === null))
-            {
-                return <any>this.set$int(r);
-            } else throw new Error('invalid overload');
-        }
-
-        public inc()
-        {
-            this.value = (this.value + 1) & 255;
-        }
-
-        public dec()
-        {
-            this.value = (this.value - 1) & 255;
-        }
-
-        public and(a: number)
-        {
-            this.value = this.value & a;
-        }
-
-        public or(o: number)
-        {
-            this.value = this.value | o;
-        }
-
-        public add(a: number)
-        {
-            this.value = (this.value + a) & 255;
-        }
+        public inc()            { this.value = (this.value + 1) & 0xFF; }
+        public dec()            { this.value = (this.value - 1) & 0xFF; }
+        public and(a: number)   { this.value = this.value & a; }
+        public or(o: number)    { this.value = this.value | o; }
+        public add(a: number)   { this.value = (this.value + a) & 0xFF; }
     }
-    value8["__class"] = "zx81emulator.z80.value8";
 
 
     export class MasterRegister extends Register
@@ -194,57 +143,23 @@ namespace zx81emulator.z80
             this.name = name;
         }
 
-        public get(): number
+        public get(): number { return this.value; }
+
+        public set(v: number): void;
+        public set(r: Register): void;
+        public set(p: number | Register): void
         {
-            return this.value;
+            if(p instanceof Register)
+                this.value = p.get();
+            else
+                this.value = p & 0xFF;
         }
 
-        public set$int(v: number)
-        {
-            this.value = v & 255;
-        }
-
-        public set(r?: any): any
-        {
-            if (((r != null && r instanceof zx81emulator.z80.Register) || r === null))
-            {
-                let __args = Array.prototype.slice.call(arguments);
-                return <any>(() =>
-                {
-                    this.value = r.get();
-                })();
-            } else if (((typeof r === 'number') || r === null))
-            {
-                return <any>this.set$int(r);
-            } else throw new Error('invalid overload');
-        }
-
-        public inc()
-        {
-            this.value = (this.value + 1) & 255;
-        }
-
-        public dec()
-        {
-            this.value = (this.value - 1) & 255;
-        }
-
-        public and(a: number)
-        {
-            this.value = this.value & a;
-        }
-
-        public or(o: number)
-        {
-            this.value = this.value | o;
-        }
-
-        public add(a: number)
-        {
-            this.value = (this.value + a) & 255;
-        }
+        public inc()            { this.value = (this.value + 1) & 0xFF; }
+        public dec()            { this.value = (this.value - 1) & 0xFF; }
+        public and(a: number)   { this.value = this.value & a; }
+        public or(o: number)    { this.value = this.value | o; }
+        public add(a: number)   { this.value = (this.value + a) & 0xFF; }
     }
-    MasterRegister["__class"] = "zx81emulator.z80.MasterRegister";
-
 }
 

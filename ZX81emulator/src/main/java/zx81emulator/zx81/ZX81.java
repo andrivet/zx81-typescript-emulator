@@ -80,19 +80,20 @@ public final class ZX81
 
         for (i = 0; i < 65536; i++) memory[i] = 7;
 
-        romlen = snap.memory_load("ROM/" + CurRom, 0, 65536);
+        snap.memory_load("ROM/" + CurRom, 0, 65536, () -> {
 
-        if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
+            // zx81opts.ROMTOP = romlen - 1; TODO romlen
 
-        zx81opts.ROMTOP = romlen - 1;
+            ink = 0;
+            paper = border = 7;
 
-        ink = 0;
-        paper = border = 7;
+            NMI_generator = false;
+            HSYNC_generator = false;
 
-        NMI_generator = false;
-        HSYNC_generator = false;
+            z80.reset();
+        });
 
-        z80.reset();
+        //if (zx81opts.chrgen == CHRGENDK) romlen += snap.memory_load("dkchr.rom", 8192, 65536);
     }
 
     public void writebyte(int Address, int Data) {

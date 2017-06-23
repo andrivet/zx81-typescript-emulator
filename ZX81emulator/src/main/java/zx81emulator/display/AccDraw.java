@@ -20,21 +20,23 @@
  */
 package zx81emulator.display;
 
+import jsweet.dom.HTMLCanvasElement;
+import jsweet.dom.ImageData;
 import zx81emulator.config.Machine;
 import zx81emulator.config.ZX81Config;
 import zx81emulator.config.ZX81ConfigDefs;
-import zx81emulator.zx81.ZX81;
 
-import java.awt.Canvas;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
+import jsweet.dom.CanvasRenderingContext2D;
+
+import static jsweet.util.Globals.any;
+import static jsweet.util.Globals.function;
+import static jsweet.dom.Globals.window;
+import static jsweet.util.StringTypes._2d;
+
 
 public class AccDraw
         implements Runnable, ZX81ConfigDefs {
     private Machine machine;
-    private boolean fullSpeed = true;
 
     private static final int HTOL = 405;
     private static final int VTOLMIN = 290;
@@ -59,87 +61,77 @@ public class AccDraw
     private int WinB = NoWinB;
 
     private int RasterX = 0, RasterY = 0;
-    private int TVH;
-    private int TVP;
+    private static int TVW = 520;
+    private static int TVH = 380;
     private int ScanLen;
-    private int Scale;
+    private int Scale = 1;
+
+    private CanvasRenderingContext2D context;
+    private ImageData imageData;
 
     private int[] Palette = new int[256], Colours = new int[256];
 
-    private AccCanvas mCanvas;
-    private BufferedImage mScreenImage;
-    private int[] mScreenImageBufferData = null;
+    private static int targetFrameTime = 1000 / 50; // Target frame time should result in 50Hz display.
     private boolean mKeepGoing = true;
     private boolean mPaused = false;
 
     private int dest = 0;
+    private long lastDisplayUpdate = 0;
 
-    private void AccurateInit(int canvasScale) {
-        if (mCanvas.getWidth() == 0 || mCanvas.getHeight() == 0)
-            mCanvas.setRequiredSize(new Dimension((NoWinR - NoWinL) * canvasScale, (NoWinB - NoWinT) * canvasScale));
+    public AccDraw(ZX81Config config, int scale, HTMLCanvasElement canvas) {
+        machine = config.machine;
 
-        RasterX = 0;
-        RasterY = 0;
+        canvas.width = (NoWinR - NoWinL);
+        canvas.height = (NoWinB - NoWinT);
 
-        Scale = 1;
+        /*if (mCanvas.getWidth() == 0 || mCanvas.getHeight() == 0)
+            mCanvas.setRequiredSize(new Dimension((NoWinR - NoWinL) * canvasScale, (NoWinB - NoWinT) * canvasScale));*/
 
         ScanLen = 2 + machine.tperscanline * 2;
 
-        WinL = NoWinL;
-        WinR = NoWinR;
-        WinT = NoWinT;
-        WinB = NoWinB;
+        context = canvas.getContext(_2d);
+        imageData = context.getImageData(0, 0, canvas.width, canvas.height);
 
-        int TVW;
-        TVW = 520;
-        TVH = 380;
-        HSYNC_TOLLERANCE = HTOL;
-        HSYNC_MINLEN = 10;
-
-        mScreenImage = new BufferedImage(TVW, TVH, BufferedImage.TYPE_INT_RGB);
-        mScreenImageBufferData = ((DataBufferInt) mScreenImage.getRaster().getDataBuffer()).getData();
-
-        dest = 0;
-        TVP = TVW;
-
-        RecalcPalette();
+        InitializePalette();
     }
-
-    private long lastDisplayUpdate = 0;
 
     private void AccurateUpdateDisplay() {
         long currentTime = System.currentTimeMillis();
         // Aim for 50Hz display
         if (currentTime - lastDisplayUpdate >= 1000 / 50) {
-            int width = mCanvas.getWidth();
-            int height = mCanvas.getHeight();
-            mCanvas.getGraphics().drawImage(mScreenImage, 0, 0, width, height, WinL, WinT, WinR, WinB, null);
-
+            context.putImageData(imageData, 0, 0);
             lastDisplayUpdate = currentTime;
         }
     }
 
-    void RedrawDisplay(Graphics g) {
-        int width = mCanvas.getWidth();
-        int height = mCanvas.getHeight();
-        g.drawImage(mScreenImage, 0, 0, width, height, WinL, WinT, WinR, WinB, null);
+    void RedrawDisplay() {
+        context.putImageData(imageData, 0, 0);
     }
 
     private int FrameNo = 0;
     private int Shade = 0;
 
+    private void setPixel(int i, int color) {
+        i *= 4;
+        int[] data = any(imageData.data);
+        data[i + 0] = color;
+        data[i + 1] = color;
+        data[i + 2] = color;
+        data[i + 3] = 0;
+    }
+
     private void AccurateDraw(Scanline Line) {
-        int bufferPos = dest + FrameNo * TVP;
+        int bufferPos = dest + FrameNo * TVW;
         for (int i = 0; i < Line.scanline_len; i++) {
             int c = Line.scanline[i];
 
-            mScreenImageBufferData[bufferPos + RasterX] = Colours[c + Shade];
+            setPixel(bufferPos + RasterX, Colours[c + Shade]);
 
             RasterX += 1;
             if (RasterX > ScanLen) {
                 RasterX = 0;
-                dest += TVP * Scale;
-                bufferPos = dest + FrameNo * TVP;
+                dest += TVW * Scale;
+                bufferPos = dest + FrameNo * TVW;
                 RasterY += Scale;
                 Shade = 8 - Shade;
 
@@ -157,7 +149,7 @@ public class AccDraw
                 RasterX = 0;
                 RasterY += Scale;
                 Shade = 8 - Shade;
-                dest += TVP * Scale;
+                dest += TVW * Scale;
             }
 
             if (RasterY >= TVH || RasterY >= VSYNC_TOLLERANCEMAX
@@ -183,24 +175,22 @@ public class AccDraw
         }
 
         int x = RasterX, y = RasterY;
-        int dest = y * TVP;
+        int dest = y * TVW;
 
         while (y <= WinB) {
             while (x <= WinR) {
-                    mScreenImageBufferData[dest + x] = 0;
-
+                setPixel(dest + x, 0);
                 x += 1;
             }
             x = 0;
             y++;
-            dest += TVP;
+            dest += TVW;
         }
     }
 
     private void RecalcPalette() {
         int rsz, gsz, bsz;  //bitsize of field
         int rsh, gsh, bsh;  //0's on left (the shift value)
-        int CompiledPixel;
         int i, r, g, b;
 
         rsz = 8;
@@ -222,22 +212,8 @@ public class AccDraw
             g <<= gsh;
             b <<= bsh;
 
-            CompiledPixel = r | g | b;
-            Colours[i] = CompiledPixel;
+            Colours[i] =  r | g | b;
         }
-    }
-
-    public AccDraw(ZX81Config config, boolean fullSpeed, int scale) {
-        machine = config.machine;
-        this.fullSpeed = fullSpeed;
-
-        InitializePalette();
-        mCanvas = new AccCanvas(this);
-        AccurateInit(scale);
-    }
-
-    public Canvas getCanvas() {
-        return mCanvas;
     }
 
     private int DoPal(int r, int g, int b) {
@@ -325,9 +301,9 @@ public class AccDraw
     }
 
     private Scanline BuildLine;
+    private long framesStartTime = 0;
     private int fps;
     private int borrow;
-    private static int scanLineNumber = 0;
 
     private void AnimTimer1Timer() {
 
@@ -343,15 +319,6 @@ public class AccDraw
         while (j > 0 && !machine.stop()) {
             j -= machine.do_scanline(BuildLine);
 
-            scanLineNumber++;
-            if (scanLineNumber < 0) //< 50000 )
-            {
-                System.out.println(scanLineNumber + ":" + RasterX + "," + RasterY + " len " + BuildLine.scanline_len +
-                        " slen " + BuildLine.sync_len +
-                        " sv " + BuildLine.sync_valid +
-                        " borrow " + ((ZX81) machine).borrow);
-            }
-
             AccurateDraw(BuildLine);
 
         }
@@ -359,55 +326,45 @@ public class AccDraw
         if (!machine.stop()) borrow = j;
     }
 
-    /**
-     * Main routine to draw frames.
-     */
     public void run() {
         Scanline[] Video = new Scanline[]{new Scanline(), new Scanline()};
         BuildLine = Video[0];
 
-        fps = 0;
-        long framesStartTime = System.currentTimeMillis();
+        if(!mKeepGoing)
+            return;
 
-        // Target frame time should result in 50Hz display.
-        int targetFrameTime = 1000 / 50;
-        mKeepGoing = true;
-        while (mKeepGoing) {
-            if (mPaused) {
-                try {
-                    Thread.sleep(1000);
-                } catch (Throwable exc) {
-                }
-                fps = 0;
-                framesStartTime = System.currentTimeMillis();
-            } else {
-                // Process a scanline
+        if(mPaused) {
+            window.setTimeout(function(this::run), 1000);
+            return;
+        }
 
-                AnimTimer1Timer();
+        if(framesStartTime == 0) {
+            fps = 0;
+            framesStartTime = System.currentTimeMillis();
+        }
 
-                // Pace the emulator to run at 100%
-                long currentTime = System.currentTimeMillis();
-                long delay = (targetFrameTime * fps) - (currentTime - framesStartTime);
-                if (!fullSpeed && delay > 0) {
-                    try {
-                        Thread.sleep(delay);
-                    } catch (InterruptedException exc) {
-                    }
-                }
+        AnimTimer1Timer();
 
-                if (fps == 100) {
-                    framesStartTime = System.currentTimeMillis();
-                    fps = 0;
-                }
-            }
+        // Pace the emulator to run at 100%
+        long currentTime = System.currentTimeMillis();
+        long delay = (targetFrameTime * fps) - (currentTime - framesStartTime);
+        if (delay > 0) {
+            window.setTimeout(function(this::run), delay);
+            return;
+        }
+
+        if (fps == 100) {
+            framesStartTime = System.currentTimeMillis();
+            fps = 0;
         }
     }
 
-    /**
-     * Stops the display drawing routine.
-     */
-    public void
-    stop() {
+    public void start() {
+        mKeepGoing = true;
+        window.setTimeout(function(this::run), 0);
+    }
+
+    public void stop() {
         mKeepGoing = false;
     }
 

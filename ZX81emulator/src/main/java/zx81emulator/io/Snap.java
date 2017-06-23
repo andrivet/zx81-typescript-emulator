@@ -159,15 +159,15 @@ public class Snap {
         }
     }
 
-    public int memory_load(String filename, int address, int length)
+    public void memory_load(String filename, int address, int length, Callback callback)
             throws IOException {
 
-        InputStream is = Snap.class.getClassLoader().getResourceAsStream(filename);
-        if (is == null) {
-            throw new IOException("could not get resource: " + filename);
-        }
+        Resource resource = new Resource();
+        resource.get(filename, () -> {
 
-        int val = is.read();
+        });
+
+        /*int val = is.read();
         int len = 0;
         while (len < length && val != -1) {
             mConfig.machine.memory[address++] = val;
@@ -177,6 +177,6 @@ public class Snap {
 
         is.close();
 
-        return (len);
+        return (len);*/
     }
 }

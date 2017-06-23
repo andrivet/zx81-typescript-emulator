@@ -20,60 +20,55 @@
  */
 package zx81emulator.main;
 
+import jsweet.dom.HTMLElement;
+import jsweet.dom.KeyboardEvent;
 import zx81emulator.config.ZX81Config;
 import zx81emulator.config.ZX81ConfigDefs;
 import zx81emulator.display.AccDraw;
 import zx81emulator.io.KBStatus;
 import zx81emulator.zx81.ZX81;
 
-import java.awt.Canvas;
-import java.awt.Frame;
-import java.awt.Container;
-import java.awt.BorderLayout;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyListener;
-import java.awt.event.WindowListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.FocusEvent;
+import jsweet.dom.Event;
+import jsweet.dom.HTMLCanvasElement;
+
+import static jsweet.dom.Globals.console;
+import static jsweet.dom.Globals.document;
+import static jsweet.util.StringTypes.keydown;
+import static jsweet.util.StringTypes.keyup;
+
 import java.io.IOException;
 
 
-public class Emulator
-        implements KeyListener, WindowListener, FocusListener {
+public class Emulator {
     private AccDraw mDisplayDrawer;
     private KBStatus mKeyboard;
     private ZX81Config mConfig;
 
-    private Canvas mCanvas;
-    private Thread mDisplayThread;
-
     public static void main(String[] args) {
 
         try {
+            HTMLCanvasElement canvas = (HTMLCanvasElement) document.getElementById("canvas");
+            if(canvas == null)
+                    throw new Exception("No HTML element found with id 'canvas'");
+
             Emulator emulator = new Emulator();
-            Frame f = new Frame("ZX81 Emulator");
-            emulator.init(args, f);
-            f.addWindowListener(emulator);
-            f.addKeyListener(emulator);
-            f.pack();
-            f.setVisible(true);
+            emulator.init(args, canvas);
+            emulator.installListeners(canvas); // TODO: or window?
             emulator.start();
         }
         catch (Exception exc) {
-            System.out.println("Error: " + exc);
+            console.error("Error: " + exc);
             exc.printStackTrace();
         }
     }
 
     private Emulator() {
-        // One-off initialisation.
         mConfig = new ZX81Config();
         mConfig.machine = new ZX81();
         mConfig.load_config();
     }
 
-    private void init(String[] args, Container container) throws IOException {
+    private void init(String[] args, HTMLCanvasElement canvas) throws IOException {
         String tzxFileName = (args.length > 0 && !args[0].startsWith("-")) ? args[0] : null;
         String scale = null;
         String hires = null;
@@ -87,10 +82,10 @@ public class Emulator
             }
         }
 
-        init(tzxFileName, hires, scale, container);
+        init(tzxFileName, hires, scale, canvas);
     }
 
-    private void init(String tzxFileName, String hires, String scale, Container container)  throws IOException {
+    private void init(String tzxFileName, String hires, String scale, HTMLCanvasElement canvas)  throws IOException {
         mConfig.machine.CurRom = mConfig.zx81opts.ROM81;
 
         int scaleCanvas = 2;
@@ -108,16 +103,16 @@ public class Emulator
         mKeyboard = new KBStatus();
 
         // Set up the various components.
-        container.setLayout(new BorderLayout());
-        container.addKeyListener(this);
-        container.addFocusListener(this);
+        //container.setLayout(new BorderLayout());
+        //container.addKeyListener(this);
+        //container.addFocusListener(this);
 
         // Set up the display.
-        mDisplayDrawer = new AccDraw(mConfig, false, scaleCanvas);
-        mCanvas = mDisplayDrawer.getCanvas();
-        mCanvas.addFocusListener(this);
-        mCanvas.addKeyListener(this);
-        container.add(mCanvas, "Center");
+        mDisplayDrawer = new AccDraw(mConfig, scaleCanvas, canvas);
+        //mCanvas = mDisplayDrawer.getCanvas();
+        //mCanvas.addFocusListener(this);
+        //mCanvas.addKeyListener(this);
+        //container.add(mCanvas, "Center");
 
         // Load the .TZX file.
         if (tzxFileName != null) {
@@ -135,9 +130,10 @@ public class Emulator
     }
 
     public void start() {
-        mCanvas.requestFocus();
-        mDisplayThread = new Thread(mDisplayDrawer);
-        mDisplayThread.start();
+        //mCanvas.requestFocus();
+        //mDisplayThread = new Thread(mDisplayDrawer);
+        //mDisplayThread.start();
+        mDisplayDrawer.start();
     }
 
     /**
@@ -145,51 +141,48 @@ public class Emulator
      */
     public void
     stop() {
-        try {
+        /*try {
             mDisplayDrawer.stop();
             mDisplayThread.join();
             mDisplayThread = null;
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        */
+        mDisplayDrawer.stop();
     }
 
-    public void keyPressed(KeyEvent e) {
-        mKeyboard.PCKeyDown(e.getKeyCode());
+    private void installListeners(HTMLElement container) {
+        container.addEventListener(keydown, event -> {
+            this.onKeyDown(event);
+            return null;
+        }, true);
+        container.addEventListener(keyup, event -> {
+            this.onKeyUp(event);
+            return null;
+        }, true);
     }
 
-    public void keyReleased(KeyEvent e) {
-        mKeyboard.PCKeyUp(e.getKeyCode());
+    private void onKeyDown(KeyboardEvent e) { e.preventDefault(); mKeyboard.PCKeyDown(e.key, e.shiftKey, e.ctrlKey, e.altKey); }
+
+    private void onKeyUp(KeyboardEvent e) {
+        e.preventDefault(); mKeyboard.PCKeyUp(e.key, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
-    public void keyTyped(KeyEvent e) { }
-
-    public void windowOpened(WindowEvent e) { }
-
-    public void windowClosing(WindowEvent e) {
+    /*public void windowClosing(WindowEvent e) {
         stop();
         System.exit(0);
-    }
-
-    public void windowClosed(WindowEvent e) { }
-
-    public void windowIconified(WindowEvent e) { }
-
-    public void windowDeiconified(WindowEvent e) { }
-
-    public void windowActivated(WindowEvent e) { }
-
-    public void windowDeactivated(WindowEvent e) { }
+    }*/
 
     private void windowActive(boolean active) {
         mDisplayDrawer.setPaused(!active);
     }
 
-    public void focusGained(FocusEvent e) {
+    /*public void focusGained(FocusEvent e) {
         windowActive(true);
     }
 
     public void focusLost(FocusEvent e) {
         windowActive(false);
-    }
+    }*/
 }

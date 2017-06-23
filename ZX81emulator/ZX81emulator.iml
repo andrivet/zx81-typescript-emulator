@@ -12,9 +12,9 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="org.jsweet.candies.j4ts:j4ts-awt-swing:0.0.1-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.jsweet.candies:jsweet-core:1.2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.jsweet.candies:j4ts:0.2.0-SNAPSHOT" level="project" />
     <orderEntry type="library" name="Maven: org.jsweet.candies:jquery:1.10.0-SNAPSHOT" level="project" />
-    <orderEntry type="library" name="org.jsweet.candies.j4ts:j4ts-awt-swing:0.0.1-SNAPSHOT" level="project" />
   </component>
 </module>

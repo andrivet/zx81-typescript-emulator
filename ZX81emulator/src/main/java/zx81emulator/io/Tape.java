@@ -24,15 +24,10 @@ import zx81emulator.config.ZX81Config;
 import zx81emulator.tzx.TZXFile;
 import zx81emulator.tzx.TZXFileDefs;
 
-import java.awt.event.KeyEvent;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
 
 public class Tape {
     private List<byte[]> mPrograms = new ArrayList<>();
@@ -42,6 +37,8 @@ public class Tape {
      * Load data from a .TZX file.
      */
     public void loadTZX(ZX81Config config, KBStatus keyboard, String fileName, int entryNum) throws IOException {
+        // TODO
+        /*
         mPrograms.clear();
         mCurrentProgram = 0;
 
@@ -50,46 +47,16 @@ public class Tape {
             throw new IOException("Error - could not get resource: " + fileName);
         }
 
-        // Process each TZX file in turn insize a .ZIP file.
-        if (fileName.toLowerCase().endsWith(".zip")) {
-            ZipInputStream zis = new ZipInputStream(is);
-            ZipEntry ze = zis.getNextEntry();
-            while (ze != null) {
-                // If its a .TZX file, add the entries from it.
-                if (ze.getName().toLowerCase().endsWith(".tzx")) {
-                    // Read in the .ZIP entry, and create a byte array input stream
-                    // with the same bytes.  That's necessary to allow mark/reset
-                    // on the input stream which is not supported by the ZIPInputStream.
-                    byte[] data = new byte[65536];
-                    int len = zis.read(data);
-                    int total = 0;
-                    while (len > 0) {
-                        total += len;
-                        len = zis.read(data, total, data.length - total);
-                    }
-
-                    byte[] newData = new byte[total];
-                    System.arraycopy(data, 0, newData, 0, total);
-                    ByteArrayInputStream bis = new ByteArrayInputStream(newData);
-
-                    addTZXEntries(bis);
-                }
-                ze = zis.getNextEntry();
-            }
-        }
-
         // Load directly from the file.
         // Use a buffered input stream filter to allow mark/reset to work.
-        else {
-            addTZXEntries(new BufferedInputStream(is));
-        }
+        addTZXEntries(new BufferedInputStream(is));
 
         is.close();
 
         mCurrentProgram = entryNum;
         if (config.autoload) {
             autoload(keyboard);
-        }
+        }*/
     }
 
     /**
@@ -117,7 +84,8 @@ public class Tape {
     }
 
     private void autoload(KBStatus keyboard) {
-        new Thread(new AutoLoader(keyboard)).start();
+        // TODO
+        /*new Thread(new AutoLoader(keyboard)).start() */;
     }
 }
 
@@ -132,8 +100,9 @@ class AutoLoader implements Runnable {
     }
 
     public void run() {
-        try {
-            char key = 'J';
+        // TODO
+        /*try {
+            String key = "J";
 
             Thread.sleep(5000);
             mKeyboard.PCKeyDown(key);
@@ -141,21 +110,22 @@ class AutoLoader implements Runnable {
             mKeyboard.PCKeyUp(key);
             Thread.sleep(200);
 
-            mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
+            mKeyboard.PCKeyDown("\"");
             Thread.sleep(200);
-            mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
+            mKeyboard.PCKeyUp("\"");
             Thread.sleep(200);
-            mKeyboard.PCKeyDown(KeyEvent.VK_QUOTE);
+            mKeyboard.PCKeyDown("\"");
             Thread.sleep(200);
-            mKeyboard.PCKeyUp(KeyEvent.VK_QUOTE);
+            mKeyboard.PCKeyUp("\"");
             Thread.sleep(200);
 
-            mKeyboard.PCKeyDown(KeyEvent.VK_ENTER);
+            mKeyboard.PCKeyDown("Enter");
             Thread.sleep(200);
-            mKeyboard.PCKeyUp(KeyEvent.VK_ENTER);
+            mKeyboard.PCKeyUp("Enter");
         } catch (Throwable exc) {
             System.err.println("Autoload failed");
             exc.printStackTrace();
         }
+        */
     }
 }

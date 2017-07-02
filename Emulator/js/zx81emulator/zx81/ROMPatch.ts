@@ -50,17 +50,7 @@ export class ROMPatch
                 return 519;
             }
         }
-        if (z80.PC === 546 && b === 62)
-        {
-            let currentProgram: Uint8Array = machine.getTape().getNextEntry();
-            if (currentProgram != null)
-            {
-                for (let i: number = 0; i < currentProgram.length; i++)
-                    machine.memory[16384 + i] = currentProgram[i] & 255
-                ROMPatch.pop16(machine, z80);
-                return 515;
-            }
-        }
+
         return (z80.PC);
     }
 }

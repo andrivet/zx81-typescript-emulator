@@ -62,6 +62,7 @@ export default class ZX81 extends Machine
     public initialise(config: ZX81Config)
     {
         this.zx81opts = config.zx81opts;
+        this.CurRom = config.zx81opts.ROM81;
         this.z80 = new Z80(this);
         let snap: Snap = new Snap(config);
         this.mTape = new Tape();

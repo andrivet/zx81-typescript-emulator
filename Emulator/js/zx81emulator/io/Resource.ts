@@ -21,13 +21,13 @@
 
 export interface Callback
 {
-    (): void;
+    (data: ArrayBuffer): void;
 }
 
 
 export class Resource
 {
-    public blob: Blob;
+    public data: ArrayBuffer;
 
     public get(name: string, callback: Callback)
     {
@@ -40,8 +40,8 @@ export class Resource
         {
             if (request.readyState === 4 && request.status === 200)
             {
-                this.blob = <Blob>request.response;
-                callback();
+                this.data = request.response;
+                callback(this.data);
             }
             else if (request.status === 404)
             {

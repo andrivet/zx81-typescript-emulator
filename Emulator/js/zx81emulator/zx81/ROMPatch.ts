@@ -42,7 +42,8 @@ export class ROMPatch
             if (currentProgram != null)
             {
                 let pos: number = 0;
-                while (((currentProgram[pos++] & 128) === 0));
+                while (((currentProgram[pos++] & 128) === 0))
+                    ;
                 for (let i: number = pos; i < currentProgram.length; i++)
                     machine.memory[16393 + i - pos] = currentProgram[i] & 255
                 ROMPatch.pop16(machine, z80);

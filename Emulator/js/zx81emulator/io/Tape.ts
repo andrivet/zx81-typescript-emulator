@@ -19,11 +19,20 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.io
+
+export default class Tape
 {
-    export interface Callback
+    private mPrograms: Uint8Array[] = [];
+    private mCurrentProgram: number = 0;
+
+    /**
+     * Get the bytes for the next entry.
+     */
+    public getNextEntry(): Uint8Array
     {
-        call();
+        if(this.mCurrentProgram < this.mPrograms.length)
+            return this.mPrograms[this.mCurrentProgram++];
+        return null;
     }
 }
 

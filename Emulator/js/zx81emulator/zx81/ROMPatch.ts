@@ -19,44 +19,47 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.zx81 {
-    import Machine = zx81emulator.config.Machine;
+import Machine from "../config/Machine";
+import Z80 from "../z80/Z80";
 
-    import Z80 = zx81emulator.z80.Z80;
-
-    export class ROMPatch {
-        private static pop16(machine : Machine, z80 : Z80) : number {
-            let h : number;
-            let l : number;
-            l = machine.memory[z80.SP++];
-            h = machine.memory[z80.SP++];
-            return ((h << 8) | l);
-        }
-
-        static PatchTest(machine : Machine, z80 : Z80) : number {
-            let b : number = machine.memory[z80.PC];
-            if(z80.PC === 854 && b === 31) {
-                let currentProgram : number[] = machine.getTape().getNextEntry();
-                if(currentProgram != null) {
-                    let pos : number = 0;
-                    while(((currentProgram[pos++] & 128) === 0));
-                    for(let i : number = pos; i < currentProgram.length; i++) machine.memory[16393 + i - pos] = currentProgram[i] & 255
-                    ROMPatch.pop16(machine, z80);
-                    return 519;
-                }
-            }
-            if(z80.PC === 546 && b === 62) {
-                let currentProgram : number[] = machine.getTape().getNextEntry();
-                if(currentProgram != null) {
-                    for(let i : number = 0; i < currentProgram.length; i++) machine.memory[16384 + i] = currentProgram[i] & 255
-                    ROMPatch.pop16(machine, z80);
-                    return 515;
-                }
-            }
-            return (z80.PC);
-        }
+export class ROMPatch
+{
+    private static pop16(machine: Machine, z80: Z80): number
+    {
+        let h: number;
+        let l: number;
+        l = machine.memory[z80.SP++];
+        h = machine.memory[z80.SP++];
+        return ((h << 8) | l);
     }
-    ROMPatch["__class"] = "zx81emulator.zx81.ROMPatch";
 
+    static PatchTest(machine: Machine, z80: Z80): number
+    {
+        let b: number = machine.memory[z80.PC];
+        if (z80.PC === 854 && b === 31)
+        {
+            let currentProgram: Uint8Array = machine.getTape().getNextEntry();
+            if (currentProgram != null)
+            {
+                let pos: number = 0;
+                while (((currentProgram[pos++] & 128) === 0));
+                for (let i: number = pos; i < currentProgram.length; i++)
+                    machine.memory[16393 + i - pos] = currentProgram[i] & 255
+                ROMPatch.pop16(machine, z80);
+                return 519;
+            }
+        }
+        if (z80.PC === 546 && b === 62)
+        {
+            let currentProgram: Uint8Array = machine.getTape().getNextEntry();
+            if (currentProgram != null)
+            {
+                for (let i: number = 0; i < currentProgram.length; i++)
+                    machine.memory[16384 + i] = currentProgram[i] & 255
+                ROMPatch.pop16(machine, z80);
+                return 515;
+            }
+        }
+        return (z80.PC);
+    }
 }
-

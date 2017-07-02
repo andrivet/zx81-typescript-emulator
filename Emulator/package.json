@@ -1,0 +1,16 @@
+{
+    "name": "ZX81emulator",
+    "version": "0.0.1",
+    "description": "ZX81 emulator written in TypeScript (transcompilation)",
+    "license": "GPL-3.0",
+    "author": "Sebastien Andrivet <sebastien@andrivet.com>",
+    "scripts": {
+        "webpack": "webpack"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "awesome-typescript-loader": "^3.2.1",
+        "typescript": "^2.5.0-dev.20170629",
+        "webpack": "^3.0.0"
+    }
+}

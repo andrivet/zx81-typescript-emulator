@@ -19,27 +19,24 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.config
+export default class ZX81Options
 {
-    export class ZX81Options
-    {
-        public protectROM: boolean;
-        public chrgen: number;
-        public enableqschrgen: boolean;
-        public RAMTOP: number;
-        public ROMTOP: number;
-        public m1not: number;
-        public ROM81: string;
+    public protectROM: boolean;
+    public chrgen: number;
+    public enableqschrgen: boolean;
+    public RAMTOP: number;
+    public ROMTOP: number;
+    public m1not: number;
+    public ROM81: string;
 
-        constructor()
-        {
-            this.protectROM = false;
-            this.chrgen = 0;
-            this.enableqschrgen = false;
-            this.RAMTOP = 0;
-            this.ROMTOP = 0;
-            this.m1not = 0;
-        }
+    constructor()
+    {
+        this.protectROM = false;
+        this.chrgen = 0;
+        this.enableqschrgen = false;
+        this.RAMTOP = 0;
+        this.ROMTOP = 0;
+        this.m1not = 0;
     }
 }
 

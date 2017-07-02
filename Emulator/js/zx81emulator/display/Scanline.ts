@@ -19,31 +19,28 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.display
+export default class Scanline
 {
-    export class Scanline
+    public sync_len: number;
+    public sync_valid: number;
+    public scanline_len: number;
+    public scanline: number[] = new Array(4000);
+
+    public add_blank(tstates: number, colour: number)
     {
-        public sync_len: number;
-        public sync_valid: number;
-        public scanline_len: number;
-        public scanline: number[] = new Array(4000);
-
-        public add_blank(tstates: number, colour: number)
+        while ((tstates-- > 0))
         {
-            while ((tstates-- > 0))
-            {
-                this.scanline[this.scanline_len++] = colour;
-                this.scanline[this.scanline_len++] = colour;
-            }
-            ;
+            this.scanline[this.scanline_len++] = colour;
+            this.scanline[this.scanline_len++] = colour;
         }
+        ;
+    }
 
-        constructor()
-        {
-            this.sync_len = 0;
-            this.sync_valid = 0;
-            this.scanline_len = 0;
-        }
+    constructor()
+    {
+        this.sync_len = 0;
+        this.sync_valid = 0;
+        this.scanline_len = 0;
     }
 }
 

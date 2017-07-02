@@ -19,35 +19,30 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.config
+import ZX81Config from "./ZX81Config";
+import Scanline from "../display/Scanline";
+import Tape from "../io/Tape";
+
+abstract class Machine
 {
-    import Scanline = zx81emulator.display.Scanline;
-    import Tape = zx81emulator.io.Tape;
+    public abstract initialise(config: ZX81Config): void;
+    public abstract do_scanline(line: Scanline): number;
+    public abstract writebyte(Address: number, Data: number): void;
+    public abstract readbyte(Address: number): number;
+    public abstract opcode_fetch(Address: number): number;
+    public abstract writeport(Address: number, Data: number): void;
+    public abstract readport(Address: number): number;
+    public abstract contendmem(Address: number, states: number, time: number): number;
+    public abstract contendio(Address: number, states: number, time: number): number;
+    public abstract stop(): boolean;
+    public abstract getTape(): Tape;
 
-    export abstract class Machine
-    {
-        public abstract initialise(config: ZX81Config);
-        public abstract do_scanline(line: Scanline): number;
-        public abstract writebyte(Address: number, Data: number);
-        public abstract readbyte(Address: number): number;
-        public abstract opcode_fetch(Address: number): number;
-        public abstract writeport(Address: number, Data: number);
-        public abstract readport(Address: number): number;
-        public abstract contendmem(Address: number, states: number, time: number): number;
-        public abstract contendio(Address: number, states: number, time: number): number;
-        public abstract stop(): boolean;
-        public abstract getTape(): Tape;
-
-        public tperscanline: number;
-        public tperframe: number;
-        public CurRom: string;
-        public memory: number[];
-
-        constructor()
-        {
-            this.tperscanline = 0;
-            this.tperframe = 0;
-        }
-    }
+    public tperscanline: number = 0;
+    public tperframe: number = 0;
+    public CurRom: string;
+    public memory: number[];
 }
+
+export default Machine;
+
 

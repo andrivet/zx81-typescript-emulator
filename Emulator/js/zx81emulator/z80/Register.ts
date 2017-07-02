@@ -19,147 +19,134 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.z80
+import { MasterRegisterPair } from "./RegisterPair";
+
+export abstract class Register
 {
-    export abstract class Register
-    {
-        public name: string;
+    public name: string;
 
-        public abstract get(): number;
-        public abstract set(v: number): void;
-        public abstract set(r: Register): void;
-        public abstract inc(): void;
-        public abstract dec(): void;
-        public abstract and(a: number): void;
-        public abstract or(o: number): void;
-        public abstract add(a: number): void;
+    public abstract get(): number;
+    public abstract set(v: number): void;
+    public abstract set(r: Register): void;
+    public abstract inc(): void;
+    public abstract dec(): void;
+    public abstract and(a: number): void;
+    public abstract or(o: number): void;
+    public abstract add(a: number): void;
 
-        public toString(): string { return "$" + (this.get() + 0x100).toString(0x10) .substring(1).toUpperCase(); }
-    }
-
-    export class RegisterHigh extends Register
-    {
-        private rp: MasterRegisterPair;
-
-        constructor(rp: MasterRegisterPair, name: string)
-        {
-            super();
-            this.rp = rp;
-            this.name = name;
-        }
-
-        public get(): number { return this.rp.hi(); }
-
-        public set(v: number): void;
-        public set(r: Register): void;
-        public set(p: number | Register): void
-        {
-            if(p instanceof Register)
-                this.rp.setHi(p.get());
-            else
-                this.rp.setHi(p);
-        }
-
-        public inc(): void          { this.rp.setHi(this.rp.hi() + 1); }
-        public dec(): void          { this.rp.setHi(this.rp.hi() - 1); }
-        public and(a: number): void { this.rp.word &= ((a << 8) | 0xFF); }
-        public or(o: number): void  { this.rp.word |= (o << 8); }
-        public add(a: number): void { this.rp.setHi(this.rp.hi() + a); }
-    }
-
-
-    export class RegisterLow extends Register
-    {
-        private rp: MasterRegisterPair;
-
-        constructor(rp: MasterRegisterPair, name: string)
-        {
-            super();
-            this.rp = rp;
-            this.name = name;
-        }
-
-        public get(): number { return this.rp.lo(); }
-
-        public set(v: number): void;
-        public set(r: Register): void;
-        public set(p: number | Register): void
-        {
-            if(p instanceof Register)
-                this.rp.setLo(p.get());
-            else
-                this.rp.setLo(p);
-        }
-
-        public inc(): void              { this.rp.setLo(this.rp.lo() + 1); }
-        public dec(): void              { this.rp.setLo(this.rp.lo() - 1); }
-        public and(a: number): void     { this.rp.word &= (a | 0xff00); }
-        public or(o: number): void      { this.rp.word |= o; }
-        public add(a: number): void     { this.rp.setLo(this.rp.lo() + a); }
-    }
-
-
-    export class value8 extends Register
-    {
-        private value: number;
-
-        constructor(name: string)
-        {
-            super();
-            this.value = 0;
-            this.value = 0;
-            this.name = name;
-        }
-
-        public get(): number { return this.value; }
-
-        public set(v: number): void;
-        public set(r: Register): void;
-        public set(p: number | Register): void
-        {
-            if(p instanceof Register)
-                this.value = p.get();
-            else
-                this.value = p & 0xFF;
-        }
-
-        public inc()            { this.value = (this.value + 1) & 0xFF; }
-        public dec()            { this.value = (this.value - 1) & 0xFF; }
-        public and(a: number)   { this.value = this.value & a; }
-        public or(o: number)    { this.value = this.value | o; }
-        public add(a: number)   { this.value = (this.value + a) & 0xFF; }
-    }
-
-
-    export class MasterRegister extends Register
-    {
-        value: number;
-
-        constructor(name: string)
-        {
-            super();
-            this.value = 0;
-            this.value = 0;
-            this.name = name;
-        }
-
-        public get(): number { return this.value; }
-
-        public set(v: number): void;
-        public set(r: Register): void;
-        public set(p: number | Register): void
-        {
-            if(p instanceof Register)
-                this.value = p.get();
-            else
-                this.value = p & 0xFF;
-        }
-
-        public inc()            { this.value = (this.value + 1) & 0xFF; }
-        public dec()            { this.value = (this.value - 1) & 0xFF; }
-        public and(a: number)   { this.value = this.value & a; }
-        public or(o: number)    { this.value = this.value | o; }
-        public add(a: number)   { this.value = (this.value + a) & 0xFF; }
-    }
+    public toString(): string { return "$" + (this.get() + 0x100).toString(0x10) .substring(1).toUpperCase(); }
 }
+
+export class RegisterHigh extends Register
+{
+    private rp: MasterRegisterPair;
+
+    constructor(rp: MasterRegisterPair, name: string)
+    {
+        super();
+        this.rp = rp;
+        this.name = name;
+    }
+
+    public get(): number { return this.rp.hi(); }
+
+    public set(v: number): void;
+    public set(r: Register): void;
+    public set(p: number | Register): void
+    {
+        this.rp.setHi(p instanceof Register ? p.get() : p);
+    }
+
+    public inc(): void          { this.rp.setHi(this.rp.hi() + 1); }
+    public dec(): void          { this.rp.setHi(this.rp.hi() - 1); }
+    public and(a: number): void { this.rp.word &= ((a << 8) | 0xFF); }
+    public or(o: number): void  { this.rp.word |= (o << 8); }
+    public add(a: number): void { this.rp.setHi(this.rp.hi() + a); }
+}
+
+
+export class RegisterLow extends Register
+{
+    private rp: MasterRegisterPair;
+
+    constructor(rp: MasterRegisterPair, name: string)
+    {
+        super();
+        this.rp = rp;
+        this.name = name;
+    }
+
+    public get(): number { return this.rp.lo(); }
+
+    public set(v: number): void;
+    public set(r: Register): void;
+    public set(p: number | Register): void
+    {
+        this.rp.setLo(p instanceof Register ? p.get() : p);
+    }
+
+    public inc(): void              { this.rp.setLo(this.rp.lo() + 1); }
+    public dec(): void              { this.rp.setLo(this.rp.lo() - 1); }
+    public and(a: number): void     { this.rp.word &= (a | 0xff00); }
+    public or(o: number): void      { this.rp.word |= o; }
+    public add(a: number): void     { this.rp.setLo(this.rp.lo() + a); }
+}
+
+
+export class value8 extends Register
+{
+    private value: number;
+
+    constructor(name: string)
+    {
+        super();
+        this.value = 0;
+        this.name = name;
+    }
+
+    public get(): number { return this.value; }
+
+    public set(v: number): void;
+    public set(r: Register): void;
+    public set(p: number | Register): void
+    {
+        this.value = (p instanceof Register ? p.get() : p) & 0xFF;
+    }
+
+    public inc()            { this.value = (this.value + 1) & 0xFF; }
+    public dec()            { this.value = (this.value - 1) & 0xFF; }
+    public and(a: number)   { this.value = this.value & a; }
+    public or(o: number)    { this.value = this.value | o; }
+    public add(a: number)   { this.value = (this.value + a) & 0xFF; }
+}
+
+
+export class MasterRegister extends Register
+{
+    value: number;
+
+    constructor(name: string)
+    {
+        super();
+        this.value = 0;
+        this.value = 0;
+        this.name = name;
+    }
+
+    public get(): number { return this.value; }
+
+    public set(v: number): void;
+    public set(r: Register): void;
+    public set(p: number | Register): void
+    {
+        this.value = (p instanceof Register ? p.get() : p) & 0xFF;
+    }
+
+    public inc()            { this.value = (this.value + 1) & 0xFF; }
+    public dec()            { this.value = (this.value - 1) & 0xFF; }
+    public and(a: number)   { this.value = this.value & a; }
+    public or(o: number)    { this.value = this.value | o; }
+    public add(a: number)   { this.value = (this.value + a) & 0xFF; }
+}
+
 

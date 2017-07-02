@@ -1,0 +1,20 @@
+{
+    "compilerOptions": {
+        "module": "CommonJS",
+        "target": "es5",
+        "removeComments": false,
+        "sourceMap": true,
+        "inlineSources": true,
+        "noImplicitAny": false,
+        "noImplicitReturns": true,
+        "noFallthroughCasesInSwitch": true,
+        "lib": [
+            "dom",
+            "es5",
+            "es2015.core"
+        ]
+    },
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -19,40 +19,42 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-namespace zx81emulator.config
+import ZX81Options from "./ZX81Options";
+import Machine from "./Machine";
+import ZX81 from "../zx81/ZX81";
+
+export const SYNCTYPEH : number = 1;
+export const SYNCTYPEV : number = 2;
+export const CHRGENSINCLAIR : number = 0;
+export const CHRGENDK : number = 1;
+export const CHRGENQS : number = 2;
+export const CHRGENCHR16 : number = 3;
+export const CHRGENLAMBDA : number = 4;
+
+export default class ZX81Config
 {
-    const SYNCTYPEH : number = 1;
-    const SYNCTYPEV : number = 2;
-    const CHRGENSINCLAIR : number = 0;
-    const CHRGENDK : number = 1;
-    const CHRGENQS : number = 2;
-    const CHRGENCHR16 : number = 3;
-    const CHRGENLAMBDA : number = 4;
+    public zx81opts: ZX81Options = new ZX81Options();
+    public machine: Machine;
+    public autoload: boolean;
 
-    export class ZX81Config
+    public load_config()
     {
-        public zx81opts: ZX81Options = new ZX81Options();
-        public machine: Machine;
-        public autoload: boolean;
+        this.zx81opts.protectROM = true;
+        this.zx81opts.RAMTOP = 32767;
+        this.zx81opts.ROMTOP = 8191;
+        this.zx81opts.chrgen = CHRGENSINCLAIR;
+        this.zx81opts.enableqschrgen = false;
+        this.zx81opts.m1not = 32768;
+        this.machine.tperscanline = 207;
+        this.machine.tperframe = 312 * 207;
+        this.zx81opts.ROM81 = "zx81.rom";
+        this.autoload = true;
+    }
 
-        public load_config()
-        {
-            this.zx81opts.protectROM = true;
-            this.zx81opts.RAMTOP = 32767;
-            this.zx81opts.ROMTOP = 8191;
-            this.zx81opts.chrgen = CHRGENSINCLAIR;
-            this.zx81opts.enableqschrgen = false;
-            this.zx81opts.m1not = 32768;
-            this.machine.tperscanline = 207;
-            this.machine.tperframe = 312 * 207;
-            this.zx81opts.ROM81 = "zx81.rom";
-            this.autoload = true;
-        }
-
-        constructor()
-        {
-            this.autoload = false;
-        }
+    constructor()
+    {
+        this.autoload = false;
+        this.machine = new ZX81();
     }
 }
 

@@ -19,17 +19,10 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export interface Callback
-{
-    (data: ArrayBuffer): void;
-}
-
 
 export class Resource
 {
-    public data: ArrayBuffer;
-
-    public get(name: string, callback: Callback)
+    public get(name: string, callback: (data: Uint8Array) => void)
     {
         let pathname: string = window.location.pathname;
         let dir: string = pathname.substring(0, pathname.lastIndexOf('/'));
@@ -40,8 +33,7 @@ export class Resource
         {
             if (request.readyState === 4 && request.status === 200)
             {
-                this.data = request.response;
-                callback(this.data);
+                callback(request.response);
             }
             else if (request.status === 404)
             {

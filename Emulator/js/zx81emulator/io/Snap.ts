@@ -156,10 +156,13 @@ export default class Snap
         }
     }*/
 
-    public memory_load(filename: string, address: number, length: number, callback: Callback)
+    public memory_load(filename: string, address: number, length: number, callback: () => void): void
     {
         let resource: Resource = new Resource();
-        resource.get(filename, callback);
+        resource.get(filename, (data: Uint8Array) => {
+            data.copyWithin(this.mConfig.machine.memory);
+            callback();
+        });
     }
 }
 

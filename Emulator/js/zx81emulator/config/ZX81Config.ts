@@ -47,7 +47,7 @@ export default class ZX81Config
         this.zx81opts.m1not = 32768;
         this.machine.tperscanline = 207;
         this.machine.tperframe = 312 * 207;
-        this.zx81opts.ROM81 = "zx81.rom";
+        this.zx81opts.ROM81 = "ZX81.data";
         this.autoload = true;
     }
 

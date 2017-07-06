@@ -159,7 +159,8 @@ export default class ZX81
             keyb = (address / 256 | 0);
             for (i = 0; i < 8; i++)
             {
-                if ((keyb & (1 << i)) === 0) data |= KBStatus.ZXKeyboard[i];
+                if ((keyb & (1 << i)) === 0)
+                    data |= KBStatus.ZXKeyboard[i];
             }
             return (~data) & 255;
         }
@@ -238,6 +239,7 @@ export default class ZX81
                 this.paper = this.border;
                 this.int_pending = false;
             }
+
             let pixels: number = ts << 1;
             for (let i: number = 0; i < pixels; i++)
             {
@@ -252,38 +254,49 @@ export default class ZX81
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;
             }
-            switch ((this.lastInstruction))
+
+            switch (this.lastInstruction)
             {
                 case ZX81.LASTINSTOUTFD:
                     this.NMI_generator = false;
-                    if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
+                    if (!this.HSYNC_generator)
+                        this.rowcounter = 0;
+                    if (scanLine.sync_len !== 0)
+                        scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 case ZX81.LASTINSTOUTFE:
                     this.NMI_generator = true;
-                    if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
+                    if (!this.HSYNC_generator)
+                        this.rowcounter = 0;
+                    if (scanLine.sync_len !== 0)
+                        scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 case ZX81.LASTINSTINFE:
                     if (!this.NMI_generator)
                     {
                         this.HSYNC_generator = false;
-                        if (scanLine.sync_len === 0) scanLine.sync_valid = 0;
+                        if (scanLine.sync_len === 0)
+                            scanLine.sync_valid = 0;
                     }
                     break;
                 case ZX81.LASTINSTOUTFF:
-                    if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
+                    if (!this.HSYNC_generator)
+                        this.rowcounter = 0;
+                    if (scanLine.sync_len !== 0)
+                        scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 default:
                     break;
             }
+
             this.hsync_counter -= ts;
-            if ((this.z80.R & 64) === 0) this.int_pending = true;
-            if (!this.HSYNC_generator) scanLine.sync_len += ts;
+            if ((this.z80.R & 64) === 0)
+                this.int_pending = true;
+            if (!this.HSYNC_generator)
+                scanLine.sync_len += ts;
             if (this.hsync_counter <= 0)
             {
                 if (this.NMI_generator)
@@ -298,14 +311,15 @@ export default class ZX81
                 {
                     scanLine.sync_len = 10;
                     scanLine.sync_valid = SYNCTYPEH;
-                    if (scanLine.scanline_len >= (this.tperscanline * 2)) scanLine.scanline_len = this.tperscanline * 2;
+                    if (scanLine.scanline_len >= (this.tperscanline * 2))
+                        scanLine.scanline_len = this.tperscanline * 2;
                     this.rowcounter = (++this.rowcounter) & 7;
                 }
                 this.hsync_counter += this.tperscanline;
             }
             tstotal += ts;
         }
-        while ((scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop));
+        while (scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop);
 
         if (scanLine.sync_valid === SYNCTYPEV)
             this.hsync_counter = this.tperscanline;

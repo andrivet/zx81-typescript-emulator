@@ -112,7 +112,7 @@ export class ZX81Emulator
 let emulator: ZX81Emulator = new ZX81Emulator;
 window.onload = () =>
 {
-    emulator.load("USINE.tzx", 2, "canvas");
+    emulator.load("USINE.tzx", 4, "canvas");
 };
 
 window.onunload = () =>

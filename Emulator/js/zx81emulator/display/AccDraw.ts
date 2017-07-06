@@ -57,10 +57,13 @@ export default class AccDraw
 {
     private machine: Machine;
     private ScanLen: number = 0;
-    private Scale: number = 1;
+    private scale: number = 1;
+    private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private imageData: ImageData;
     private argb: Uint32Array;
+    private srcCanvas: HTMLCanvasElement;
+    private srcContext: CanvasRenderingContext2D;
     private Palette: number[] = new Array(256);
     private Colours: number[] = new Array(256);
     private mKeepGoing: boolean = true;
@@ -79,12 +82,23 @@ export default class AccDraw
 
     public constructor(config: ZX81Config, scale: number, canvas: HTMLCanvasElement)
     {
+        this.scale = scale;
+        this.canvas = canvas;
         this.machine = config.machine;
-        canvas.width = TVW * 2;
-        canvas.height = TVH * 2;
         this.ScanLen = 2 + this.machine.tperscanline * 2;
-        this.context = canvas.getContext("2d");
-        this.imageData = this.context.createImageData(TVW, TVH);
+
+        this.canvas.width = TVW * this.scale;
+        this.canvas.height = TVH * this.scale;
+        this.canvas.hidden = false;
+        this.context = this.canvas.getContext("2d");
+        this.context.webkitImageSmoothingEnabled = false;
+
+        this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
+        this.srcCanvas.width = TVW;
+        this.srcCanvas.height = TVH;
+        this.srcCanvas.hidden = true;
+        this.srcContext = this.srcCanvas.getContext("2d");
+        this.imageData = this.srcContext.getImageData(0, 0, TVW, TVH);
         this.argb = new Uint32Array(this.imageData.data.buffer);
 
         this.InitializePalette();
@@ -101,14 +115,17 @@ export default class AccDraw
         // Aim for 50Hz display
         if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
         {
-            this.context.putImageData(this.imageData, 0, 0, WinL, WinT, WinW * 2, WinH * 2);
+            this.RedrawDisplay();
             this.lastDisplayUpdate = currentTime;
         }
     }
 
     public RedrawDisplay()
     {
-        this.context.putImageData(this.imageData, 0, 0, WinL, WinT, WinW * 2, WinH * 2);
+        this.srcContext.putImageData(this.imageData, 0, 0, WinL, WinT, WinW, WinH);
+        this.context.fillStyle = "white";
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
     }
 
     private AccurateDraw(Line: Scanline)
@@ -124,9 +141,9 @@ export default class AccDraw
             if (this.RasterX > this.ScanLen)
             {
                 this.RasterX = 0;
-                this.dest += TVW * this.Scale;
+                this.dest += TVW;
                 bufferPos = this.dest + this.FrameNo * TVW;
-                this.RasterY += this.Scale;
+                this.RasterY += 1;
                 this.Shade = 8 - this.Shade;
                 if (this.RasterY >= TVH)
                 {
@@ -141,9 +158,9 @@ export default class AccDraw
             if (this.RasterX > HSYNC_TOLLERANCE)
             {
                 this.RasterX = 0;
-                this.RasterY += this.Scale;
+                this.RasterY += 1;
                 this.Shade = 8 - this.Shade;
-                this.dest += TVW * this.Scale;
+                this.dest += TVW;
             }
             if (this.RasterY >= TVH || this.RasterY >= VSYNC_TOLLERANCEMAX || (Line.sync_len > VSYNC_MINLEN && this.RasterY > VSYNC_TOLLERANCEMIN))
             {

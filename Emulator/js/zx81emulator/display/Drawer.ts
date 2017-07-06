@@ -61,8 +61,6 @@ export default class Drawer
     private argb: Uint32Array;
     private srcCanvas: HTMLCanvasElement;
     private srcContext: CanvasRenderingContext2D;
-    private palette: number[] = new Array(256);
-    private colours: number[] = new Array(256);
     private keepGoing: boolean = true;
     private paused: boolean = false;
     private dest: number = 0;
@@ -88,6 +86,8 @@ export default class Drawer
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
         this.context.webkitImageSmoothingEnabled = false;
+        this.context.fillStyle = "red";
+        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
         this.srcCanvas.width = TVW;
@@ -96,8 +96,6 @@ export default class Drawer
         this.srcContext = this.srcCanvas.getContext("2d");
         this.imageData = this.srcContext.getImageData(0, 0, TVW, TVH);
         this.argb = new Uint32Array(this.imageData.data.buffer);
-
-        this.InitializePalette();
     }
 
     private static currentTimeMillis(): number
@@ -119,8 +117,6 @@ export default class Drawer
     public RedrawDisplay()
     {
         this.srcContext.putImageData(this.imageData, 0, 0, WinL, WinT, WinW, WinH);
-        this.context.fillStyle = "red";
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
     }
 
@@ -131,7 +127,7 @@ export default class Drawer
         {
             let c: number = line.scanline[i];
 
-            this.argb[bufferPos + this.rasterX] = 255 - this.colours[c + this.shade];
+            this.argb[bufferPos + this.rasterX] = c ? 0xFFFFFFFF : 0xFF000000;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -191,118 +187,6 @@ export default class Drawer
             y++;
             dest += TVW;
         }
-    }
-
-    private RecalcPalette()
-    {
-        const rsz: number = 8;
-        const gsz: number = 8;
-        const bsz: number = 8;
-        const rsh: number = 16;
-        const gsh: number = 8;
-        const bsh: number = 0;
-
-        let r: number;
-        let g: number;
-        let b: number;
-
-        for (let i = 0; i < 256; i++)
-        {
-            r = this.palette[i] & 255;
-            g = (this.palette[i] >> 8) & 255;
-            b = (this.palette[i] >> 16) & 255;
-            r >>= (8 - rsz);
-            g >>= (8 - gsz);
-            b >>= (8 - bsz);
-            r <<= rsh;
-            g <<= gsh;
-            b <<= bsh;
-            this.colours[i] = r | g | b;
-        }
-    }
-
-    private DoPal(r: number, g: number, b: number): number
-    {
-        return ((((b > 255 ? 255 : (b < 0 ? 0 : b)) & 255) << 16) | (((g > 255 ? 255 : (g < 0 ? 0 : g)) & 255) << 8) | ((r > 255 ? 255 : (r < 0 ? 0 : r)) & 255));
-    }
-
-    private InitializePalette()
-    {
-        let noiseLevel: number = -20;
-        let ghostLevel: number = -40;
-        let ghostLevel2: number = (ghostLevel / 3 | 0);
-        let brightnessLevel: number;
-        let contrastLevel: number;
-        let colourLevel: number = 255;
-        let hiBrightLevel: number;
-        let r: number;
-        let g: number;
-        let b: number;
-        let colour: number;
-        let i: number;
-        let f: number;
-        let basecolour: number;
-        let difference: number;
-        let colr: number;
-        let colg: number;
-        let colb: number;
-        let bwr: number;
-        let bwg: number;
-        let bwb: number;
-
-        brightnessLevel = 255 - 188;
-        contrastLevel = 255 - 125;
-        brightnessLevel -= contrastLevel;
-        hiBrightLevel = brightnessLevel + ((contrastLevel / 2 | 0)) + 2 * contrastLevel;
-        contrastLevel = brightnessLevel + contrastLevel + contrastLevel;
-
-        for (let i = 0; i < 16; i++)
-        {
-            colour = i;
-            difference = ((1000 * (((colour > 7) ? hiBrightLevel : contrastLevel) - brightnessLevel)) / 16 | 0);
-            basecolour = ((difference * ((colour & 7) + 9)) / 1000 | 0);
-            if (colour === 0 || colour === 8) basecolour = brightnessLevel;
-            colb = brightnessLevel + ((colour & 1) !== 0 ? basecolour : 0);
-            colg = brightnessLevel + ((colour & 4) !== 0 ? basecolour : 0);
-            colr = brightnessLevel + ((colour & 2) !== 0 ? basecolour : 0);
-            bwb = brightnessLevel + basecolour;
-            bwg = brightnessLevel + basecolour;
-            bwr = brightnessLevel + basecolour;
-            r = ((((colr - bwr) * colourLevel) / 255 | 0)) + bwr;
-            g = ((((colg - bwg) * colourLevel) / 255 | 0)) + bwg;
-            b = ((((colb - bwb) * colourLevel) / 255 | 0)) + bwb;
-            this.palette[i * 16] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
-            b += noiseLevel;
-            g += noiseLevel;
-            r += noiseLevel;
-            this.palette[i * 16 + 1] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16 + 1] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
-            b += ghostLevel;
-            g += ghostLevel;
-            r += ghostLevel;
-            this.palette[i * 16 + 3] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16 + 3] = this.DoPal(r, g, b);
-            b -= noiseLevel;
-            g -= noiseLevel;
-            r -= noiseLevel;
-            this.palette[i * 16 + 2] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16 + 2] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
-        }
-
-        for (i = 0; i < 16; i++)
-        {
-            for (f = 0; f < 8; f++)
-            {
-                colour = this.palette[i * 16 + f];
-                b = ((colour & 16711680) >> 16);
-                g = ((colour & 65280) >> 8);
-                r = (colour & 255);
-                this.palette[i * 16 + f + 8] = this.DoPal(r, g, b);
-            }
-        }
-
-        this.RecalcPalette();
     }
 
     public run()

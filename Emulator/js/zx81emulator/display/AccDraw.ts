@@ -109,7 +109,7 @@ export default class AccDraw
         return +new Date();
     }
 
-    private AccurateUpdateDisplay()
+    private UpdateDisplay()
     {
         let currentTime: number = AccDraw.currentTimeMillis();
         // Aim for 50Hz display
@@ -128,7 +128,7 @@ export default class AccDraw
         this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
     }
 
-    private AccurateDraw(Line: Scanline)
+    private Draw(Line: Scanline)
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
         for (let i: number = 0; i < Line.scanline_len; i++)
@@ -169,7 +169,7 @@ export default class AccDraw
                 this.dest = 0;
                 this.frameNo = 0;
                 this.shade = 0;
-                this.AccurateUpdateDisplay();
+                this.UpdateDisplay();
             }
         }
     }
@@ -258,7 +258,6 @@ export default class AccDraw
         let bwg: number;
         let bwb: number;
 
-
         NoiseLevel = -20;
         GhostLevel = -40;
         BrightnessLevel = 255 - 188;
@@ -316,27 +315,9 @@ export default class AccDraw
         this.RecalcPalette();
     }
 
-    private AnimTimer1Timer()
-    {
-        if (this.machine.stop())
-        {
-            this.AccurateUpdateDisplay();
-            return;
-        }
-        this.fps++;
-        let j: number = this.machine.tperframe + this.borrow;
-        while ((j > 0 && !this.machine.stop()))
-        {
-            j -= this.machine.do_scanline(this.buildLine);
-            this.AccurateDraw(this.buildLine);
-        }
-        if (!this.machine.stop()) this.borrow = j;
-    }
-
     public run()
     {
-        let Video: Scanline[] = [new Scanline(), new Scanline()];
-        this.buildLine = Video[0];
+        this.buildLine = new Scanline();
         this.fps = 0;
         this.framesStartTime = AccDraw.currentTimeMillis();
 
@@ -344,23 +325,34 @@ export default class AccDraw
         {
             if (this.paused)
             {
-                window.setTimeout((() => {
-                    return this.run()
-                }), 1000);
+                window.setTimeout((() => { return this.run() }), 1000);
                 return;
             }
 
-            this.AnimTimer1Timer();
+            if (this.machine.stop())
+            {
+                this.UpdateDisplay();
+                return;
+            }
+
+            this.fps++;
+            let j: number = this.machine.tperframe + this.borrow;
+            while ((j > 0 && !this.machine.stop()))
+            {
+                j -= this.machine.do_scanline(this.buildLine);
+                this.Draw(this.buildLine);
+            }
+            if (!this.machine.stop())
+                this.borrow = j;
 
             let currentTime: number = AccDraw.currentTimeMillis();
             let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);
             if (delay > 0)
             {
-                window.setTimeout((() => {
-                    return this.run()
-                }), delay);
+                window.setTimeout((() => { return this.run() }), delay);
                 return;
             }
+
             if (this.fps === 100)
             {
                 this.framesStartTime = AccDraw.currentTimeMillis();

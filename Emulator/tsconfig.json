@@ -5,6 +5,7 @@
         "removeComments": false,
         "sourceMap": true,
         "inlineSources": true,
+        "noImplicitThis": true,
         "noImplicitAny": false,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,

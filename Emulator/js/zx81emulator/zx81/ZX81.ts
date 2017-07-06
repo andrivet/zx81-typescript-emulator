@@ -21,9 +21,9 @@
 
 import Z80 from "../z80/Z80";
 import Tape from "../io/Tape";
-import Snap from "../io/Snap";
 import {KBStatus} from "../io/KBStatus";
 import Scanline from "../display/Scanline";
+import Resource from "../io/Resource";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
@@ -66,8 +66,7 @@ export default class ZX81
         for (let i = 0; i < 65536; i++)
             this.memory[i] = 7
 
-        let snap: Snap = new Snap(this);
-        snap.memory_load(ROM, 0, 65536, () => {
+        this.memory_load(ROM, 0, 65536, () => {
             this.ink = 0;
             this.paper = this.border = 7;
             this.NMI_generator = false;
@@ -312,6 +311,20 @@ export default class ZX81
             this.hsync_counter = this.tperscanline;
 
         return tstotal;
+    }
+
+    private memory_load(filename: string, address: number, length: number, callback: (this: void) => void): void
+    {
+        let resource: Resource = new Resource();
+
+        let cb = (data: Uint8Array): void => {
+            let size = (data.length < length) ? data.length : length;
+            for (var i = 0; i < size; ++i)
+                this.memory[address + i] = data[i];
+            callback();
+        };
+
+        resource.get(filename, cb);
     }
 
     public stop(): boolean

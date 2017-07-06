@@ -24,7 +24,6 @@ import Tape from "../io/Tape";
 import Snap from "../io/Snap";
 import {KBStatus} from "../io/KBStatus";
 import Scanline from "../display/Scanline";
-import {ROMPatch} from "./ROMPatch";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
@@ -47,16 +46,16 @@ export default class ZX81
     private paper: number = 7;
     private hsync_counter: number = 207;
     private zx81_stop: boolean = false;
-    private lastInstruction: number;
+    private lastInstruction: number = 0;
     private shift_register: number = 0;
-    private shift_reg_inv: number;
+    private shift_reg_inv: number = 0;
     private int_pending: boolean = false;
-    private z80: Z80;
-    private tape: Tape;
+    private z80: Z80 = new Z80(this);
+    private tape: Tape = new Tape();
 
     public tperscanline: number = 207;
     public tperframe: number = 312 * 207;
-    public memory: number[];
+    public memory: number[] = new Array(64 * 1024);
     public NMI_generator: boolean = false;
     public HSYNC_generator: boolean = false;
     public rowcounter: number = 0;
@@ -64,15 +63,7 @@ export default class ZX81
 
     public constructor()
     {
-        this.lastInstruction = 0;
-        this.shift_reg_inv = 0;
-
-        this.z80 = new Z80(this);
-        this.tape = new Tape();
-        this.memory = new Array(64 * 1024);
-        let i: number;
-
-        for (i = 0; i < 65536; i++)
+        for (let i = 0; i < 65536; i++)
             this.memory[i] = 7
 
         let snap: Snap = new Snap(this);
@@ -197,6 +188,34 @@ export default class ZX81
         return time;
     }
 
+    private  pop16(): number
+    {
+        let l = this.memory[this.z80.SP++];
+        let h = this.memory[this.z80.SP++];
+        return ((h << 8) | l);
+    }
+
+    private PatchTest(): number
+    {
+        let b: number = this.memory[this.z80.PC];
+        if (this.z80.PC === 854 && b === 31)
+        {
+            let currentProgram: Uint8Array = this.getTape().getNextEntry();
+            if (currentProgram != null)
+            {
+                let pos: number = 0;
+                while ((currentProgram[pos++] & 128) === 0)
+                    ;
+                for (let i: number = pos; i < currentProgram.length; i++)
+                    this.memory[16393 + i - pos] = currentProgram[i] & 255
+                this.pop16();
+                return 519;
+            }
+        }
+
+        return this.z80.PC;
+    }
+
     public do_scanline(scanLine: Scanline): number
     {
         let tstotal: number = 0;
@@ -212,7 +231,7 @@ export default class ZX81
         do
         {
             this.lastInstruction = ZX81.LASTINSTNONE;
-            this.z80.PC = ROMPatch.PatchTest(this, this.z80);
+            this.z80.PC = this.PatchTest();
             let ts: number = this.z80.do_opcode();
             if (this.int_pending)
             {

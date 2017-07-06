@@ -23,8 +23,6 @@ import ZX81 from "../zx81/ZX81";
 import Scanline from "./Scanline";
 
 const HTOL: number = 405;
-const VTOLMIN: number = 290;
-const VTOLMAX: number = 340;
 const HMIN: number = 10;
 const VMIN: number = 350;
 
@@ -126,12 +124,12 @@ export default class AccDraw
         this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
     }
 
-    private Draw(Line: Scanline)
+    private Draw(line: Scanline)
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
-        for (let i: number = 0; i < Line.scanline_len; i++)
+        for (let i: number = 0; i < line.scanline_len; i++)
         {
-            let c: number = Line.scanline[i];
+            let c: number = line.scanline[i];
 
             this.argb[bufferPos + this.rasterX] = 255 - this.colours[c + this.shade];
             this.rasterX += 1;
@@ -145,13 +143,14 @@ export default class AccDraw
                 this.shade = 8 - this.shade;
                 if (this.rasterY >= TVH)
                 {
-                    i = Line.scanline_len + 1;
-                    Line.sync_valid = 1;
+                    i = line.scanline_len + 1;
+                    line.sync_valid = 1;
                 }
             }
         }
-        if (Line.sync_len < HSYNC_MINLEN) Line.sync_valid = 0;
-        if (Line.sync_valid !== 0)
+        if (line.sync_len < HSYNC_MINLEN)
+            line.sync_valid = 0;
+        if (line.sync_valid !== 0)
         {
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
@@ -160,7 +159,7 @@ export default class AccDraw
                 this.shade = 8 - this.shade;
                 this.dest += TVW;
             }
-            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (Line.sync_len > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
+            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (line.sync_len > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
                 this.CompleteFrame();
                 this.rasterX = this.rasterY = 0;
@@ -196,23 +195,18 @@ export default class AccDraw
 
     private RecalcPalette()
     {
-        let rsz: number;
-        let gsz: number;
-        let bsz: number;
-        let rsh: number;
-        let gsh: number;
-        let bsh: number;
-        let i: number;
+        const rsz: number = 8;
+        const gsz: number = 8;
+        const bsz: number = 8;
+        const rsh: number = 16;
+        const gsh: number = 8;
+        const bsh: number = 0;
+
         let r: number;
         let g: number;
         let b: number;
-        rsz = 8;
-        gsz = 8;
-        bsz = 8;
-        rsh = 16;
-        gsh = 8;
-        bsh = 0;
-        for (i = 0; i < 256; i++)
+
+        for (let i = 0; i < 256; i++)
         {
             r = this.palette[i] & 255;
             g = (this.palette[i] >> 8) & 255;
@@ -234,13 +228,13 @@ export default class AccDraw
 
     private InitializePalette()
     {
-        let NoiseLevel: number;
-        let GhostLevel: number;
-        let GhostLevel2: number;
-        let BrightnessLevel: number;
-        let ContrastLevel: number;
-        let ColourLevel: number;
-        let HiBrightLevel: number;
+        let noiseLevel: number = -20;
+        let ghostLevel: number = -40;
+        let ghostLevel2: number = (ghostLevel / 3 | 0);
+        let brightnessLevel: number;
+        let contrastLevel: number;
+        let colourLevel: number = 255;
+        let hiBrightLevel: number;
         let r: number;
         let g: number;
         let b: number;
@@ -256,49 +250,46 @@ export default class AccDraw
         let bwg: number;
         let bwb: number;
 
-        NoiseLevel = -20;
-        GhostLevel = -40;
-        BrightnessLevel = 255 - 188;
-        GhostLevel2 = (GhostLevel / 3 | 0);
-        ContrastLevel = 255 - 125;
-        ColourLevel = 255;
-        BrightnessLevel -= ContrastLevel;
-        HiBrightLevel = BrightnessLevel + ((ContrastLevel / 2 | 0)) + 2 * ContrastLevel;
-        ContrastLevel = BrightnessLevel + ContrastLevel + ContrastLevel;
+        brightnessLevel = 255 - 188;
+        contrastLevel = 255 - 125;
+        brightnessLevel -= contrastLevel;
+        hiBrightLevel = brightnessLevel + ((contrastLevel / 2 | 0)) + 2 * contrastLevel;
+        contrastLevel = brightnessLevel + contrastLevel + contrastLevel;
 
-        for (i = 0; i < 16; i++)
+        for (let i = 0; i < 16; i++)
         {
             colour = i;
-            difference = ((1000 * (((colour > 7) ? HiBrightLevel : ContrastLevel) - BrightnessLevel)) / 16 | 0);
+            difference = ((1000 * (((colour > 7) ? hiBrightLevel : contrastLevel) - brightnessLevel)) / 16 | 0);
             basecolour = ((difference * ((colour & 7) + 9)) / 1000 | 0);
-            if (colour === 0 || colour === 8) basecolour = BrightnessLevel;
-            colb = BrightnessLevel + ((colour & 1) !== 0 ? basecolour : 0);
-            colg = BrightnessLevel + ((colour & 4) !== 0 ? basecolour : 0);
-            colr = BrightnessLevel + ((colour & 2) !== 0 ? basecolour : 0);
-            bwb = BrightnessLevel + basecolour;
-            bwg = BrightnessLevel + basecolour;
-            bwr = BrightnessLevel + basecolour;
-            r = ((((colr - bwr) * ColourLevel) / 255 | 0)) + bwr;
-            g = ((((colg - bwg) * ColourLevel) / 255 | 0)) + bwg;
-            b = ((((colb - bwb) * ColourLevel) / 255 | 0)) + bwb;
+            if (colour === 0 || colour === 8) basecolour = brightnessLevel;
+            colb = brightnessLevel + ((colour & 1) !== 0 ? basecolour : 0);
+            colg = brightnessLevel + ((colour & 4) !== 0 ? basecolour : 0);
+            colr = brightnessLevel + ((colour & 2) !== 0 ? basecolour : 0);
+            bwb = brightnessLevel + basecolour;
+            bwg = brightnessLevel + basecolour;
+            bwr = brightnessLevel + basecolour;
+            r = ((((colr - bwr) * colourLevel) / 255 | 0)) + bwr;
+            g = ((((colg - bwg) * colourLevel) / 255 | 0)) + bwg;
+            b = ((((colb - bwb) * colourLevel) / 255 | 0)) + bwb;
             this.palette[i * 16] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
-            b += NoiseLevel;
-            g += NoiseLevel;
-            r += NoiseLevel;
+            this.palette[4 + i * 16] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
+            b += noiseLevel;
+            g += noiseLevel;
+            r += noiseLevel;
             this.palette[i * 16 + 1] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16 + 1] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
-            b += GhostLevel;
-            g += GhostLevel;
-            r += GhostLevel;
+            this.palette[4 + i * 16 + 1] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
+            b += ghostLevel;
+            g += ghostLevel;
+            r += ghostLevel;
             this.palette[i * 16 + 3] = this.DoPal(r, g, b);
             this.palette[4 + i * 16 + 3] = this.DoPal(r, g, b);
-            b -= NoiseLevel;
-            g -= NoiseLevel;
-            r -= NoiseLevel;
+            b -= noiseLevel;
+            g -= noiseLevel;
+            r -= noiseLevel;
             this.palette[i * 16 + 2] = this.DoPal(r, g, b);
-            this.palette[4 + i * 16 + 2] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
+            this.palette[4 + i * 16 + 2] = this.DoPal(r + ghostLevel2, g + ghostLevel2, b + ghostLevel2);
         }
+
         for (i = 0; i < 16; i++)
         {
             for (f = 0; f < 8; f++)
@@ -310,6 +301,7 @@ export default class AccDraw
                 this.palette[i * 16 + f + 8] = this.DoPal(r, g, b);
             }
         }
+
         this.RecalcPalette();
     }
 

@@ -56,7 +56,7 @@ const targetFrameTime: number = 1000 / 50; // Target frame time should result in
 export default class AccDraw
 {
     private machine: Machine;
-    private ScanLen: number = 0;
+    private scanLen: number = 0;
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
@@ -64,18 +64,18 @@ export default class AccDraw
     private argb: Uint32Array;
     private srcCanvas: HTMLCanvasElement;
     private srcContext: CanvasRenderingContext2D;
-    private Palette: number[] = new Array(256);
-    private Colours: number[] = new Array(256);
-    private mKeepGoing: boolean = true;
-    private mPaused: boolean = false;
+    private palette: number[] = new Array(256);
+    private colours: number[] = new Array(256);
+    private keepGoing: boolean = true;
+    private paused: boolean = false;
     private dest: number = 0;
     private lastDisplayUpdate: number = 0;
-    private RasterX: number = 0;
-    private RasterY: number = 0;
-    private FrameNo: number = 0;
-    private Shade: number = 0;
+    private rasterX: number = 0;
+    private rasterY: number = 0;
+    private frameNo: number = 0;
+    private shade: number = 0;
     private dumpedscanlines: boolean = false;
-    private BuildLine: Scanline;
+    private buildLine: Scanline;
     private framesStartTime: number = 0;
     private fps: number = 0;
     private borrow: number = 0;
@@ -85,7 +85,7 @@ export default class AccDraw
         this.scale = scale;
         this.canvas = canvas;
         this.machine = config.machine;
-        this.ScanLen = 2 + this.machine.tperscanline * 2;
+        this.scanLen = 2 + this.machine.tperscanline * 2;
 
         this.canvas.width = TVW * this.scale;
         this.canvas.height = TVH * this.scale;
@@ -130,22 +130,22 @@ export default class AccDraw
 
     private AccurateDraw(Line: Scanline)
     {
-        let bufferPos: number = this.dest + this.FrameNo * TVW;
+        let bufferPos: number = this.dest + this.frameNo * TVW;
         for (let i: number = 0; i < Line.scanline_len; i++)
         {
             let c: number = Line.scanline[i];
 
-            this.argb[bufferPos + this.RasterX] = 255 - this.Colours[c + this.Shade];
-            this.RasterX += 1;
+            this.argb[bufferPos + this.rasterX] = 255 - this.colours[c + this.shade];
+            this.rasterX += 1;
 
-            if (this.RasterX > this.ScanLen)
+            if (this.rasterX > this.scanLen)
             {
-                this.RasterX = 0;
+                this.rasterX = 0;
                 this.dest += TVW;
-                bufferPos = this.dest + this.FrameNo * TVW;
-                this.RasterY += 1;
-                this.Shade = 8 - this.Shade;
-                if (this.RasterY >= TVH)
+                bufferPos = this.dest + this.frameNo * TVW;
+                this.rasterY += 1;
+                this.shade = 8 - this.shade;
+                if (this.rasterY >= TVH)
                 {
                     i = Line.scanline_len + 1;
                     Line.sync_valid = 1;
@@ -155,20 +155,20 @@ export default class AccDraw
         if (Line.sync_len < HSYNC_MINLEN) Line.sync_valid = 0;
         if (Line.sync_valid !== 0)
         {
-            if (this.RasterX > HSYNC_TOLLERANCE)
+            if (this.rasterX > HSYNC_TOLLERANCE)
             {
-                this.RasterX = 0;
-                this.RasterY += 1;
-                this.Shade = 8 - this.Shade;
+                this.rasterX = 0;
+                this.rasterY += 1;
+                this.shade = 8 - this.shade;
                 this.dest += TVW;
             }
-            if (this.RasterY >= TVH || this.RasterY >= VSYNC_TOLLERANCEMAX || (Line.sync_len > VSYNC_MINLEN && this.RasterY > VSYNC_TOLLERANCEMIN))
+            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (Line.sync_len > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
                 this.CompleteFrame();
-                this.RasterX = this.RasterY = 0;
+                this.rasterX = this.rasterY = 0;
                 this.dest = 0;
-                this.FrameNo = 0;
-                this.Shade = 0;
+                this.frameNo = 0;
+                this.shade = 0;
                 this.AccurateUpdateDisplay();
             }
         }
@@ -180,8 +180,8 @@ export default class AccDraw
         {
             this.dumpedscanlines = true;
         }
-        let x: number = this.RasterX;
-        let y: number = this.RasterY;
+        let x: number = this.rasterX;
+        let y: number = this.rasterY;
         let dest: number = y * TVW;
         while(y <= WinB)
         {
@@ -216,16 +216,16 @@ export default class AccDraw
         bsh = 0;
         for (i = 0; i < 256; i++)
         {
-            r = this.Palette[i] & 255;
-            g = (this.Palette[i] >> 8) & 255;
-            b = (this.Palette[i] >> 16) & 255;
+            r = this.palette[i] & 255;
+            g = (this.palette[i] >> 8) & 255;
+            b = (this.palette[i] >> 16) & 255;
             r >>= (8 - rsz);
             g >>= (8 - gsz);
             b >>= (8 - bsz);
             r <<= rsh;
             g <<= gsh;
             b <<= bsh;
-            this.Colours[i] = r | g | b;
+            this.colours[i] = r | g | b;
         }
     }
 
@@ -284,33 +284,33 @@ export default class AccDraw
             r = ((((colr - bwr) * ColourLevel) / 255 | 0)) + bwr;
             g = ((((colg - bwg) * ColourLevel) / 255 | 0)) + bwg;
             b = ((((colb - bwb) * ColourLevel) / 255 | 0)) + bwb;
-            this.Palette[i * 16] = this.DoPal(r, g, b);
-            this.Palette[4 + i * 16] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
+            this.palette[i * 16] = this.DoPal(r, g, b);
+            this.palette[4 + i * 16] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
             b += NoiseLevel;
             g += NoiseLevel;
             r += NoiseLevel;
-            this.Palette[i * 16 + 1] = this.DoPal(r, g, b);
-            this.Palette[4 + i * 16 + 1] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
+            this.palette[i * 16 + 1] = this.DoPal(r, g, b);
+            this.palette[4 + i * 16 + 1] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
             b += GhostLevel;
             g += GhostLevel;
             r += GhostLevel;
-            this.Palette[i * 16 + 3] = this.DoPal(r, g, b);
-            this.Palette[4 + i * 16 + 3] = this.DoPal(r, g, b);
+            this.palette[i * 16 + 3] = this.DoPal(r, g, b);
+            this.palette[4 + i * 16 + 3] = this.DoPal(r, g, b);
             b -= NoiseLevel;
             g -= NoiseLevel;
             r -= NoiseLevel;
-            this.Palette[i * 16 + 2] = this.DoPal(r, g, b);
-            this.Palette[4 + i * 16 + 2] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
+            this.palette[i * 16 + 2] = this.DoPal(r, g, b);
+            this.palette[4 + i * 16 + 2] = this.DoPal(r + GhostLevel2, g + GhostLevel2, b + GhostLevel2);
         }
         for (i = 0; i < 16; i++)
         {
             for (f = 0; f < 8; f++)
             {
-                colour = this.Palette[i * 16 + f];
+                colour = this.palette[i * 16 + f];
                 b = ((colour & 16711680) >> 16);
                 g = ((colour & 65280) >> 8);
                 r = (colour & 255);
-                this.Palette[i * 16 + f + 8] = this.DoPal(r, g, b);
+                this.palette[i * 16 + f + 8] = this.DoPal(r, g, b);
             }
         }
         this.RecalcPalette();
@@ -327,8 +327,8 @@ export default class AccDraw
         let j: number = this.machine.tperframe + this.borrow;
         while ((j > 0 && !this.machine.stop()))
         {
-            j -= this.machine.do_scanline(this.BuildLine);
-            this.AccurateDraw(this.BuildLine);
+            j -= this.machine.do_scanline(this.buildLine);
+            this.AccurateDraw(this.buildLine);
         }
         if (!this.machine.stop()) this.borrow = j;
     }
@@ -336,13 +336,13 @@ export default class AccDraw
     public run()
     {
         let Video: Scanline[] = [new Scanline(), new Scanline()];
-        this.BuildLine = Video[0];
+        this.buildLine = Video[0];
         this.fps = 0;
         this.framesStartTime = AccDraw.currentTimeMillis();
 
-        while(this.mKeepGoing)
+        while(this.keepGoing)
         {
-            if (this.mPaused)
+            if (this.paused)
             {
                 window.setTimeout((() => {
                     return this.run()
@@ -371,18 +371,18 @@ export default class AccDraw
 
     public start()
     {
-        this.mKeepGoing = true;
+        this.keepGoing = true;
         window.setTimeout((() => { return this.run(); }), 0);
     }
 
     public stop()
     {
-        this.mKeepGoing = false;
+        this.keepGoing = false;
     }
 
     public setPaused(paused: boolean)
     {
-        this.mPaused = paused;
+        this.paused = paused;
     }
 }
 

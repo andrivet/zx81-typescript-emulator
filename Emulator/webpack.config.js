@@ -7,7 +7,7 @@ module.exports = {
         path: path.resolve(__dirname, "build"),
         filename: "bundle.js"
     },
-    watch: true,
+    watch: false,
     devtool: "source-map",
     resolve: {
         extensions: ['.ts']

@@ -114,11 +114,11 @@ export default class Z80
         this.IYH = this.IY.getRH("IYH");
         this.IYL = this.IY.getRL("IYL");
         this.machine = machine;
-        this.init_tables();
+        Z80.init_tables();
     }
 
     /* Initalise the tables used to set flags */
-    private init_tables()
+    private static init_tables()
     {
         let i: number;
         let j: number;

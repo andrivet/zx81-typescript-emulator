@@ -34,16 +34,15 @@ const SYNCTYPEV : number = 2;
 
 export default class ZX81
 {
-    static VBLANKCOLOUR: number = 0;
+    static WHITE = 0;
+    static BLACK = 112;
+
     static LASTINSTNONE: number = 0;
     static LASTINSTINFE: number = 1;
     static LASTINSTOUTFE: number = 2;
     static LASTINSTOUTFD: number = 3;
     static LASTINSTOUTFF: number = 4;
 
-    private border: number = 7;
-    private ink: number = 0;
-    private paper: number = 7;
     private hsync_counter: number = 207;
     private zx81_stop: boolean = false;
     private lastInstruction: number = 0;
@@ -67,8 +66,6 @@ export default class ZX81
             this.memory[i] = 7
 
         this.memory_load(ROM, 0, 65536, () => {
-            this.ink = 0;
-            this.paper = this.border = 7;
             this.NMI_generator = false;
             this.HSYNC_generator = false;
             this.z80.reset();
@@ -223,7 +220,7 @@ export default class ZX81
         let maxScanLen: number = 420;
         if (scanLine.sync_valid !== 0)
         {
-            scanLine.add_blank(this.borrow, this.HSYNC_generator ? (16 * this.paper) : ZX81.VBLANKCOLOUR);
+            scanLine.add_blank(this.borrow, this.HSYNC_generator ? ZX81.WHITE : ZX81.BLACK);
             this.borrow = 0;
             scanLine.sync_valid = 0;
             scanLine.sync_len = 0;
@@ -236,7 +233,6 @@ export default class ZX81
             if (this.int_pending)
             {
                 ts += this.z80.interrupt(ts);
-                this.paper = this.border;
                 this.int_pending = false;
             }
 
@@ -247,9 +243,9 @@ export default class ZX81
                 let bit: number;
                 bit = ((this.shift_register ^ this.shift_reg_inv) & 32768);
                 if (this.HSYNC_generator)
-                    colour = (bit !== 0 ? this.ink : this.paper) << 4;
+                    colour = (bit !== 0 ? ZX81.BLACK : ZX81.WHITE);
                 else
-                    colour = ZX81.VBLANKCOLOUR;
+                    colour = 0;
                 scanLine.scanline[scanLine.scanline_len++] = colour;
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;

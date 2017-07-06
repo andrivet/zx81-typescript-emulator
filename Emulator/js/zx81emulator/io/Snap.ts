@@ -19,17 +19,17 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ZX81Config from "../config/ZX81Config";
 import Resource from "./Resource";
+import ZX81 from "../zx81/ZX81";
 
 
 export default class Snap
 {
-    private mConfig: ZX81Config;
+    private machine: ZX81;
 
-    public constructor(config: ZX81Config)
+    public constructor(machine: ZX81)
     {
-        this.mConfig = config;
+        this.machine = machine;
     }
 
     /*private get_token(f: InputStream): string
@@ -162,7 +162,7 @@ export default class Snap
         let cb = (data: Uint8Array): void => {
             let size = (data.length < length) ? data.length : length;
             for (var i = 0; i < size; ++i)
-                this.mConfig.machine.memory[address + i] = data[i];
+                this.machine.memory[address + i] = data[i];
             callback();
         };
 

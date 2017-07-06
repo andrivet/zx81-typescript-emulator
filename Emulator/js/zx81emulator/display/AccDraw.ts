@@ -19,8 +19,7 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Machine from "../config/Machine";
-import ZX81Config from "../config/ZX81Config";
+import ZX81 from "../zx81/ZX81";
 import Scanline from "./Scanline";
 
 const HTOL: number = 405;
@@ -55,7 +54,7 @@ const targetFrameTime: number = 1000 / 50; // Target frame time should result in
 
 export default class AccDraw
 {
-    private machine: Machine;
+    private machine: ZX81;
     private scanLen: number = 0;
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
@@ -75,16 +74,15 @@ export default class AccDraw
     private frameNo: number = 0;
     private shade: number = 0;
     private dumpedscanlines: boolean = false;
-    private buildLine: Scanline;
     private framesStartTime: number = 0;
     private fps: number = 0;
     private borrow: number = 0;
 
-    public constructor(config: ZX81Config, scale: number, canvas: HTMLCanvasElement)
+    public constructor(machine: ZX81, scale: number, canvas: HTMLCanvasElement)
     {
         this.scale = scale;
         this.canvas = canvas;
-        this.machine = config.machine;
+        this.machine = machine;
         this.scanLen = 2 + this.machine.tperscanline * 2;
 
         this.canvas.width = TVW * this.scale;
@@ -317,7 +315,7 @@ export default class AccDraw
 
     public run()
     {
-        this.buildLine = new Scanline();
+        let buildLine = new Scanline();
         this.fps = 0;
         this.framesStartTime = AccDraw.currentTimeMillis();
 
@@ -339,8 +337,8 @@ export default class AccDraw
             let j: number = this.machine.tperframe + this.borrow;
             while ((j > 0 && !this.machine.stop()))
             {
-                j -= this.machine.do_scanline(this.buildLine);
-                this.Draw(this.buildLine);
+                j -= this.machine.do_scanline(buildLine);
+                this.Draw(buildLine);
             }
             if (!this.machine.stop())
                 this.borrow = j;

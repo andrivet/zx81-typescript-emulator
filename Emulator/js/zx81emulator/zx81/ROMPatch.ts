@@ -19,12 +19,12 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Machine from "../config/Machine";
+import ZX81 from "../zx81/ZX81";
 import Z80 from "../z80/Z80";
 
 export class ROMPatch
 {
-    private static pop16(machine: Machine, z80: Z80): number
+    private static pop16(machine: ZX81, z80: Z80): number
     {
         let h: number;
         let l: number;
@@ -33,7 +33,7 @@ export class ROMPatch
         return ((h << 8) | l);
     }
 
-    static PatchTest(machine: Machine, z80: Z80): number
+    static PatchTest(machine: ZX81, z80: Z80): number
     {
         let b: number = machine.memory[z80.PC];
         if (z80.PC === 854 && b === 31)

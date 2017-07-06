@@ -22,20 +22,16 @@
 
 import AccDraw from "./display/AccDraw";
 import {KBStatus} from "./io/KBStatus";
-import ZX81Config from "./config/ZX81Config";
 import ZX81 from "./zx81/ZX81";
 
 export class ZX81Emulator
 {
-    private mDisplayDrawer: AccDraw;
-    private mKeyboard: KBStatus;
-    private mConfig: ZX81Config;
+    private machine: ZX81;
+    private drawer: AccDraw;
+    private keyboard: KBStatus;
 
     public constructor()
     {
-        this.mConfig = new ZX81Config();
-        this.mConfig.load_config();
-
     }
 
     public load(tzxFileName: string, scale: number, canvasID: string): void
@@ -45,9 +41,10 @@ export class ZX81Emulator
             throw new Error("No HTML element found with id \'canvas\'");
 
         this.installListeners(canvas);
-        this.mConfig.machine.initialise(this.mConfig);
-        this.mKeyboard = new KBStatus();
-        this.mDisplayDrawer = new AccDraw(this.mConfig, scale, canvas);
+        this.machine = new ZX81();
+        this.keyboard = new KBStatus();
+        this.drawer = new AccDraw(this.machine, scale, canvas);
+
         if (tzxFileName != null)
         {
             let tzxEntry: string;
@@ -66,7 +63,7 @@ export class ZX81Emulator
 
     public start()
     {
-        this.mDisplayDrawer.start();
+        this.drawer.start();
     }
 
     /**
@@ -74,7 +71,7 @@ export class ZX81Emulator
      */
     public stop()
     {
-        this.mDisplayDrawer.stop();
+        this.drawer.stop();
     }
 
     private installListeners(container: HTMLElement)
@@ -94,18 +91,18 @@ export class ZX81Emulator
     private onKeyDown(e: KeyboardEvent)
     {
         e.preventDefault();
-        this.mKeyboard.PCKeyDown(e.key, e.shiftKey, e.ctrlKey, e.altKey);
+        this.keyboard.PCKeyDown(e.key, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
     private onKeyUp(e: KeyboardEvent)
     {
         e.preventDefault();
-        this.mKeyboard.PCKeyUp(e.key, e.shiftKey, e.ctrlKey, e.altKey);
+        this.keyboard.PCKeyUp(e.key, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
     private windowActive(active: boolean)
     {
-        this.mDisplayDrawer.setPaused(!active);
+        this.drawer.setPaused(!active);
     }
 }
 

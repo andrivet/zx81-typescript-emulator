@@ -19,18 +19,21 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-import Machine from "../config/Machine";
 import Z80 from "../z80/Z80";
-import ZX81Options from "../config/ZX81Options";
 import Tape from "../io/Tape";
-import ZX81Config, {CHRGENCHR16, CHRGENQS, SYNCTYPEH, SYNCTYPEV} from "../config/ZX81Config";
 import Snap from "../io/Snap";
 import {KBStatus} from "../io/KBStatus";
 import Scanline from "../display/Scanline";
 import {ROMPatch} from "./ROMPatch";
 
-export default class ZX81 extends Machine
+const RAMTOP: number = 32767;
+const ROMTOP: number = 8191;
+const ROM: string = "ZX81.data";
+
+const SYNCTYPEH : number = 1;
+const SYNCTYPEV : number = 2;
+
+export default class ZX81
 {
     static VBLANKCOLOUR: number = 0;
     static LASTINSTNONE: number = 0;
@@ -45,26 +48,30 @@ export default class ZX81 extends Machine
     private hsync_counter: number = 207;
     private zx81_stop: boolean = false;
     private LastInstruction: number;
-    private font: number[] = new Array(1024);
-    private memhrg: number[] = new Array(1024);
     private shift_register: number = 0;
     private shift_reg_inv: number;
     private int_pending: boolean = false;
     private z80: Z80;
-    private zx81opts: ZX81Options;
     private mTape: Tape;
 
+    public tperscanline: number = 207;
+    public tperframe: number = 312 * 207;
+    public CurRom: string;
+    public memory: number[];
     public NMI_generator: boolean = false;
     public HSYNC_generator: boolean = false;
     public rowcounter: number = 0;
     public borrow: number = 0;
 
-    public initialise(config: ZX81Config)
+    private beeper: number = 0;
+
+    public constructor()
     {
-        this.zx81opts = config.zx81opts;
-        this.CurRom = config.zx81opts.ROM81;
+        this.LastInstruction = 0;
+        this.shift_reg_inv = 0;
+
+        this.CurRom = ROM;
         this.z80 = new Z80(this);
-        let snap: Snap = new Snap(config);
         this.mTape = new Tape();
         this.memory = new Array(64 * 1024);
         let i: number;
@@ -72,6 +79,7 @@ export default class ZX81 extends Machine
         for (i = 0; i < 65536; i++)
             this.memory[i] = 7
 
+        let snap: Snap = new Snap(this);
         snap.memory_load("ROM/" + this.CurRom, 0, 65536, () => {
             this.ink = 0;
             this.paper = this.border = 7;
@@ -81,70 +89,60 @@ export default class ZX81 extends Machine
         });
     }
 
-    public writebyte(Address: number, Data: number)
+    public writebyte(address: number, data: number)
     {
-        if (this.zx81opts.chrgen === CHRGENQS && Address >= 33792 && Address <= 34815)
-        {
-            this.font[Address - 33792] = Data;
-            this.zx81opts.enableqschrgen = true;
-        }
-        if (Address > this.zx81opts.RAMTOP) Address = (Address & (this.zx81opts.RAMTOP));
-        if (Address <= this.zx81opts.ROMTOP && this.zx81opts.protectROM)
-        {
+        if (address > RAMTOP)
+            address = (address & (RAMTOP));
+        if (address <= ROMTOP)
             return;
-        }
-        this.memory[Address] = Data;
+        this.memory[address] = data;
     }
 
-    public readbyte(Address: number): number
+    public readbyte(address: number): number
     {
         let data: number;
-        if (Address <= this.zx81opts.RAMTOP) data = this.memory[Address]; else data = this.memory[(Address & (this.zx81opts.RAMTOP - 16384)) + 16384];
+        if (address <= RAMTOP)
+            data = this.memory[address];
+        else
+            data = this.memory[(address & (RAMTOP - 16384)) + 16384];
         return (data);
     }
 
-    public opcode_fetch(Address: number): number
+    public opcode_fetch(address: number): number
     {
         let inv: boolean;
         let update: boolean = false;
         let opcode: number;
         let bit6: boolean;
         let data: number;
-        if (Address < this.zx81opts.m1not)
-        {
-            data = this.readbyte(Address);
-            return (data);
-        }
-        data = this.readbyte((Address >= 49152) ? Address & 32767 : Address);
+
+        if(address <= RAMTOP)
+            return this.readbyte(address);
+
+        data = this.readbyte((address >= 49152) ? address & 32767 : address);
         opcode = data;
         bit6 = (opcode & 64) !== 0;
-        if (!bit6) opcode = 0;
+        if (!bit6)
+            opcode = 0;
         inv = (data & 128) !== 0;
         if (!bit6)
         {
-            if ((this.zx81opts.chrgen === CHRGENCHR16 && (this.z80.I & 1) !== 0) || (this.zx81opts.chrgen === CHRGENQS && this.zx81opts.enableqschrgen))
-                data = ((data & 128) >> 1) | (data & 63); else data = data & 63;
-            if (this.z80.I < 64 || (this.z80.I >= 128 && this.z80.I < 192 && this.zx81opts.chrgen === CHRGENCHR16))
-            {
-                if ((this.zx81opts.chrgen === CHRGENQS && this.zx81opts.enableqschrgen))
-                    data = this.font[(data << 3) | this.rowcounter];
-                else
-                    data = this.readbyte(((this.z80.I & 254) << 8) + (data << 3) | this.rowcounter);
-            }
+            data = data & 63;
+            if (this.z80.I < 64)
+                data = this.readbyte(((this.z80.I & 254) << 8) + (data << 3) | this.rowcounter);
             else
                 data = 255;
             update = true;
         }
-        if (update)
+
+        if(update)
         {
             this.shift_register |= data;
             this.shift_reg_inv |= inv ? 255 : 0;
             return (0);
         }
         else
-        {
             return (opcode);
-        }
     }
 
     public writeport(Address: number, Data: number)
@@ -162,8 +160,6 @@ export default class ZX81 extends Machine
         }
         if (this.LastInstruction === 0) this.LastInstruction = ZX81.LASTINSTOUTFF;
     }
-
-    private beeper: number = 0;
 
     public readport(Address: number): number
     {
@@ -205,17 +201,17 @@ export default class ZX81 extends Machine
         return (time);
     }
 
-    public do_scanline(CurScanLine: Scanline): number
+    public do_scanline(scanLine: Scanline): number
     {
         let tstotal: number = 0;
-        CurScanLine.scanline_len = 0;
+        scanLine.scanline_len = 0;
         let MaxScanLen: number = 420;
-        if (CurScanLine.sync_valid !== 0)
+        if (scanLine.sync_valid !== 0)
         {
-            CurScanLine.add_blank(this.borrow, this.HSYNC_generator ? (16 * this.paper) : ZX81.VBLANKCOLOUR);
+            scanLine.add_blank(this.borrow, this.HSYNC_generator ? (16 * this.paper) : ZX81.VBLANKCOLOUR);
             this.borrow = 0;
-            CurScanLine.sync_valid = 0;
-            CurScanLine.sync_len = 0;
+            scanLine.sync_valid = 0;
+            scanLine.sync_len = 0;
         }
         do {
             this.LastInstruction = ZX81.LASTINSTNONE;
@@ -234,7 +230,7 @@ export default class ZX81 extends Machine
                 let bit: number;
                 bit = ((this.shift_register ^ this.shift_reg_inv) & 32768);
                 if (this.HSYNC_generator) colour = (bit !== 0 ? this.ink : this.paper) << 4; else colour = ZX81.VBLANKCOLOUR;
-                CurScanLine.scanline[CurScanLine.scanline_len++] = colour;
+                scanLine.scanline[scanLine.scanline_len++] = colour;
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;
             }
@@ -243,25 +239,25 @@ export default class ZX81 extends Machine
                 case ZX81.LASTINSTOUTFD:
                     this.NMI_generator = false;
                     if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (CurScanLine.sync_len !== 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 case ZX81.LASTINSTOUTFE:
                     this.NMI_generator = true;
                     if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (CurScanLine.sync_len !== 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 case ZX81.LASTINSTINFE:
                     if (!this.NMI_generator)
                     {
                         this.HSYNC_generator = false;
-                        if (CurScanLine.sync_len === 0) CurScanLine.sync_valid = 0;
+                        if (scanLine.sync_len === 0) scanLine.sync_valid = 0;
                     }
                     break;
                 case ZX81.LASTINSTOUTFF:
                     if (!this.HSYNC_generator) this.rowcounter = 0;
-                    if (CurScanLine.sync_len !== 0) CurScanLine.sync_valid = SYNCTYPEV;
+                    if (scanLine.sync_len !== 0) scanLine.sync_valid = SYNCTYPEV;
                     this.HSYNC_generator = true;
                     break;
                 default:
@@ -269,29 +265,29 @@ export default class ZX81 extends Machine
             }
             this.hsync_counter -= ts;
             if ((this.z80.R & 64) === 0) this.int_pending = true;
-            if (!this.HSYNC_generator) CurScanLine.sync_len += ts;
+            if (!this.HSYNC_generator) scanLine.sync_len += ts;
             if (this.hsync_counter <= 0)
             {
                 if (this.NMI_generator)
                 {
                     let nmilen: number;
-                    nmilen = this.z80.nmi(CurScanLine.scanline_len);
+                    nmilen = this.z80.nmi(scanLine.scanline_len);
                     this.hsync_counter -= nmilen;
                     ts += nmilen;
                 }
                 this.borrow = -this.hsync_counter;
-                if (this.HSYNC_generator && CurScanLine.sync_len === 0)
+                if (this.HSYNC_generator && scanLine.sync_len === 0)
                 {
-                    CurScanLine.sync_len = 10;
-                    CurScanLine.sync_valid = SYNCTYPEH;
-                    if (CurScanLine.scanline_len >= (this.tperscanline * 2)) CurScanLine.scanline_len = this.tperscanline * 2;
+                    scanLine.sync_len = 10;
+                    scanLine.sync_valid = SYNCTYPEH;
+                    if (scanLine.scanline_len >= (this.tperscanline * 2)) scanLine.scanline_len = this.tperscanline * 2;
                     this.rowcounter = (++this.rowcounter) & 7;
                 }
                 this.hsync_counter += this.tperscanline;
             }
             tstotal += ts;
-        } while ((CurScanLine.scanline_len < MaxScanLen && CurScanLine.sync_valid === 0 && !this.zx81_stop));
-        if (CurScanLine.sync_valid === SYNCTYPEV)
+        } while ((scanLine.scanline_len < MaxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop));
+        if (scanLine.sync_valid === SYNCTYPEV)
         {
             this.hsync_counter = this.tperscanline;
         }
@@ -306,13 +302,6 @@ export default class ZX81 extends Machine
     public getTape(): Tape
     {
         return this.mTape;
-    }
-
-    constructor()
-    {
-        super();
-        this.LastInstruction = 0;
-        this.shift_reg_inv = 0;
     }
 }
 

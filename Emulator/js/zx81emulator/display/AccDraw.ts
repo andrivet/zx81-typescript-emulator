@@ -35,10 +35,13 @@ const VSYNC_TOLLERANCEMAX: number = VSYNC_TOLLERANCEMIN + 40;
 const HSYNC_MINLEN: number = HMIN;
 const VSYNC_MINLEN: number = VMIN;
 
+const WinW: number = 320;
+const WinH: number = 240;
+
 const NoWinT: number = 32;
-const NoWinB: number = NoWinT + 240;
+const NoWinB: number = NoWinT + WinH;
 const NoWinL: number = 42;
-const NoWinR: number = NoWinL + 320;
+const NoWinR: number = NoWinL + WinW;
 
 const WinR: number = NoWinR;
 const WinL: number = NoWinL;
@@ -57,6 +60,7 @@ export default class AccDraw
     private Scale: number = 1;
     private context: CanvasRenderingContext2D;
     private imageData: ImageData;
+    private argb: Uint32Array;
     private Palette: number[] = new Array(256);
     private Colours: number[] = new Array(256);
     private mKeepGoing: boolean = true;
@@ -65,17 +69,24 @@ export default class AccDraw
     private lastDisplayUpdate: number = 0;
     private RasterX: number = 0;
     private RasterY: number = 0;
+    private FrameNo: number = 0;
+    private Shade: number = 0;
+    private dumpedscanlines: boolean = false;
+    private BuildLine: Scanline;
+    private framesStartTime: number = 0;
+    private fps: number = 0;
+    private borrow: number = 0;
 
     public constructor(config: ZX81Config, scale: number, canvas: HTMLCanvasElement)
     {
-        this.fps = 0;
-        this.borrow = 0;
         this.machine = config.machine;
-        canvas.width = (NoWinR - NoWinL);
-        canvas.height = (NoWinB - NoWinT);
+        canvas.width = TVW * 2;
+        canvas.height = TVH * 2;
         this.ScanLen = 2 + this.machine.tperscanline * 2;
         this.context = canvas.getContext("2d");
-        this.imageData = this.context.getImageData(0, 0, canvas.width, canvas.height);
+        this.imageData = this.context.createImageData(TVW, TVH);
+        this.argb = new Uint32Array(this.imageData.data.buffer);
+
         this.InitializePalette();
     }
 
@@ -90,27 +101,14 @@ export default class AccDraw
         // Aim for 50Hz display
         if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
         {
-            this.context.putImageData(this.imageData, 0, 0);
+            this.context.putImageData(this.imageData, 0, 0, WinL, WinT, WinW * 2, WinH * 2);
             this.lastDisplayUpdate = currentTime;
         }
     }
 
-    RedrawDisplay()
+    public RedrawDisplay()
     {
-        this.context.putImageData(this.imageData, 0, 0);
-    }
-
-    private FrameNo: number = 0;
-    private Shade: number = 0;
-
-    private setPixel(i: number, color: number)
-    {
-        i *= 4;
-        let data: number[] = (<any>this.imageData.data);
-        data[i    ] = color;
-        data[i + 1] = color;
-        data[i + 2] = color;
-        data[i + 3] = 0;
+        this.context.putImageData(this.imageData, 0, 0, WinL, WinT, WinW * 2, WinH * 2);
     }
 
     private AccurateDraw(Line: Scanline)
@@ -119,8 +117,10 @@ export default class AccDraw
         for (let i: number = 0; i < Line.scanline_len; i++)
         {
             let c: number = Line.scanline[i];
-            this.setPixel(bufferPos + this.RasterX, this.Colours[c + this.Shade]);
+
+            this.argb[bufferPos + this.RasterX] = 255 - this.Colours[c + this.Shade];
             this.RasterX += 1;
+
             if (this.RasterX > this.ScanLen)
             {
                 this.RasterX = 0;
@@ -157,8 +157,6 @@ export default class AccDraw
         }
     }
 
-    private dumpedscanlines: boolean = false;
-
     private CompleteFrame()
     {
         if (!this.dumpedscanlines)
@@ -168,11 +166,11 @@ export default class AccDraw
         let x: number = this.RasterX;
         let y: number = this.RasterY;
         let dest: number = y * TVW;
-        while ((y <= WinB))
+        while(y <= WinB)
         {
-            while ((x <= WinR))
+            while(x <= WinR)
             {
-                this.setPixel(dest + x, 0);
+                this.argb[dest + x] = 0;
                 x += 1;
             }
             x = 0;
@@ -301,14 +299,6 @@ export default class AccDraw
         this.RecalcPalette();
     }
 
-    private BuildLine: Scanline;
-
-    private framesStartTime: number = 0;
-
-    private fps: number;
-
-    private borrow: number;
-
     private AnimTimer1Timer()
     {
         if (this.machine.stop())
@@ -330,35 +320,35 @@ export default class AccDraw
     {
         let Video: Scanline[] = [new Scanline(), new Scanline()];
         this.BuildLine = Video[0];
-        if (!this.mKeepGoing) return;
-        if (this.mPaused)
+        this.fps = 0;
+        this.framesStartTime = AccDraw.currentTimeMillis();
+
+        while(this.mKeepGoing)
         {
-            window.setTimeout((() =>
+            if (this.mPaused)
             {
-                return this.run()
-            }), 1000);
-            return;
-        }
-        if (this.framesStartTime === 0)
-        {
-            this.fps = 0;
-            this.framesStartTime = AccDraw.currentTimeMillis();
-        }
-        this.AnimTimer1Timer();
-        let currentTime: number = AccDraw.currentTimeMillis();
-        let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);
-        if (delay > 0)
-        {
-            window.setTimeout((() =>
+                window.setTimeout((() => {
+                    return this.run()
+                }), 1000);
+                return;
+            }
+
+            this.AnimTimer1Timer();
+
+            let currentTime: number = AccDraw.currentTimeMillis();
+            let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);
+            if (delay > 0)
             {
-                return this.run()
-            }), delay);
-            return;
-        }
-        if (this.fps === 100)
-        {
-            this.framesStartTime = AccDraw.currentTimeMillis();
-            this.fps = 0;
+                window.setTimeout((() => {
+                    return this.run()
+                }), delay);
+                return;
+            }
+            if (this.fps === 100)
+            {
+                this.framesStartTime = AccDraw.currentTimeMillis();
+                this.fps = 0;
+            }
         }
     }
 

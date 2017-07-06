@@ -20,30 +20,31 @@
  */
 
 
-export class Resource
+export default class Resource
 {
+    private request: XMLHttpRequest = new XMLHttpRequest();
+
     public get(name: string, callback: (data: Uint8Array) => void)
     {
         let pathname: string = window.location.pathname;
         let dir: string = pathname.substring(0, pathname.lastIndexOf('/'));
-        let request: XMLHttpRequest = new XMLHttpRequest();
-        request.responseType = "arraybuffer";
-        request.open("GET", dir + "/" + name, true);
-        request.onreadystatechange = () =>
+
+        this.request.responseType = "arraybuffer";
+        this.request.open("GET", dir + "/" + name, true);
+
+        this.request.onreadystatechange = () =>
         {
-            if (request.readyState === 4 && request.status === 200)
+            if (this.request.readyState === 4 && this.request.status === 200)
             {
-                callback(request.response);
+                let data: Uint8Array = new Uint8Array(this.request.response);
+                callback(data);
             }
-            else if (request.status === 404)
+            else if (this.request.status === 404)
             {
             }
         };
-        request.send();
-    }
 
-    constructor()
-    {
+        this.request.send();
     }
 }
 

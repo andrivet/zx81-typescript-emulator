@@ -20,8 +20,7 @@
  */
 
 import ZX81Config from "../config/ZX81Config";
-import Z80 from "../z80/Z80";
-import {Callback, Resource} from "./Resource";
+import Resource from "./Resource";
 
 
 export default class Snap
@@ -156,13 +155,18 @@ export default class Snap
         }
     }*/
 
-    public memory_load(filename: string, address: number, length: number, callback: () => void): void
+    public memory_load(filename: string, address: number, length: number, callback: (this: void) => void): void
     {
         let resource: Resource = new Resource();
-        resource.get(filename, (data: Uint8Array) => {
-            data.copyWithin(this.mConfig.machine.memory);
+
+        let cb = (data: Uint8Array): void => {
+            let size = (data.length < length) ? data.length : length;
+            for (var i = 0; i < size; ++i)
+                this.mConfig.machine.memory[address + i] = data[i];
             callback();
-        });
+        };
+
+        resource.get(filename, cb);
     }
 }
 

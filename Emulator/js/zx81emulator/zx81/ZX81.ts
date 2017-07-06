@@ -28,7 +28,7 @@ import {ROMPatch} from "./ROMPatch";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
-const ROM: string = "ZX81.data";
+const ROM: string = "ROM/ZX81.data";
 
 const SYNCTYPEH : number = 1;
 const SYNCTYPEV : number = 2;
@@ -47,32 +47,28 @@ export default class ZX81
     private paper: number = 7;
     private hsync_counter: number = 207;
     private zx81_stop: boolean = false;
-    private LastInstruction: number;
+    private lastInstruction: number;
     private shift_register: number = 0;
     private shift_reg_inv: number;
     private int_pending: boolean = false;
     private z80: Z80;
-    private mTape: Tape;
+    private tape: Tape;
 
     public tperscanline: number = 207;
     public tperframe: number = 312 * 207;
-    public CurRom: string;
     public memory: number[];
     public NMI_generator: boolean = false;
     public HSYNC_generator: boolean = false;
     public rowcounter: number = 0;
     public borrow: number = 0;
 
-    private beeper: number = 0;
-
     public constructor()
     {
-        this.LastInstruction = 0;
+        this.lastInstruction = 0;
         this.shift_reg_inv = 0;
 
-        this.CurRom = ROM;
         this.z80 = new Z80(this);
-        this.mTape = new Tape();
+        this.tape = new Tape();
         this.memory = new Array(64 * 1024);
         let i: number;
 
@@ -80,7 +76,7 @@ export default class ZX81
             this.memory[i] = 7
 
         let snap: Snap = new Snap(this);
-        snap.memory_load("ROM/" + this.CurRom, 0, 65536, () => {
+        snap.memory_load(ROM, 0, 65536, () => {
             this.ink = 0;
             this.paper = this.border = 7;
             this.NMI_generator = false;
@@ -92,7 +88,7 @@ export default class ZX81
     public writebyte(address: number, data: number)
     {
         if (address > RAMTOP)
-            address = (address & (RAMTOP));
+            address = address & RAMTOP;
         if (address <= ROMTOP)
             return;
         this.memory[address] = data;
@@ -145,67 +141,67 @@ export default class ZX81
             return (opcode);
     }
 
-    public writeport(Address: number, Data: number)
+    public writeport(address: number, Data: number)
     {
-        switch ((Address & 255))
+        switch (address & 255)
         {
             case 253:
-                this.LastInstruction = ZX81.LASTINSTOUTFD;
+                this.lastInstruction = ZX81.LASTINSTOUTFD;
                 break;
             case 254:
-                this.LastInstruction = ZX81.LASTINSTOUTFE;
+                this.lastInstruction = ZX81.LASTINSTOUTFE;
                 break;
             default:
                 break;
         }
-        if (this.LastInstruction === 0) this.LastInstruction = ZX81.LASTINSTOUTFF;
+        if (this.lastInstruction === 0) this.lastInstruction = ZX81.LASTINSTOUTFF;
     }
 
-    public readport(Address: number): number
+    public readport(address: number): number
     {
-        if ((Address & 1) === 0)
+        if ((address & 1) === 0)
         {
             let keyb: number;
             let data: number = 0;
             let i: number;
             data |= 128;
-            this.LastInstruction = ZX81.LASTINSTINFE;
-            keyb = (Address / 256 | 0);
+            this.lastInstruction = ZX81.LASTINSTINFE;
+            keyb = (address / 256 | 0);
             for (i = 0; i < 8; i++)
             {
                 if ((keyb & (1 << i)) === 0) data |= KBStatus.ZXKeyboard[i];
             }
-            return ((~data) & 255);
-        } else switch ((Address & 255))
+            return (~data) & 255;
+        }
+        else switch (address & 255)
         {
             case 1:
-                return (0);
+                return 0;
             case 95:
-                return (255);
+                return 255;
             case 245:
-                this.beeper = 1 - this.beeper;
-                return (255);
+                return 255;
             default:
                 break;
         }
-        return (255);
+        return 255;
     }
 
     public contendmem(Address: number, states: number, time: number): number
     {
-        return (time);
+        return time;
     }
 
     public contendio(Address: number, states: number, time: number): number
     {
-        return (time);
+        return time;
     }
 
     public do_scanline(scanLine: Scanline): number
     {
         let tstotal: number = 0;
         scanLine.scanline_len = 0;
-        let MaxScanLen: number = 420;
+        let maxScanLen: number = 420;
         if (scanLine.sync_valid !== 0)
         {
             scanLine.add_blank(this.borrow, this.HSYNC_generator ? (16 * this.paper) : ZX81.VBLANKCOLOUR);
@@ -213,8 +209,9 @@ export default class ZX81
             scanLine.sync_valid = 0;
             scanLine.sync_len = 0;
         }
-        do {
-            this.LastInstruction = ZX81.LASTINSTNONE;
+        do
+        {
+            this.lastInstruction = ZX81.LASTINSTNONE;
             this.z80.PC = ROMPatch.PatchTest(this, this.z80);
             let ts: number = this.z80.do_opcode();
             if (this.int_pending)
@@ -229,12 +226,15 @@ export default class ZX81
                 let colour: number;
                 let bit: number;
                 bit = ((this.shift_register ^ this.shift_reg_inv) & 32768);
-                if (this.HSYNC_generator) colour = (bit !== 0 ? this.ink : this.paper) << 4; else colour = ZX81.VBLANKCOLOUR;
+                if (this.HSYNC_generator)
+                    colour = (bit !== 0 ? this.ink : this.paper) << 4;
+                else
+                    colour = ZX81.VBLANKCOLOUR;
                 scanLine.scanline[scanLine.scanline_len++] = colour;
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;
             }
-            switch ((this.LastInstruction))
+            switch ((this.lastInstruction))
             {
                 case ZX81.LASTINSTOUTFD:
                     this.NMI_generator = false;
@@ -286,12 +286,13 @@ export default class ZX81
                 this.hsync_counter += this.tperscanline;
             }
             tstotal += ts;
-        } while ((scanLine.scanline_len < MaxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop));
-        if (scanLine.sync_valid === SYNCTYPEV)
-        {
-            this.hsync_counter = this.tperscanline;
         }
-        return (tstotal);
+        while ((scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop));
+
+        if (scanLine.sync_valid === SYNCTYPEV)
+            this.hsync_counter = this.tperscanline;
+
+        return tstotal;
     }
 
     public stop(): boolean
@@ -301,7 +302,7 @@ export default class ZX81
 
     public getTape(): Tape
     {
-        return this.mTape;
+        return this.tape;
     }
 }
 

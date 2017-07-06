@@ -50,7 +50,7 @@ const TVH: number = 380;
 
 const targetFrameTime: number = 1000 / 50; // Target frame time should result in 50Hz display
 
-export default class AccDraw
+export default class Drawer
 {
     private machine: ZX81;
     private scanLen: number = 0;
@@ -107,7 +107,7 @@ export default class AccDraw
 
     private UpdateDisplay()
     {
-        let currentTime: number = AccDraw.currentTimeMillis();
+        let currentTime: number = Drawer.currentTimeMillis();
         // Aim for 50Hz display
         if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
         {
@@ -119,7 +119,7 @@ export default class AccDraw
     public RedrawDisplay()
     {
         this.srcContext.putImageData(this.imageData, 0, 0, WinL, WinT, WinW, WinH);
-        this.context.fillStyle = "white";
+        this.context.fillStyle = "red";
         this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
         this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
     }
@@ -309,7 +309,7 @@ export default class AccDraw
     {
         let buildLine = new Scanline();
         this.fps = 0;
-        this.framesStartTime = AccDraw.currentTimeMillis();
+        this.framesStartTime = Drawer.currentTimeMillis();
 
         while(this.keepGoing)
         {
@@ -335,7 +335,7 @@ export default class AccDraw
             if (!this.machine.stop())
                 this.borrow = j;
 
-            let currentTime: number = AccDraw.currentTimeMillis();
+            let currentTime: number = Drawer.currentTimeMillis();
             let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);
             if (delay > 0)
             {
@@ -345,7 +345,7 @@ export default class AccDraw
 
             if (this.fps === 100)
             {
-                this.framesStartTime = AccDraw.currentTimeMillis();
+                this.framesStartTime = Drawer.currentTimeMillis();
                 this.fps = 0;
             }
         }

@@ -20,14 +20,14 @@
  */
 
 
-import AccDraw from "./display/AccDraw";
+import Drawer from "./display/Drawer";
 import {KBStatus} from "./io/KBStatus";
 import ZX81 from "./zx81/ZX81";
 
 export class ZX81Emulator
 {
     private machine: ZX81;
-    private drawer: AccDraw;
+    private drawer: Drawer;
     private keyboard: KBStatus;
 
     public constructor()
@@ -43,7 +43,7 @@ export class ZX81Emulator
         this.installListeners(canvas);
         this.machine = new ZX81();
         this.keyboard = new KBStatus();
-        this.drawer = new AccDraw(this.machine, scale, canvas);
+        this.drawer = new Drawer(this.machine, scale, canvas);
 
         if (tzxFileName != null)
         {

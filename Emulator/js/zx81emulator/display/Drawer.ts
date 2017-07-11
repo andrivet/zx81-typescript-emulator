@@ -63,7 +63,6 @@ export default class Drawer
     private rasterX: number = 0;
     private rasterY: number = 0;
     private frameNo: number = 0;
-    private shade: number = 0;
     private dumpedscanlines: boolean = false;
     private framesStartTime: number = 0;
     private fps: number = 0;
@@ -131,7 +130,6 @@ export default class Drawer
                 this.dest += TVW;
                 bufferPos = this.dest + this.frameNo * TVW;
                 this.rasterY += 1;
-                this.shade = 8 - this.shade;
                 if (this.rasterY >= TVH)
                 {
                     i = line.scanline_len + 1;
@@ -147,7 +145,6 @@ export default class Drawer
             {
                 this.rasterX = 0;
                 this.rasterY += 1;
-                this.shade = 8 - this.shade;
                 this.dest += TVW;
             }
             if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (line.sync_len > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
@@ -156,7 +153,6 @@ export default class Drawer
                 this.rasterX = this.rasterY = 0;
                 this.dest = 0;
                 this.frameNo = 0;
-                this.shade = 0;
                 this.UpdateDisplay();
             }
         }

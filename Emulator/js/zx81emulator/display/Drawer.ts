@@ -63,7 +63,6 @@ export default class Drawer
     private rasterX: number = 0;
     private rasterY: number = 0;
     private frameNo: number = 0;
-    private dumpedscanlines: boolean = false;
     private framesStartTime: number = 0;
     private fps: number = 0;
     private borrow: number = 0;
@@ -160,10 +159,6 @@ export default class Drawer
 
     private CompleteFrame()
     {
-        if (!this.dumpedscanlines)
-        {
-            this.dumpedscanlines = true;
-        }
         let x: number = this.rasterX;
         let y: number = this.rasterY;
         let dest: number = y * TVW;

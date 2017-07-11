@@ -35,15 +35,10 @@ const VSYNC_MINLEN: number = VMIN;
 const WinW: number = 320;
 const WinH: number = 240;
 
-const NoWinT: number = 32;
-const NoWinB: number = NoWinT + WinH;
-const NoWinL: number = 42;
-const NoWinR: number = NoWinL + WinW;
-
-const WinR: number = NoWinR;
-const WinL: number = NoWinL;
-const WinT: number = NoWinT;
-const WinB: number = NoWinB;
+const WinL: number = 42;
+const WinT: number = 32;
+const WinR: number = WinL + WinW;
+const WinB: number = WinT + WinH;
 
 const TVW: number = 520;
 const TVH: number = 380;
@@ -81,13 +76,11 @@ export default class Drawer
         this.machine = machine;
         this.scanLen = 2 + this.machine.tperscanline * 2;
 
-        this.canvas.width = TVW * this.scale;
-        this.canvas.height = TVH * this.scale;
+        this.canvas.width = WinW * this.scale;
+        this.canvas.height = WinH * this.scale;
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
         this.context.webkitImageSmoothingEnabled = false;
-        this.context.fillStyle = "red";
-        this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
         this.srcCanvas.width = TVW;
@@ -116,8 +109,10 @@ export default class Drawer
 
     public RedrawDisplay()
     {
-        this.srcContext.putImageData(this.imageData, 0, 0, WinL, WinT, WinW, WinH);
-        this.context.drawImage(this.srcCanvas, 0, 0, WinW * this.scale, WinH * this.scale);
+        this.srcContext.putImageData(this.imageData, 0, 0, 0, 0, TVW, TVH);
+        this.context.drawImage(this.srcCanvas,
+            WinL, WinT, WinW, WinH,
+           0, 0, this.canvas.width, this.canvas.height);
     }
 
     private Draw(line: Scanline)

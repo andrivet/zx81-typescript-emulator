@@ -29,19 +29,13 @@ const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
 const ROM: string = "ROM/ZX81.data";
 
-const SYNCTYPEH : number = 1;
-const SYNCTYPEV : number = 2;
+const enum SYNCTYPE { H = 1, V = 2 }
+const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 
 export default class ZX81
 {
     static WHITE = 0;
     static BLACK = 112;
-
-    static LASTINSTNONE: number = 0;
-    static LASTINSTINFE: number = 1;
-    static LASTINSTOUTFE: number = 2;
-    static LASTINSTOUTFD: number = 3;
-    static LASTINSTOUTFF: number = 4;
 
     private hsync_counter: number = 207;
     private zx81_stop: boolean = false;
@@ -83,34 +77,47 @@ export default class ZX81
 
     public readbyte(address: number): number
     {
-        let data: number;
-        if (address <= RAMTOP)
-            data = this.memory[address];
-        else
-            data = this.memory[(address & (RAMTOP - 16384)) + 16384];
-        return (data);
+        return (address <= RAMTOP)
+            ? this.memory[address]
+            : this.memory[(address & (RAMTOP - 16384)) + 16384];
     }
 
+    // Given an address, opcode fetch return the byte at that memory address,
+    // modified depending on certain circumstances.
+    // It also loads the video shift register.
+    //
+    // If Address is less than M1NOT, all code is executed,
+    // the shift register is cleared.
+    //
+    // If Address >= M1NOT, and bit 6 of the fetched opcode is not set
+    // a NOP is returned and we load the shift register accordingly,
+    // depending on which video system is in use (WRX/Memotech/etc.)
+    //
+    // The ZX81 has effectively two busses.  The ROM is on the first bus
+    // while (usually) RAM is on the second.  In video generation, the ROM
+    // bus is used to get character bitmap data while the second bus
+    // is used to get the display file.  This is important because depending
+    // on which bus RAM is placed, it can either be used for extended
+    // Fonts OR WRX style hi-res graphics, but never both.
     public opcode_fetch(address: number): number
     {
-        let inv: boolean;
         let update: boolean = false;
-        let opcode: number;
-        let bit6: boolean;
-        let data: number;
 
         if(address <= RAMTOP)
             return this.readbyte(address);
 
-        data = this.readbyte((address >= 49152) ? address & 32767 : address);
-        opcode = data;
-        bit6 = (opcode & 64) !== 0;
+        let data: number = this.readbyte((address >= 49152) ? address & 32767 : address);
+        let opcode: number = data;
+        let bit6: boolean = (opcode & 64) !== 0;
         if (!bit6)
             opcode = 0;
-        inv = (data & 128) !== 0;
+        let inv: boolean = (data & 128) !== 0;
         if (!bit6)
         {
+            // standard ZX81 character sets are only 64 characters in size.
             data = data & 63;
+            // If points to ROM, fetch the bitmap from there.
+            // Otherwise, we can't get a bitmap from anywhere, so display 11111111 (what does a real ZX81 do?).
             if (this.z80.I < 64)
                 data = this.readbyte(((this.z80.I & 254) << 8) + (data << 3) | this.rowcounter);
             else
@@ -120,11 +127,14 @@ export default class ZX81
 
         if(update)
         {
+            // load the bitmap we retrieved into the video shift register
             this.shift_register |= data;
             this.shift_reg_inv |= inv ? 255 : 0;
             return (0);
         }
         else
+            // This is the fallthrough for when we found an opcode with
+            // bit 6 set in the display file.  We actually execute these opcodes
             return (opcode);
     }
 
@@ -133,45 +143,35 @@ export default class ZX81
         switch (address & 255)
         {
             case 253:
-                this.lastInstruction = ZX81.LASTINSTOUTFD;
+                this.lastInstruction = LASTINST.OUTFD;
                 break;
             case 254:
-                this.lastInstruction = ZX81.LASTINSTOUTFE;
+                this.lastInstruction = LASTINST.OUTFE;
                 break;
             default:
                 break;
         }
-        if (this.lastInstruction === 0) this.lastInstruction = ZX81.LASTINSTOUTFF;
+        if (this.lastInstruction === 0)
+            this.lastInstruction = LASTINST.OUTFF;
     }
 
     public readport(address: number): number
     {
         if ((address & 1) === 0)
         {
-            let keyb: number;
-            let data: number = 0;
-            let i: number;
-            data |= 128;
-            this.lastInstruction = ZX81.LASTINSTINFE;
-            keyb = (address / 256 | 0);
-            for (i = 0; i < 8; i++)
+            let data: number = 128;
+            this.lastInstruction = LASTINST.INFE;
+            let keyb: number = address / 256;
+            for (let i = 0; i < 8; i++)
             {
                 if ((keyb & (1 << i)) === 0)
                     data |= KBStatus.ZXKeyboard[i];
             }
             return (~data) & 255;
         }
-        else switch (address & 255)
-        {
-            case 1:
-                return 0;
-            case 95:
-                return 255;
-            case 245:
-                return 255;
-            default:
-                break;
-        }
+        else if ((address & 255) == 1)
+            return 0;
+
         return 255;
     }
 
@@ -217,6 +217,7 @@ export default class ZX81
     {
         let tstotal: number = 0;
         scanLine.scanline_len = 0;
+
         let maxScanLen: number = 420;
         if (scanLine.sync_valid !== 0)
         {
@@ -225,11 +226,13 @@ export default class ZX81
             scanLine.sync_valid = 0;
             scanLine.sync_len = 0;
         }
+
         do
         {
-            this.lastInstruction = ZX81.LASTINSTNONE;
+            this.lastInstruction = LASTINST.NONE;
             this.z80.PC = this.PatchTest();
             let ts: number = this.z80.do_opcode();
+
             if (this.int_pending)
             {
                 ts += this.z80.interrupt(ts);
@@ -239,37 +242,37 @@ export default class ZX81
             let pixels: number = ts << 1;
             for (let i: number = 0; i < pixels; i++)
             {
-                let colour: number;
-                let bit: number;
-                bit = ((this.shift_register ^ this.shift_reg_inv) & 32768);
+                let bit: number = ((this.shift_register ^ this.shift_reg_inv) & 32768);
+
+                let colour: number = 0;
                 if (this.HSYNC_generator)
                     colour = (bit !== 0 ? ZX81.BLACK : ZX81.WHITE);
-                else
-                    colour = 0;
+
                 scanLine.scanline[scanLine.scanline_len++] = colour;
+
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;
             }
 
             switch (this.lastInstruction)
             {
-                case ZX81.LASTINSTOUTFD:
+                case LASTINST.OUTFD:
                     this.NMI_generator = false;
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
                     if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPEV;
+                        scanLine.sync_valid = SYNCTYPE.V;
                     this.HSYNC_generator = true;
                     break;
-                case ZX81.LASTINSTOUTFE:
+                case LASTINST.OUTFE:
                     this.NMI_generator = true;
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
                     if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPEV;
+                        scanLine.sync_valid = SYNCTYPE.V;
                     this.HSYNC_generator = true;
                     break;
-                case ZX81.LASTINSTINFE:
+                case LASTINST.INFE:
                     if (!this.NMI_generator)
                     {
                         this.HSYNC_generator = false;
@@ -277,11 +280,11 @@ export default class ZX81
                             scanLine.sync_valid = 0;
                     }
                     break;
-                case ZX81.LASTINSTOUTFF:
+                case LASTINST.OUTFF:
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
                     if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPEV;
+                        scanLine.sync_valid = SYNCTYPE.V;
                     this.HSYNC_generator = true;
                     break;
                 default:
@@ -289,24 +292,26 @@ export default class ZX81
             }
 
             this.hsync_counter -= ts;
+
             if ((this.z80.R & 64) === 0)
                 this.int_pending = true;
             if (!this.HSYNC_generator)
                 scanLine.sync_len += ts;
+
             if (this.hsync_counter <= 0)
             {
                 if (this.NMI_generator)
                 {
-                    let nmilen: number;
-                    nmilen = this.z80.nmi(scanLine.scanline_len);
+                    let nmilen: number = this.z80.nmi(scanLine.scanline_len);
                     this.hsync_counter -= nmilen;
                     ts += nmilen;
                 }
+
                 this.borrow = -this.hsync_counter;
                 if (this.HSYNC_generator && scanLine.sync_len === 0)
                 {
                     scanLine.sync_len = 10;
-                    scanLine.sync_valid = SYNCTYPEH;
+                    scanLine.sync_valid = SYNCTYPE.H;
                     if (scanLine.scanline_len >= (this.tperscanline * 2))
                         scanLine.scanline_len = this.tperscanline * 2;
                     this.rowcounter = (++this.rowcounter) & 7;
@@ -317,7 +322,7 @@ export default class ZX81
         }
         while (scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop);
 
-        if (scanLine.sync_valid === SYNCTYPEV)
+        if (scanLine.sync_valid === SYNCTYPE.V)
             this.hsync_counter = this.tperscanline;
 
         return tstotal;

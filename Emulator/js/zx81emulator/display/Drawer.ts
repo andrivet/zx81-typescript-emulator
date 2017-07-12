@@ -181,11 +181,14 @@ export default class Drawer
         this.fps = 0;
         this.framesStartTime = Drawer.currentTimeMillis();
 
+        this.keepGoing = true;
         while(this.keepGoing)
         {
             if (this.paused)
             {
                 window.setTimeout((() => { return this.run() }), 1000);
+                this.fps = 0;
+                this.framesStartTime = Drawer.currentTimeMillis();
                 return;
             }
 
@@ -196,8 +199,9 @@ export default class Drawer
             }
 
             this.fps++;
+
             let j: number = this.machine.tperframe + this.borrow;
-            while ((j > 0 && !this.machine.stop()))
+            while (j > 0 && !this.machine.stop())
             {
                 j -= this.machine.do_scanline(buildLine);
                 this.Draw(buildLine);

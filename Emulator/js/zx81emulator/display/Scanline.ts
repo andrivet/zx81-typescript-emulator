@@ -28,7 +28,7 @@ export default class Scanline
 
     public add_blank(tstates: number, colour: number)
     {
-        while ((tstates-- > 0))
+        while (tstates-- > 0)
         {
             this.scanline[this.scanline_len++] = colour;
             this.scanline[this.scanline_len++] = colour;

@@ -35,10 +35,9 @@ const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 export default class ZX81
 {
     static WHITE = 0;
-    static BLACK = 112;
+    static BLACK = 0xFF;
 
     private hsync_counter: number = 207;
-    private zx81_stop: boolean = false;
     private lastInstruction: number = 0;
     private shift_register: number = 0;
     private shift_reg_inv: number = 0;
@@ -175,12 +174,12 @@ export default class ZX81
         return 255;
     }
 
-    public contendmem(Address: number, states: number, time: number): number
+    public contendmem(address: number, states: number, time: number): number
     {
         return time;
     }
 
-    public contendio(Address: number, states: number, time: number): number
+    public contendio(address: number, states: number, time: number): number
     {
         return time;
     }
@@ -219,7 +218,7 @@ export default class ZX81
         scanLine.scanline_len = 0;
 
         let maxScanLen: number = 420;
-        if (scanLine.sync_valid !== 0)
+        if (scanLine.sync_valid)
         {
             scanLine.add_blank(this.borrow, this.HSYNC_generator ? ZX81.WHITE : ZX81.BLACK);
             this.borrow = 0;
@@ -320,7 +319,7 @@ export default class ZX81
             }
             tstotal += ts;
         }
-        while (scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0 && !this.zx81_stop);
+        while (scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0);
 
         if (scanLine.sync_valid === SYNCTYPE.V)
             this.hsync_counter = this.tperscanline;
@@ -334,17 +333,12 @@ export default class ZX81
 
         let cb = (data: Uint8Array): void => {
             let size = (data.length < length) ? data.length : length;
-            for (var i = 0; i < size; ++i)
+            for (let i = 0; i < size; ++i)
                 this.memory[address + i] = data[i];
             callback();
         };
 
         resource.get(filename, cb);
-    }
-
-    public stop(): boolean
-    {
-        return this.zx81_stop;
     }
 
     public getTape(): Tape

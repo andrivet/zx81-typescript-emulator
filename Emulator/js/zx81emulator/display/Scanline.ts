@@ -21,9 +21,9 @@
 
 export default class Scanline
 {
-    public sync_len: number;
-    public sync_valid: number;
-    public scanline_len: number;
+    public sync_len: number = 0;
+    public sync_valid: number = 0;
+    public scanline_len: number = 0;
     public scanline: number[] = new Array(4000);
 
     public add_blank(tstates: number, colour: number)
@@ -33,14 +33,7 @@ export default class Scanline
             this.scanline[this.scanline_len++] = colour;
             this.scanline[this.scanline_len++] = colour;
         }
-        ;
-    }
-
-    constructor()
-    {
-        this.sync_len = 0;
-        this.sync_valid = 0;
-        this.scanline_len = 0;
     }
 }
+
 

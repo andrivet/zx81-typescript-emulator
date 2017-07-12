@@ -138,7 +138,7 @@ export default class Drawer
         }
         if (line.sync_len < HSYNC_MINLEN)
             line.sync_valid = 0;
-        if (line.sync_valid !== 0)
+        if (line.sync_valid)
         {
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
@@ -192,22 +192,15 @@ export default class Drawer
                 return;
             }
 
-            if (this.machine.stop())
-            {
-                this.UpdateDisplay();
-                return;
-            }
-
             this.fps++;
 
             let j: number = this.machine.tperframe + this.borrow;
-            while (j > 0 && !this.machine.stop())
+            while (j > 0)
             {
                 j -= this.machine.do_scanline(buildLine);
                 this.Draw(buildLine);
             }
-            if (!this.machine.stop())
-                this.borrow = j;
+            this.borrow = j;
 
             let currentTime: number = Drawer.currentTimeMillis();
             let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);

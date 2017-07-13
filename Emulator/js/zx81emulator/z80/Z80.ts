@@ -562,9 +562,7 @@ export default class Z80
                 this.contend(this.PC, 3);
                 this.B.dec();
                 if (this.B.get() !== 0)
-                {
                     this.JR();
-                }
                 this.PC++;
                 break;
             case 0x11:  // LD DE,nnnn
@@ -671,7 +669,8 @@ export default class Z80
                         this.SUB(add);
                     else
                     {
-                        if ((this.A.value > 0x90) && ((this.A.value & 0x0f) > 9)) add |= 0x60;
+                        if ((this.A.value > 0x90) && ((this.A.value & 0x0f) > 9))
+                            add |= 0x60;
                         this.ADD(add);
                     }
                     this.F.set((this.F.value & ~(FLAG_C | FLAG_P)) | carry | Z80.parity_table[this.A.value]);
@@ -2078,7 +2077,7 @@ export default class Z80
             case 135:
                 this.A.and(254);
                 break;
-            case 0x88:
+            case 136:
                 this.B.and(253);
                 break;
             case 137:
@@ -2121,38 +2120,38 @@ export default class Z80
                 break;
             case 149:
                 break;
-            case 0x0f0:
+            case 150:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 251);
                 break;
-            case 0x0f1:
+            case 151:
                 this.A.and(251);
                 break;
-            case 0x0f2:
+            case 152:
                 this.B.and(247);
                 break;
-            case 0x0f3:
+            case 153:
                 this.C.and(247);
                 break;
-            case 0x0f4:
+            case 154:
                 this.D.and(247);
                 break;
-            case 0x0f5:
+            case 155:
                 this.E.and(247);
                 break;
-            case 0x0f6:
+            case 156:
                 this.H.and(247);
                 break;
-            case 0x0f7:
+            case 157:
                 this.L.and(247);
                 break;
-            case 0x0f8:
+            case 158:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 247);
                 break;
-            case 0x0f9:
+            case 159:
                 this.A.and(247);
                 break;
             case 160:
@@ -2643,10 +2642,7 @@ export default class Z80
                 break;
             case 112:
                 this.tstates += 1;
-                {
-                    let bytetemp: number = 0;
-                    this.IN(bytetemp, this.BC.word);
-                }
+                this.IN(0, this.BC.get());
                 break;
             case 113:
                 this.tstates += 1;
@@ -2803,7 +2799,11 @@ export default class Z80
                     this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.DE, 1)
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2814,7 +2814,11 @@ export default class Z80
                     let bytetemp: number = this.A.value - value;
                     let lookup: number = ((this.A.value & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
                     this.contend(this.HL, 3);
-                    for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
+                    this.contend(this.HL, 1);
+                    this.contend(this.HL, 1);
+                    this.contend(this.HL, 1);
+                    this.contend(this.HL, 1);
+                    this.contend(this.HL, 1);
                     this.HL.inc();
                     this.BC.dec();
                     this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
@@ -2822,7 +2826,11 @@ export default class Z80
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                     if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2839,7 +2847,11 @@ export default class Z80
                     this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2853,13 +2865,19 @@ export default class Z80
                     this.HL.inc();
                     this.machine.writeport(this.BC.word, outitemp);
                     this.F.set(((outitemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
-                    if (this.B.get() !== 0)
+                    if(this.B.get() !== 0)
                     {
                         this.contend_io(this.BC, 1);
-                        for (let i: number = 0; i < 6; ++i) this.contend(this.PC, 1)
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
                         this.contend(this.PC - 1, 1);
                         this.PC -= 2;
-                    } else
+                    }
+                    else
                     {
                         this.contend_io(this.BC, 3);
                     }
@@ -2880,7 +2898,11 @@ export default class Z80
                     this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) > 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.DE, 1)
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
+                        this.contend(this.DE, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2899,7 +2921,12 @@ export default class Z80
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                     if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
+                        this.contend(this.HL, 3);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2916,7 +2943,11 @@ export default class Z80
                     this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
+                        this.contend(this.HL, 1);
                         this.PC -= 2;
                     }
                 }
@@ -2933,10 +2964,16 @@ export default class Z80
                     if (this.B.get() !== 0)
                     {
                         this.contend_io(this.BC, 1);
-                        for (let i: number = 0; i < 5; ++i) this.contend(this.PC, 1)
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
+                        this.contend(this.PC, 1);
                         this.contend(this.PC - 1, 1);
                         this.PC -= 2;
-                    } else
+                    }
+                    else
                     {
                         this.contend_io(this.BC, 3);
                     }
@@ -3858,7 +3895,7 @@ export default class Z80
             case 124:
             case 125:
             case 126:
-            case 0x7f:
+            case 127:
                 this.tstates += 5;
                 {
                     let tempreg = new value8();
@@ -3866,7 +3903,7 @@ export default class Z80
                     this.BIT7(tempreg);
                 }
                 break;
-            case 0x80:
+            case 128:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 254);
                 this.machine.writebyte(tempaddr, this.B.get());
@@ -3905,7 +3942,7 @@ export default class Z80
                 this.A.set(this.machine.readbyte(tempaddr) & 254);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
-            case 0x88:
+            case 136:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 253);
                 this.machine.writebyte(tempaddr, this.B.get());
@@ -3974,50 +4011,50 @@ export default class Z80
                 this.L.set(this.machine.readbyte(tempaddr) & 251);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
-            case 0x0f0:
+            case 150:
                 this.tstates += 8;
                 this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 251);
                 break;
-            case 0x0f1:
+            case 151:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 251);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
-            case 0x0f2:
+            case 152:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.B.get());
                 break;
-            case 0x0f3:
+            case 153:
                 this.tstates += 8;
                 this.C.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.C.get());
                 break;
-            case 0x0f4:
+            case 154:
                 this.tstates += 8;
                 this.D.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.D.get());
                 break;
-            case 0x0f5:
+            case 155:
                 this.tstates += 8;
                 this.E.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.E.get());
                 break;
-            case 0x0f6:
+            case 156:
                 this.tstates += 8;
                 this.H.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.H.get());
                 break;
-            case 0x0f7:
+            case 157:
                 this.tstates += 8;
                 this.L.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
-            case 0x0f8:
+            case 158:
                 this.tstates += 8;
                 this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 247);
                 break;
-            case 0x0f9:
+            case 159:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.A.value);

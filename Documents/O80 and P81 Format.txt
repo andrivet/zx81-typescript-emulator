@@ -1,0 +1,101 @@
+
+ZX80 and ZX81 File formats
+--------------------------
+
+    kio 2012-10-03
+
+.o / .80
+--------
+
+"o" and "80" files are the same and used when saving ZX80 programs.
+
+A ZX80 program is stored like this on a real audio tape:
+
+    x seconds    your voice, saying "filename" (optional)
+    x seconds    video noise
+    5 seconds    silence
+    LEN bytes    data, loaded to address $4000, LEN = ($400A)-$4000.
+    x seconds    silence / video noise
+
+Notes:
+    ZX80 files do not have filenames
+    ZX80 files cannot be autostarted.
+    The data is loaded to address $4000++
+    The data contains the whole system area, basic program, VARS.
+    Video memory is NOT included in ZX80 files.
+    the last byte of a (clean) file should be $80 (the last byte of VARS)
+    The system area should contain proper data.
+    $400A       (2 bytes) defines the data end address (used to calculate the file length).
+    $4028++     may be misused for whatever purpose.
+
+    While loading, the data at address $400A/400B is overwritten. After this they contain 
+    the real data end address of the data loaded and define when loading will stop. :-)
+
+    Files should usually not exceed 16 kBytes.
+    The memory detection procedure in both ZX80 and ZX81 stops after 16 kBytes (at $8000),
+    and initializes the stack pointer at that address, even if more memory is installed.
+    Thus loading files of 16k or more would destroy the stack area,
+    unless a separate loader has previously moved the stack area to another location.
+    However, most ZXes don't have more than 16k RAM, so bigger files won't load on most computers.
+
+".o" and ".80" files consists of the raw data as saved by the ZX80 tape saving routine.
+They can only store one program, not a whole tape with multiple programs.
+
+    .80 and .o files:   include only the data, loaded to $4000++
+    .o files:       typically there is some garbage at the file end
+
+
+.p / .81 files and .p81 files
+-----------------------------
+
+"p" and "81" files are the same and used when saving ZX81 programs.
+"p81" files are like "p" and "81" files prepended with the program's name.
+
+A ZX81 program is stored like this on a real audio tape:
+
+    x seconds    your voice, saying "filename" (optional)
+    x seconds    video noise
+    5 seconds    silence
+    1-127 bytes  filename (bit 7 set in last char)
+    LEN bytes    data, loaded to address $4009, LEN = ($4014)-$4009.
+    1 pulse      video retrace signal if display was enabled
+    x seconds    silence / video noise
+
+Notes:
+    The data contains system area, basic program, video memory, VARS.
+    the last byte of a (clean) file should be $80 (the last byte of VARS)
+
+    $4014   defines the end address (used to calculate the file length)
+    $4029   points to the next executed (autostarted) BASIC line
+    $403B   indicates if program runs in SLOW or FAST mode (bit 6)
+    $403C++ may be misused for whatever purpose,
+    video memory must contain 25 HALT opcodes if the file was saved in SLOW mode.
+
+    While loading, the data at address $4014/4015 is overwritten. After this they contain 
+    the real data end address of the data loaded and define when loading will stop. :-)
+
+    Files should usually not exceed 16 kBytes.
+    The memory detection procedure in both ZX80 and ZX81 stops after 16 kBytes (at $8000),
+    and initializes the stack pointer at that address, even if more memory is installed.
+    Thus loading files of 16k or more would destroy the stack area,
+    unless a separate loader has previously moved the stack area to another location.
+    However, most ZXes don't have more than 16k RAM, so bigger files won't load on most computers.
+
+".81" and ".p" files consist of the raw data as saved by the ZX81 tape saving routine WITHOUT the filename.
+They can only store one program, not a whole tape with multiple programs.
+".p81" files consist of the raw data as saved by the ZX81 tape saving routine INCLUDING the filename.
+This format can store multiple programs.
+    
+    .p and .81: include only the data, loaded to $4009++
+    .p files:   typically there is some garbage at the file end
+    .p81 files: start with the 1..127 bytes filename, last byte ORed with $80
+
+
+
+
+
+
+
+
+
+

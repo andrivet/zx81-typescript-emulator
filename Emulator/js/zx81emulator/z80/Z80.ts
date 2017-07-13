@@ -23,32 +23,32 @@ import ZX81 from "../zx81/ZX81";
 import {MasterRegisterPair, RegisterPair, SlaveRegisterPair, isRegisterPair} from "./RegisterPair";
 import {Register, MasterRegister, value8} from "./Register";
 
+const FLAG_C: number = 0x01;
+const FLAG_N: number = 0x02;
+const FLAG_P: number = 0x04;
+const FLAG_V: number = FLAG_P;
+const FLAG_3: number = 0x08;
+const FLAG_H: number = 0x10;
+const FLAG_5: number = 0x20;
+const FLAG_Z: number = 0x40;
+const FLAG_S: number = 0x80;
+
 
 export default class Z80
 {
-    static FLAG_C: number = 0x01;
-    static FLAG_N: number = 0x02;
-    static FLAG_P: number = 0x04;
-    static FLAG_V: number = Z80.FLAG_P;
-    static FLAG_3: number = 0x08;
-    static FLAG_H: number = 0x10;
-    static FLAG_5: number = 0x20;
-    static FLAG_Z: number = 0x40;
-    static FLAG_S: number = 0x80;
-
     /* Whether a half carry occured or not can be determined by looking at
      the 3rd bit of the two arguments and the result; these are hashed
      into this table in the form r12, where r is the 3rd bit of the
      result, 1 is the 3rd bit of the 1st argument and 2 is the
      third bit of the 2nd argument; the tables differ for add and subtract
      operations */
-    static halfcarry_add_table: number[] = [0, Z80.FLAG_H, Z80.FLAG_H, Z80.FLAG_H, 0, 0, 0, Z80.FLAG_H];
-    static halfcarry_sub_table: number[] = [0, 0, Z80.FLAG_H, 0, Z80.FLAG_H, 0, Z80.FLAG_H, Z80.FLAG_H];
+    static halfcarry_add_table: number[] = [0, FLAG_H, FLAG_H, FLAG_H, 0, 0, 0, FLAG_H];
+    static halfcarry_sub_table: number[] = [0, 0, FLAG_H, 0, FLAG_H, 0, FLAG_H, FLAG_H];
 
     /* Similarly, overflow can be determined by looking at the 7th bits; again
      the hash into this table is r12 */
-    static overflow_add_table: number[] =  [0, 0, 0, Z80.FLAG_V, Z80.FLAG_V, 0, 0, 0];
-    static overflow_sub_table: number[] = [0, Z80.FLAG_V, 0, 0, 0, 0, Z80.FLAG_V, 0];
+    static overflow_add_table: number[] =  [0, 0, 0, FLAG_V, FLAG_V, 0, 0, 0];
+    static overflow_sub_table: number[] = [0, FLAG_V, 0, 0, 0, 0, FLAG_V, 0];
 
     /* Some more tables; initialised in z80_init_tables() */
     static sz53_table: number[] = new Array(0x100);     /* The S, Z, 5 and 3 bits of the lookup value */
@@ -57,24 +57,24 @@ export default class Z80
 
     private machine: ZX81;
 
-    public BC: MasterRegisterPair;
-    public DE: MasterRegisterPair;
-    public HL: MasterRegisterPair;
-    public AF: RegisterPair;
-    public A: MasterRegister;
-    public F: MasterRegister;
-    public B: Register;
-    public C: Register;
-    public D: Register;
-    public E: Register;
-    public H: Register;
-    public L: Register;
-    public IX: RegisterPair;
-    public IY: RegisterPair;
-    public IXH: Register;
-    public IXL: Register;
-    public IYH: Register;
-    public IYL: Register;
+    public AF: RegisterPair = new SlaveRegisterPair("AF");
+    public BC: MasterRegisterPair = new MasterRegisterPair("BC");
+    public DE: MasterRegisterPair = new MasterRegisterPair("DE");
+    public HL: MasterRegisterPair = new MasterRegisterPair("HL");
+    public IX: RegisterPair = new MasterRegisterPair("IX");
+    public IY: RegisterPair = new MasterRegisterPair("IY");
+    public A: MasterRegister = <MasterRegister>this.AF.getRH("A");
+    public F: MasterRegister = <MasterRegister>this.AF.getRL("F");
+    public B: Register = this.BC.getRH("B");
+    public C: Register = this.BC.getRL("C");
+    public D: Register = this.DE.getRH("D");
+    public E: Register = this.DE.getRL("E");
+    public H: Register = this.HL.getRH("H");
+    public L: Register= this.HL.getRL("L");
+    public IXH: Register = this.IX.getRH("IXH");
+    public IXL: Register = this.IX.getRL("IXL");
+    public IYH: Register = this.IY.getRH("IYH");
+    public IYL: Register = this.IY.getRL("IYL");
     public SP: number = 0;
     public PC: number = 0;
     public AF_: number = 0;
@@ -90,29 +90,9 @@ export default class Z80
     public halted: number = 0;
     private tstates: number = 0;
 
-    private tempreg: value8 = new value8("value8");
-
     /* Set up the z80 emulation */
     public constructor(machine: ZX81)
     {
-        this.AF = new SlaveRegisterPair("AF");
-        this.BC = new MasterRegisterPair("BC");
-        this.DE = new MasterRegisterPair("DE");
-        this.HL = new MasterRegisterPair("HL");
-        this.IX = new MasterRegisterPair("IX");
-        this.IY = new MasterRegisterPair("IY");
-        this.A = <MasterRegister>this.AF.getRH("A");
-        this.F = <MasterRegister>this.AF.getRL("F");
-        this.B = this.BC.getRH("B");
-        this.C = this.BC.getRL("C");
-        this.D = this.DE.getRH("D");
-        this.E = this.DE.getRL("E");
-        this.H = this.HL.getRH("H");
-        this.L = this.HL.getRL("L");
-        this.IXH = this.IX.getRH("IXH");
-        this.IXL = this.IX.getRL("IXL");
-        this.IYH = this.IY.getRH("IYH");
-        this.IYL = this.IY.getRL("IYL");
         this.machine = machine;
         Z80.init_tables();
     }
@@ -120,25 +100,21 @@ export default class Z80
     /* Initalise the tables used to set flags */
     private static init_tables()
     {
-        let i: number;
-        let j: number;
-        let k: number;
-        let parity: number;
-        for (i = 0; i < 256; i++)
+        for (let i: number = 0; i < 0x100; i++)
         {
-            Z80.sz53_table[i] = i & (Z80.FLAG_3 | Z80.FLAG_5 | Z80.FLAG_S);
-            j = i;
-            parity = 0;
-            for (k = 0; k < 8; k++)
+            Z80.sz53_table[i] = i & (FLAG_3 | FLAG_5 | FLAG_S);
+            let j: number = i;
+            let parity: number = 0;
+            for (let k: number = 0; k < 8; k++)
             {
                 parity ^= j & 1;
                 j >>= 1;
             }
-            Z80.parity_table[i] = (parity !== 0 ? 0 : Z80.FLAG_P);
+            Z80.parity_table[i] = (parity !== 0 ? 0 : FLAG_P);
             Z80.sz53p_table[i] = Z80.sz53_table[i] | Z80.parity_table[i];
         }
-        Z80.sz53_table[0] |= Z80.FLAG_Z;
-        Z80.sz53p_table[0] |= Z80.FLAG_Z;
+        Z80.sz53_table[0] |= FLAG_Z;
+        Z80.sz53p_table[0] |= FLAG_Z;
     }
 
     /* Reset the z80 */
@@ -175,14 +151,10 @@ export default class Z80
 
             this.R = (this.R + 1) & 0xFF;
 
-            switch ((this.IM))
+            switch (this.IM)
             {
-                case 0:
-                    this.PC = 56;
-                    return (13);
-                case 1:
-                    this.PC = 56;
-                    return (13);
+                case 0: this.PC = 0x0038; return (13);
+                case 1: this.PC = 0x0038; return (13);
                 case 2:
                 {
                     let inttemp: number = (this.I << 8) | 0xFF;
@@ -208,9 +180,10 @@ export default class Z80
             this.halted = 0;
             this.PC++;
 
-            waitstates = ((ts / 2 | 0)) - this.machine.tperscanline;
+            waitstates = (ts / 2) - this.machine.tperscanline;
             waitstates = 4 - waitstates;
-            if (waitstates < 0) waitstates = 0;
+            if (waitstates < 0)
+                waitstates = 0;
         }
 
         this.machine.writebyte(--this.SP, this.PC >> 8);
@@ -221,8 +194,7 @@ export default class Z80
         return (4 + waitstates);
     }
 
-    /* Get the appropriate contended memory delay. Use this function later
-     to avoid a function call if memory contention is disabled */
+    /* Get the appropriate contended memory delay */
     private contend(address: number, time: number): void;
     private contend(address: RegisterPair, time: number): void;
     private contend(address: number | RegisterPair, time: number): void
@@ -242,31 +214,31 @@ export default class Z80
     public AND(value: Register | number): void
     {
         this.A.value &= (value instanceof Register ? value.get() : value);
-        this.F.set(Z80.FLAG_H | Z80.sz53p_table[this.A.value]);
+        this.F.set(FLAG_H | Z80.sz53p_table[this.A.value]);
     }
 
     private ADC(value: number)
     {
-        let adctemp: number = this.A.value + value + (this.F.value & Z80.FLAG_C);
-        let lookup: number = ((this.A.value & 136) >> 3) | (((value) & 136) >> 2) | ((adctemp & 136) >> 1);
+        let adctemp: number = this.A.value + value + (this.F.value & FLAG_C);
+        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((adctemp & 0x88) >> 1);
         this.A.set(adctemp);
-        this.F.set(((adctemp & 256) > 0 ? Z80.FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((adctemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
     }
 
     private ADC16(value: number)
     {
-        let add16temp: number = this.HL.word + value + (this.F.value & Z80.FLAG_C);
-        let lookup: number = ((this.HL.word & 34816) >> 11) | ((value & 34816) >> 10) | ((add16temp & 34816) >> 9);
+        let add16temp: number = this.HL.word + value + (this.F.value & FLAG_C);
+        let lookup: number = ((this.HL.word & 0x8800) >> 11) | ((value & 0x8800) >> 10) | ((add16temp & 0x8800) >> 9);
         this.HL.set(add16temp);
-        this.F.set(((add16temp & 65536) > 0 ? Z80.FLAG_C : 0) | Z80.overflow_add_table[lookup >> 4] | (this.H.get() & (Z80.FLAG_3 | Z80.FLAG_5 | Z80.FLAG_S)) | Z80.halfcarry_add_table[lookup & 7] | (this.HL.word === 0 ? 0 : Z80.FLAG_Z));
+        this.F.set(((add16temp & 0x10000) > 0 ? FLAG_C : 0) | Z80.overflow_add_table[lookup >> 4] | (this.H.get() & (FLAG_3 | FLAG_5 | FLAG_S)) | Z80.halfcarry_add_table[lookup & 7] | (this.HL.word === 0 ? 0 : FLAG_Z));
     }
 
     private ADD(value: number)
     {
         let addtemp: number = this.A.value + value;
-        let lookup: number = ((this.A.value & 136) >> 3) | (((value) & 136) >> 2) | ((addtemp & 136) >> 1);
+        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((addtemp & 0x88) >> 1);
         this.A.set(addtemp);
-        this.F.set(((addtemp & 256) > 0 ? Z80.FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((addtemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
     }
 
     public ADD16(rp1: RegisterPair, rp2: RegisterPair): void;
@@ -275,20 +247,20 @@ export default class Z80
     {
         let value2: number = isRegisterPair(rp2) ? rp2.get() : rp2;
         let add16temp: number = rp1.get() + value2;
-        let lookup: number = ((rp1.get() & 2048) >> 11) | ((value2 & 2048) >> 10) | ((add16temp & 2048) >> 9);
+        let lookup: number = ((rp1.get() & 0x0800) >> 11) | ((value2 & 0x0800) >> 10) | ((add16temp & 0x0800) >> 9);
         this.tstates += 7;
         rp1.set(add16temp);
-        this.F.set((this.F.value & (Z80.FLAG_V | Z80.FLAG_Z | Z80.FLAG_S)) | ((add16temp & 65536) > 0 ? Z80.FLAG_C : 0) | ((add16temp >> 8) & (Z80.FLAG_3 | Z80.FLAG_5)) | Z80.halfcarry_add_table[lookup]);
+        this.F.set((this.F.value & (FLAG_V | FLAG_Z | FLAG_S)) | ((add16temp & 0x10000) > 0 ? FLAG_C : 0) | ((add16temp >> 8) & (FLAG_3 | FLAG_5)) | Z80.halfcarry_add_table[lookup]);
     }
 
     private BIT(bit: number, value: Register)
     {
-        this.F.set((this.F.value & Z80.FLAG_C) | (value.get() & (Z80.FLAG_3 | Z80.FLAG_5)) | ((value.get() & (1 << bit)) > 0 ? Z80.FLAG_H : (Z80.FLAG_P | Z80.FLAG_H | Z80.FLAG_Z)));
+        this.F.set((this.F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & (1 << bit)) > 0 ? FLAG_H : (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
     private BIT7(value: Register)
     {
-        this.F.set((this.F.value & Z80.FLAG_C) | (value.get() & (Z80.FLAG_3 | Z80.FLAG_5)) | ((value.get() & 128) > 0 ? (Z80.FLAG_H | Z80.FLAG_S) : (Z80.FLAG_P | Z80.FLAG_H | Z80.FLAG_Z)));
+        this.F.set((this.F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & 0x80) > 0 ? (FLAG_H | FLAG_S) : (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
     private CALL()
@@ -303,15 +275,15 @@ export default class Z80
     private CP(value: number)
     {
         let cptemp: number = this.A.value - value;
-        let lookup: number = ((this.A.value & 136) >> 3) | (((value) & 136) >> 2) | ((cptemp & 136) >> 1);
-        this.F.set(((cptemp & 256) > 0 ? Z80.FLAG_C : (cptemp > 0 ? 0 : Z80.FLAG_Z)) | Z80.FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | (value & (Z80.FLAG_3 | Z80.FLAG_5)) | (cptemp & Z80.FLAG_S));
+        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((cptemp & 0x88) >> 1);
+        this.F.set(((cptemp & 0x100) > 0 ? FLAG_C : (cptemp > 0 ? 0 : FLAG_Z)) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | (value & (FLAG_3 | FLAG_5)) | (cptemp & FLAG_S));
     }
 
     private DEC(reg: Register)
     {
-        this.F.set((this.F.value & Z80.FLAG_C) | ((reg.get() & 15) > 0 ? 0 : Z80.FLAG_H) | Z80.FLAG_N);
+        this.F.set((this.F.value & FLAG_C) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | FLAG_N);
         reg.dec();
-        this.F.or((reg.get() === 127 ? Z80.FLAG_V : 0) | Z80.sz53_table[reg.get()]);
+        this.F.or((reg.get() === 0x7f ? FLAG_V : 0) | Z80.sz53_table[reg.get()]);
     }
 
     public IN(reg: Register, rp: RegisterPair): void;
@@ -325,13 +297,13 @@ export default class Z80
         this.contend_io(port, 3);
         let result: number = this.machine.readport(port);
         if(reg instanceof Register) reg.set(result);
-        this.F.set((this.F.value & Z80.FLAG_C) | Z80.sz53p_table[value]);
+        this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[value]);
     }
 
     private INC(reg: Register)
     {
         reg.inc();
-        this.F.set((this.F.value & Z80.FLAG_C) | (reg.get() === 128 ? Z80.FLAG_V : 0) | ((reg.get() & 15) > 0 ? 0 : Z80.FLAG_H) | Z80.sz53_table[reg.get()]);
+        this.F.set((this.F.value & FLAG_C) | (reg.get() === 0x80 ? FLAG_V : 0) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | Z80.sz53_table[reg.get()]);
     }
 
     private LD16_NNRR(value: number)
@@ -341,7 +313,7 @@ export default class Z80
         this.contend(this.PC, 3);
         ldtemp |= this.machine.readbyte(this.PC++) << 8;
         this.contend(ldtemp, 3);
-        this.machine.writebyte(ldtemp++, value & 255);
+        this.machine.writebyte(ldtemp++, value & 0xFF);
         this.contend(ldtemp, 3);
         this.machine.writebyte(ldtemp, value >> 8);
     }
@@ -371,7 +343,7 @@ export default class Z80
         this.contend(this.PC, 1);
         this.contend(this.PC, 1);
         let dist: number = this.machine.readbyte(this.PC);
-        dist = (dist < 128 ? dist : dist - 256);
+        dist = (dist < 0x80 ? dist : dist - 0x100);
         this.PC += dist;
     }
 
@@ -408,7 +380,7 @@ export default class Z80
         this.machine.writebyte(this.SP, value >> 8);
         this.SP--;
         this.contend(this.SP, 3);
-        this.machine.writebyte(this.SP, value & 255);
+        this.machine.writebyte(this.SP, value & 0xFF);
     }
 
     private RET()
@@ -419,7 +391,7 @@ export default class Z80
     private RL(reg: Register)
     {
         let rltemp: number = reg.get();
-        reg.set((rltemp << 1) | (this.F.value & Z80.FLAG_C));
+        reg.set((rltemp << 1) | (this.F.value & FLAG_C));
         this.F.set((rltemp >> 7) | Z80.sz53p_table[reg.get()]);
     }
 
@@ -429,19 +401,19 @@ export default class Z80
         let newValue: number = (before << 1) | (before >> 7);
         reg.set(newValue);
         let after: number = reg.get();
-        this.F.set((after & Z80.FLAG_C) | Z80.sz53p_table[after]);
+        this.F.set((after & FLAG_C) | Z80.sz53p_table[after]);
     }
 
     private RR(reg: Register)
     {
         let rrtemp: number = reg.get();
         reg.set((reg.get() >> 1) | (this.F.value << 7));
-        this.F.set((rrtemp & Z80.FLAG_C) | Z80.sz53p_table[reg.get()]);
+        this.F.set((rrtemp & FLAG_C) | Z80.sz53p_table[reg.get()]);
     }
 
     private RRC(reg: Register)
     {
-        this.F.set(reg.get() & Z80.FLAG_C);
+        this.F.set(reg.get() & FLAG_C);
         reg.set((reg.get() >> 1) | (reg.get() << 7));
         this.F.or(Z80.sz53p_table[reg.get()]);
     }
@@ -454,18 +426,18 @@ export default class Z80
 
     private SBC(value: number)
     {
-        let sbctemp: number = this.A.value - (value) - (this.F.value & Z80.FLAG_C);
-        let lookup: number = ((this.A.value & 136) >> 3) | (((value) & 136) >> 2) | ((sbctemp & 136) >> 1);
+        let sbctemp: number = this.A.value - (value) - (this.F.value & FLAG_C);
+        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((sbctemp & 0x88) >> 1);
         this.A.set(sbctemp);
-        this.F.set(((sbctemp & 256) > 0 ? Z80.FLAG_C : 0) | Z80.FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((sbctemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
     }
 
     private SBC16(value: number)
     {
-        let sub16temp: number = this.HL.word - (value) - (this.F.value & Z80.FLAG_C);
+        let sub16temp: number = this.HL.word - (value) - (this.F.value & FLAG_C);
         let lookup: number = ((this.HL.word & 34816) >> 11) | (((value) & 34816) >> 10) | ((sub16temp & 34816) >> 9);
         this.HL.set(sub16temp);
-        this.F.set(((sub16temp & 65536) > 0 ? Z80.FLAG_C : 0) | Z80.FLAG_N | Z80.overflow_sub_table[lookup >> 4] | (this.H.get() & (Z80.FLAG_3 | Z80.FLAG_5 | Z80.FLAG_S)) | Z80.halfcarry_sub_table[lookup & 7] | (this.HL.word > 0 ? 0 : Z80.FLAG_Z));
+        this.F.set(((sub16temp & 0x10000) > 0 ? FLAG_C : 0) | FLAG_N | Z80.overflow_sub_table[lookup >> 4] | (this.H.get() & (FLAG_3 | FLAG_5 | FLAG_S)) | Z80.halfcarry_sub_table[lookup & 7] | (this.HL.word > 0 ? 0 : FLAG_Z));
     }
 
     private SLA(reg: Register)
@@ -484,14 +456,14 @@ export default class Z80
 
     private SRA(reg: Register)
     {
-        this.F.set(reg.get() & Z80.FLAG_C);
-        reg.set((reg.get() & 128) | (reg.get() >> 1));
+        this.F.set(reg.get() & FLAG_C);
+        reg.set((reg.get() & 0x80) | (reg.get() >> 1));
         this.F.or(Z80.sz53p_table[reg.get()]);
     }
 
     private SRL(reg: Register)
     {
-        this.F.set(reg.get() & Z80.FLAG_C);
+        this.F.set(reg.get() & FLAG_C);
         reg.set(reg.get() >> 1);
         this.F.or(Z80.sz53p_table[reg.get()]);
     }
@@ -499,9 +471,9 @@ export default class Z80
     private SUB(value: number)
     {
         let subtemp: number = this.A.value - (value);
-        let lookup: number = ((this.A.value & 136) >> 3) | (((value) & 136) >> 2) | ((subtemp & 136) >> 1);
+        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((subtemp & 0x88) >> 1);
         this.A.set(subtemp);
-        this.F.set(((subtemp & 256) > 0 ? Z80.FLAG_C : 0) | Z80.FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((subtemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
     }
 
     public XOR(r: Register): void;
@@ -517,74 +489,75 @@ export default class Z80
     {
         this.tstates = 0;
         this.contend(this.PC, 4);
-        this.R = (this.R + 1) & 255;
+        this.R = (this.R + 1) & 0xFF;
         let opcode: number = this.machine.opcode_fetch(this.PC++);
+
         switch(opcode)
         {
-            case 0:
+            case 0x0:   // NOP
                 break;
-            case 1:
+            case 0x01:  // LD BC,nnnn
                 this.contend(this.PC, 3);
                 this.C.set(this.machine.readbyte(this.PC++));
                 this.contend(this.PC, 3);
                 this.B.set(this.machine.readbyte(this.PC++));
                 break;
-            case 2:
+            case 0x02:  // LD (BC),A
                 this.contend(this.BC, 3);
                 this.machine.writebyte(this.BC.word, this.A.value);
                 break;
-            case 3:
+            case 0x03:  // INC BC
                 this.tstates += 2;
                 this.BC.inc();
                 break;
-            case 4:
+            case 0x04:  // INC B
                 this.INC(this.B);
                 break;
-            case 5:
+            case 0x05:  // DEC B
                 this.DEC(this.B);
                 break;
-            case 6:
+            case 0x06:  // LD B,nn
                 this.contend(this.PC, 3);
                 this.B.set(this.machine.readbyte(this.PC++));
                 break;
-            case 7:
+            case 0x07:  // RLCA
                 this.A.set((this.A.value << 1) | (this.A.value >> 7));
-                this.F.set((this.F.value & (Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | (this.A.value & (Z80.FLAG_C | Z80.FLAG_3 | Z80.FLAG_5)));
+                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_C | FLAG_3 | FLAG_5)));
                 break;
-            case 8:
+            case 0x08:  // EX AF,AF'
                 {
                     let wordtemp: number = this.AF.get();
                     this.AF.set(this.AF_);
                     this.AF_ = wordtemp;
                 }
                 break;
-            case 9:
+            case 0x09:  // ADD HL,BC
                 this.ADD16(this.HL, this.BC);
                 break;
-            case 10:
+            case 0x0A:  // LD A,(BC)
                 this.contend(this.BC, 3);
                 this.A.set(this.machine.readbyte(this.BC.word));
                 break;
-            case 11:
+            case 0x0B:  // DEC BC
                 this.tstates += 2;
                 this.BC.dec();
                 break;
-            case 12:
+            case 0x0C:  // INC C
                 this.INC(this.C);
                 break;
-            case 13:
+            case 0x0D:  // DEC C
                 this.DEC(this.C);
                 break;
-            case 14:
+            case 0x0E:  // LD C,nn
                 this.contend(this.PC, 3);
                 this.C.set(this.machine.readbyte(this.PC++));
                 break;
-            case 15:
-                this.F.set((this.F.value & (Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | (this.A.value & Z80.FLAG_C));
+            case 0x0F:  // RRCA
+                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & FLAG_C));
                 this.A.set((this.A.value >> 1) | (this.A.value << 7));
-                this.F.or(this.A.value & (Z80.FLAG_3 | Z80.FLAG_5));
+                this.F.or(this.A.value & (FLAG_3 | FLAG_5));
                 break;
-            case 16:
+            case 0x10:  // DJNZ offset
                 this.tstates++;
                 this.contend(this.PC, 3);
                 this.B.dec();
@@ -594,165 +567,159 @@ export default class Z80
                 }
                 this.PC++;
                 break;
-            case 17:
+            case 0x11:  // LD DE,nnnn
                 this.contend(this.PC, 3);
                 this.E.set(this.machine.readbyte(this.PC++));
                 this.contend(this.PC, 3);
                 this.D.set(this.machine.readbyte(this.PC++));
                 break;
-            case 18:
+            case 0x12:  // LD (DE),A
                 this.contend(this.DE, 3);
                 this.machine.writebyte(this.DE.word, this.A.value);
                 break;
-            case 19:
+            case 0x13:  // INC DE
                 this.tstates += 2;
                 this.DE.inc();
                 break;
-            case 20:
+            case 0x14:  // INC D
                 this.INC(this.D);
                 break;
-            case 21:
+            case 0x15:  // DEC D
                 this.DEC(this.D);
                 break;
-            case 22:
+            case 0x16:  // LD D,nn
                 this.contend(this.PC, 3);
                 this.D.set(this.machine.readbyte(this.PC++));
                 break;
-            case 23:
+            case 0x17:  // RLA
                 {
                     let bytetemp: number = this.A.value;
-                    this.A.set((this.A.value << 1) | (this.F.value & Z80.FLAG_C));
-                    this.F.set((this.F.value & (Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | (this.A.value & (Z80.FLAG_3 | Z80.FLAG_5)) | (bytetemp >> 7));
+                    this.A.set((this.A.value << 1) | (this.F.value & FLAG_C));
+                    this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_3 | FLAG_5)) | (bytetemp >> 7));
                 }
                 break;
-            case 24:
+            case 0x18:  // JR offset
                 this.contend(this.PC, 3);
                 this.JR();
                 this.PC++;
                 break;
-            case 25:
+            case 0x19:  // ADD HL,DE
                 this.ADD16(this.HL, this.DE);
                 break;
-            case 26:
+            case 0x1A:  // LD A,(DE)
                 this.contend(this.DE, 3);
                 this.A.set(this.machine.readbyte(this.DE.word));
                 break;
-            case 27:
+            case 0x1B:  // DEC DE
                 this.tstates += 2;
                 this.DE.dec();
                 break;
-            case 28:
+            case 0x1C:  // INC E
                 this.INC(this.E);
                 break;
-            case 29:
+            case 0x1D:  // DEC E
                 this.DEC(this.E);
                 break;
-            case 30:
+            case 0x1E:  // LD E,nn
                 this.contend(this.PC, 3);
                 this.E.set(this.machine.readbyte(this.PC++));
                 break;
-            case 31:
+            case 0x1F:  // RRA
                 {
                     let bytetemp: number = this.A.value;
                     this.A.set((this.A.value >> 1) | (this.F.value << 7));
-                    this.F.set((this.F.value & (Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | (this.A.value & (Z80.FLAG_3 | Z80.FLAG_5)) | (bytetemp & Z80.FLAG_C));
+                    this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_3 | FLAG_5)) | (bytetemp & FLAG_C));
                 }
                 break;
-            case 32:
+            case 0x20:  // JR NZ,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & Z80.FLAG_Z) === 0)
-                {
+                if ((this.F.value & FLAG_Z) === 0)
                     this.JR();
-                }
                 this.PC++;
                 break;
-            case 33:
+            case 0x21:  // LD HL,nnnn
                 this.contend(this.PC, 3);
                 this.L.set(this.machine.readbyte(this.PC++));
                 this.contend(this.PC, 3);
                 this.H.set(this.machine.readbyte(this.PC++));
                 break;
-            case 34:
+            case 0x22:  // LD (nnnn),HL
                 this.LD16_NNRR(this.HL.word);
                 break;
-            case 35:
+            case 0x23:  // INC HL
                 this.tstates += 2;
                 this.HL.inc();
                 break;
-            case 36:
+            case 0x24:  // INC H
                 this.INC(this.H);
                 break;
-            case 37:
+            case 0x25:  // DEC H
                 this.DEC(this.H);
                 break;
-            case 38:
+            case 0x26:  // LD H,nn
                 this.contend(this.PC, 3);
                 this.H.set(this.machine.readbyte(this.PC++));
                 break;
-            case 39:
+            case 0x27:  // DAA
                 {
                     let add: number = 0;
-                    let carry: number = (this.F.value & Z80.FLAG_C);
-                    if (((this.F.value & Z80.FLAG_H) !== 0) || ((this.A.value & 15) > 9)) add = 6;
-                    if (carry !== 0 || (this.A.value > 159)) add |= 96;
-                    if (this.A.value > 153) carry = 1;
-                    if ((this.F.value & Z80.FLAG_N) !== 0)
-                    {
+                    let carry: number = (this.F.value & FLAG_C);
+                    if (((this.F.value & FLAG_H) !== 0) || (this.A.value & 0x0f) > 9) add = 6;
+                    if (carry !== 0 || (this.A.value > 0x0f9)) add |= 0x60;
+                    if (this.A.value > 0x99) carry = 1;
+                    if ((this.F.value & FLAG_N) !== 0)
                         this.SUB(add);
-                    } else
+                    else
                     {
-                        if ((this.A.value > 144) && ((this.A.value & 15) > 9)) add |= 96;
+                        if ((this.A.value > 0x90) && ((this.A.value & 0x0f) > 9)) add |= 0x60;
                         this.ADD(add);
                     }
-                    this.F.set((this.F.value & ~(Z80.FLAG_C | Z80.FLAG_P)) | carry | Z80.parity_table[this.A.value]);
+                    this.F.set((this.F.value & ~(FLAG_C | FLAG_P)) | carry | Z80.parity_table[this.A.value]);
                 }
                 break;
-            case 40:
+            case 0x28:  // JR Z,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & Z80.FLAG_Z) !== 0)
-                {
+                if ((this.F.value & FLAG_Z) !== 0)
                     this.JR();
-                }
                 this.PC++;
                 break;
-            case 41:
+            case 0x29:  // ADD HL,HL
                 this.ADD16(this.HL, this.HL);
                 break;
-            case 42:
+            case 0x2A:  // LD HL,(nnnn)
                 this.HL.set(this.LD16_RRNN());
                 break;
-            case 43:
+            case 0x2B:  // DEC HL
                 this.tstates += 2;
                 this.HL.dec();
                 break;
-            case 44:
+            case 0x2C:  // INC L
                 this.INC(this.L);
                 break;
-            case 45:
+            case 0x2D:  // DEC L
                 this.DEC(this.L);
                 break;
-            case 46:
+            case 0x2E:  // LD L,nn
                 this.contend(this.PC, 3);
                 this.L.set(this.machine.readbyte(this.PC++));
                 break;
-            case 47:
-                this.A.set(this.A.value ^ 255);
-                this.F.set((this.F.value & (Z80.FLAG_C | Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | (this.A.value & (Z80.FLAG_3 | Z80.FLAG_5)) | (Z80.FLAG_N | Z80.FLAG_H));
+            case 0x2F:  // CPL
+                this.A.set(this.A.value ^ 0xFF);
+                this.F.set((this.F.value & (FLAG_C | FLAG_P | FLAG_Z | FLAG_S)) |
+                           (this.A.value & (FLAG_3 | FLAG_5)) | (FLAG_N | FLAG_H));
                 break;
-            case 48:
+            case 0x30:  // JR NC,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & Z80.FLAG_C) === 0)
-                {
+                if ((this.F.value & FLAG_C) === 0)
                     this.JR();
-                }
                 this.PC++;
                 break;
-            case 49:
+            case 0x31:  // LD SP,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC, 3);
                 this.SP = this.machine.readbyte(this.PC++) + (this.machine.readbyte(this.PC++) << 8);
                 break;
-            case 50:
+            case 0x32:  // LD (nnnn),A
                 this.contend(this.PC, 3);
                 {
                     let wordtemp: number = this.machine.readbyte(this.PC++);
@@ -762,639 +729,624 @@ export default class Z80
                     this.machine.writebyte(wordtemp, this.A.value);
                 }
                 break;
-            case 51:
+            case 0x33:  // INC SP
                 this.tstates += 2;
                 this.SP++;
                 break;
-            case 52:
+            case 0x34:  // INC (HL)
                 this.contend(this.HL, 4);
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: Register = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.INC(bytetemp);
                     this.contend(this.HL, 3);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 53:
+            case 0x35:  // DEC (HL)
                 this.contend(this.HL, 4);
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: Register = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.DEC(bytetemp);
                     this.contend(this.HL, 3);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 54:
+            case 0x36:  // LD (HL),nn
                 this.contend(this.PC, 3);
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.machine.readbyte(this.PC++));
                 break;
-            case 55:
-                this.F.and(~(Z80.FLAG_N | Z80.FLAG_H));
-                this.F.or((this.A.value & (Z80.FLAG_3 | Z80.FLAG_5)) | Z80.FLAG_C);
+            case 0x37:  // SCF
+                this.F.and(~(FLAG_N | FLAG_H));
+                this.F.or((this.A.value & (FLAG_3 | FLAG_5)) | FLAG_C);
                 break;
-            case 56:
+            case 0x38:  // JR C,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & Z80.FLAG_C) !== 0)
-                {
+                if ((this.F.value & FLAG_C) !== 0)
                     this.JR();
-                }
                 this.PC++;
                 break;
-            case 57:
+            case 0x39:  // ADD HL,SP
                 this.ADD16(this.HL, this.SP);
                 break;
-            case 58:
+            case 0x3A:  // LD A,(nnnn)
                 {
-                    let wordtemp: number;
                     this.contend(this.PC, 3);
-                    wordtemp = this.machine.readbyte(this.PC++);
+                    let wordtemp = this.machine.readbyte(this.PC++);
                     this.contend(this.PC, 3);
                     wordtemp |= (this.machine.readbyte(this.PC++) << 8);
                     this.contend(wordtemp, 3);
                     this.A.set(this.machine.readbyte(wordtemp));
                 }
                 break;
-            case 59:
+            case 0x3B:  // DEC SP
                 this.tstates += 2;
                 this.SP--;
                 break;
-            case 60:
+            case 0x3C:  // INC A
                 this.INC(this.A);
                 break;
-            case 61:
+            case 0x3D:  // DEC A
                 this.DEC(this.A);
                 break;
-            case 62:
+            case 0x3E:  // LD A,nn
                 this.contend(this.PC, 3);
                 this.A.set(this.machine.readbyte(this.PC++));
                 break;
-            case 63:
-                this.F.set((this.F.value & (Z80.FLAG_P | Z80.FLAG_Z | Z80.FLAG_S)) | ((this.F.value & Z80.FLAG_C) !== 0 ? Z80.FLAG_H : Z80.FLAG_C) | (this.A.value & (Z80.FLAG_3 | Z80.FLAG_5)));
+            case 0x3F:  // CCF
+                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) |
+                          ((this.F.value & FLAG_C) !== 0 ? FLAG_H : FLAG_C) |
+                           (this.A.value & (FLAG_3 | FLAG_5)));
                 break;
-            case 64:
+            case 0x40:  // LD B,B
                 break;
-            case 65:
+            case 0x41:  // LD B,C
                 this.B.set(this.C);
                 break;
-            case 66:
+            case 0x42:  // LD B,D
                 this.B.set(this.D);
                 break;
-            case 67:
+            case 0x43:  // LD B,E
                 this.B.set(this.E);
                 break;
-            case 68:
+            case 0x44:  // LD B,H
                 this.B.set(this.H);
                 break;
-            case 69:
+            case 0x45:  // LD B,L
                 this.B.set(this.L);
                 break;
-            case 70:
+            case 0x46:  // LD B,(HL)
                 this.contend(this.HL, 3);
                 this.B.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 71:
+            case 0x47:  // LD B,A
                 this.B.set(this.A);
                 break;
-            case 72:
+            case 0x48:  // LD C,B
                 this.C.set(this.B);
                 break;
-            case 73:
+            case 0x49:  // LD C,C
                 break;
-            case 74:
+            case 0x4A:  // LD C,D
                 this.C.set(this.D);
                 break;
-            case 75:
+            case 0x4B:  // LD C,E
                 this.C.set(this.E);
                 break;
-            case 76:
+            case 0x4C:  // LD C,H
                 this.C.set(this.H);
                 break;
-            case 77:
+            case 0x4D:  // LD C,L
                 this.C.set(this.L);
                 break;
-            case 78:
+            case 0x4E:  // LD C,(HL)
                 this.contend(this.HL, 3);
                 this.C.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 79:
+            case 0x4F:  // LD C,A
                 this.C.set(this.A);
                 break;
-            case 80:
+            case 0x50:  // LD D,B
                 this.D.set(this.B);
                 break;
-            case 81:
+            case 0x51:  // LD D,C
                 this.D.set(this.C);
                 break;
-            case 82:
+            case 0x52:  // LD D,D
                 break;
-            case 83:
+            case 0x53:  // LD D,E
                 this.D.set(this.E);
                 break;
-            case 84:
+            case 0x54:  // LD D,H
                 this.D.set(this.H);
                 break;
-            case 85:
+            case 0x55:  // LD D,L
                 this.D.set(this.L);
                 break;
-            case 86:
+            case 0x56:  // LD D,(HL)
                 this.contend(this.HL, 3);
                 this.D.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 87:
+            case 0x57:  // LD D,A
                 this.D.set(this.A);
                 break;
-            case 88:
+            case 0x58:  // LD E,B
                 this.E.set(this.B);
                 break;
-            case 89:
+            case 0x59:  // LD E,C
                 this.E.set(this.C);
                 break;
-            case 90:
+            case 0x5A: // LD E,D
                 this.E.set(this.D);
                 break;
-            case 91:
+            case 0x5B:  // LD E,E
                 break;
-            case 92:
+            case 0x5C:  // LD E,H
                 this.E.set(this.H);
                 break;
-            case 93:
+            case 0x5D:  // LD E,L
                 this.E.set(this.L);
                 break;
-            case 94:
+            case 0x5E:  // LD E,(HL)
                 this.contend(this.HL, 3);
                 this.E.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 95:
+            case 0x5F:  // LD E,A
                 this.E.set(this.A);
                 break;
-            case 96:
+            case 0x60:  // LD H,B
                 this.H.set(this.B);
                 break;
-            case 97:
+            case 0x61:  // LD H,C
                 this.H.set(this.C);
                 break;
-            case 98:
+            case 0x62:  // LD H,D
                 this.H.set(this.D);
                 break;
-            case 99:
+            case 0x63:  // LD H,E
                 this.H.set(this.E);
                 break;
-            case 100:
+            case 0x64:  // LD H,H
                 break;
-            case 101:
+            case 0x65:  // LD H,L
                 this.H.set(this.L);
                 break;
-            case 102:
+            case 0x66:  // LD H,(HL)
                 this.contend(this.HL, 3);
                 this.H.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 103:
+            case 0x67:  // LD H,A
                 this.H.set(this.A);
                 break;
-            case 104:
+            case 0x68:  // LD L,B
                 this.L.set(this.B);
                 break;
-            case 105:
+            case 0x69:  // LD L,C
                 this.L.set(this.C);
                 break;
-            case 106:
+            case 0x6A:  // LD L,D
                 this.L.set(this.D);
                 break;
-            case 107:
+            case 0x6B:  // LD L,E
                 this.L.set(this.E);
                 break;
-            case 108:
+            case 0x6C:  // LD L,H
                 this.L.set(this.H);
                 break;
-            case 109:
+            case 0x6D:  // LD L,L
                 break;
-            case 110:
+            case 0x6E:  // LD L,(HL)
                 this.contend(this.HL, 3);
                 this.L.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 111:
+            case 0x6F:  // LD L,A
                 this.L.set(this.A);
                 break;
-            case 112:
+            case 0x70:  // LD (HL),B
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.B.get());
                 break;
-            case 113:
+            case 0x71:  // LD (HL),C
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.C.get());
                 break;
-            case 114:
+            case 0x72:  // LD (HL),D
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.D.get());
                 break;
-            case 115:
+            case 0x73:  // LD (HL),E
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.E.get());
                 break;
-            case 116:
+            case 0x74:  // LD (HL),H
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.H.get());
                 break;
-            case 117:
+            case 0x75:  // LD (HL),L
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.L.get());
                 break;
-            case 118:
+            case 0x76:  // HALT
                 this.halted = 1;
                 this.PC--;
                 break;
-            case 119:
+            case 0x77:  // LD (HL),A
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.A.value);
                 break;
-            case 120:
+            case 0x78:  // LD A,B
                 this.A.set(this.B);
                 break;
-            case 121:
+            case 0x79:  // LD A,C
                 this.A.set(this.C);
                 break;
-            case 122:
+            case 0x7A:  // LD A,D
                 this.A.set(this.D);
                 break;
-            case 123:
+            case 0x7B:  // LD A,E
                 this.A.set(this.E);
                 break;
-            case 124:
+            case 0x7C:  // LD A,H
                 this.A.set(this.H);
                 break;
-            case 125:
+            case 0x7D:  // LD A,L
                 this.A.set(this.L);
                 break;
-            case 126:
+            case 0x7E:  // LD A,(HL)
                 this.contend(this.HL, 3);
                 this.A.set(this.machine.readbyte(this.HL.word));
                 break;
-            case 127:
+            case 0x7F:  // LD A,A
                 break;
-            case 128:
+            case 0x80:  // ADD A,B
                 this.ADD(this.B.get());
                 break;
-            case 129:
+            case 0x81:   // ADD A,C
                 this.ADD(this.C.get());
                 break;
-            case 130:
+            case 0x82:  // ADD A,D
                 this.ADD(this.D.get());
                 break;
-            case 131:
+            case 0x83:  // ADD A,E
                 this.ADD(this.E.get());
                 break;
-            case 132:
+            case 0x84:  // ADD A,H
                 this.ADD(this.H.get());
                 break;
-            case 133:
+            case 0x85:  // ADD A,L
                 this.ADD(this.L.get());
                 break;
-            case 134:
+            case 0x86:  // ADD A,(HL)
                 this.contend(this.HL, 3);
                 this.ADD(this.machine.readbyte(this.HL.word));
                 break;
-            case 135:
+            case 0x87:  // ADD A,A
                 this.ADD(this.A.get());
                 break;
-            case 136:
+            case 0x88:  // ADC A,B
                 this.ADC(this.B.get());
                 break;
-            case 137:
+            case 0x89:  // ADC A,C
                 this.ADC(this.C.get());
                 break;
-            case 138:
+            case 0x8A:  // ADC A,D
                 this.ADC(this.D.get());
                 break;
-            case 139:
+            case 0x8B:  // ADC A,E
                 this.ADC(this.E.get());
                 break;
-            case 140:
+            case 0x8C:  // ADC A,H
                 this.ADC(this.H.get());
                 break;
-            case 141:
+            case 0x8D:  // ADC A,L
                 this.ADC(this.L.get());
                 break;
-            case 142:
+            case 0x8E:  // ADC A,(HL)
                 this.contend(this.HL, 3);
                 this.ADC(this.machine.readbyte(this.HL.word));
                 break;
-            case 143:
+            case 0x8F:  // ADC A,A
                 this.ADC(this.A.get());
                 break;
-            case 144:
+            case 0x90:  // SUB A,B
                 this.SUB(this.B.get());
                 break;
-            case 145:
+            case 0x91:  // SUB A,C
                 this.SUB(this.C.get());
                 break;
-            case 146:
+            case 0x92:  // SUB A,D
                 this.SUB(this.D.get());
                 break;
-            case 147:
+            case 0x93:  // SUB A,E
                 this.SUB(this.E.get());
                 break;
-            case 148:
+            case 0x94:  // SUB A,H
                 this.SUB(this.H.get());
                 break;
-            case 149:
+            case 0x95:  // SUB A,L
                 this.SUB(this.L.get());
                 break;
-            case 150:
+            case 0x96:  // SUB A,(HL)
                 this.contend(this.HL, 3);
                 this.SUB(this.machine.readbyte(this.HL.word));
                 break;
-            case 151:
+            case 0x97:  // SUB A,A
                 this.SUB(this.A.get());
                 break;
-            case 152:
+            case 0x98:  // SBC A,B
                 this.SBC(this.B.get());
                 break;
-            case 153:
+            case 0x99:  // SBC A,C
                 this.SBC(this.C.get());
                 break;
-            case 154:
+            case 0x9A:  // SBC A,D
                 this.SBC(this.D.get());
                 break;
-            case 155:
+            case 0x9B:  // SBC A,E
                 this.SBC(this.E.get());
                 break;
-            case 156:
+            case 0x9C:  // SBC A,H
                 this.SBC(this.H.get());
                 break;
-            case 157:
+            case 0x9D:  // SBC A,L
                 this.SBC(this.L.get());
                 break;
-            case 158:
+            case 0x9E:  // SBC A,(HL)
                 this.contend(this.HL, 3);
                 this.SBC(this.machine.readbyte(this.HL.word));
                 break;
-            case 159:
+            case 0x9F:  // SBC A,A
                 this.SBC(this.A.get());
                 break;
-            case 160:
+            case 0xA0:  // AND A,B
                 this.AND(this.B);
                 break;
-            case 161:
+            case 0xA1:  // AND A,C
                 this.AND(this.C);
                 break;
-            case 162:
+            case 0xA2:  // AND A,D
                 this.AND(this.D);
                 break;
-            case 163:
+            case 0xA3:  // AND A,E
                 this.AND(this.E);
                 break;
-            case 164:
+            case 0xA4:  // AND A,H
                 this.AND(this.H);
                 break;
-            case 165:
+            case 0xA5:  // AND A,L
                 this.AND(this.L);
                 break;
-            case 166:
+            case 0xA6:  // AND A,(HL)
                 this.contend(this.HL, 3);
                 this.AND(this.machine.readbyte(this.HL.word));
                 break;
-            case 167:
+            case 0xA7:  // AND A,A
                 this.AND(this.A.get());
                 break;
-            case 168:
+            case 0xA8:  // XOR A,B
                 this.XOR(this.B);
                 break;
-            case 169:
+            case 0xA9:  // XOR A,C
                 this.XOR(this.C);
                 break;
-            case 170:
+            case 0xAA:  // XOR A,D
                 this.XOR(this.D);
                 break;
-            case 171:
+            case 0xAB:  // XOR A,E
                 this.XOR(this.E);
                 break;
-            case 172:
+            case 0xAC:  // XOR A,H
                 this.XOR(this.H);
                 break;
-            case 173:
+            case 0xAD:  // XOR A,L
                 this.XOR(this.L);
                 break;
-            case 174:
+            case 0xAE:  // XOR A,(HL)
                 this.contend(this.HL, 3);
                 this.XOR(this.machine.readbyte(this.HL.word));
                 break;
-            case 175:
+            case 0xAF:  // XOR A,A
                 this.XOR(this.A);
                 break;
-            case 176:
+            case 0xB0:  // OR A,B
                 this.OR(this.B);
                 break;
-            case 177:
+            case 0xB1:  // OR A,C
                 this.OR(this.C);
                 break;
-            case 178:
+            case 0xB2:  // OR A,D
                 this.OR(this.D);
                 break;
-            case 179:
+            case 0xB3:  // OR A,E
                 this.OR(this.E);
                 break;
-            case 180:
+            case 0xB4:  // OR A,H
                 this.OR(this.H);
                 break;
-            case 181:
+            case 0xB5:  // OR A,L
                 this.OR(this.L);
                 break;
-            case 182:
+            case 0xB6:  // OR A,(HL)
                 this.contend(this.HL, 3);
                 this.OR(this.machine.readbyte(this.HL.word));
                 break;
-            case 183:
+            case 0xB7:  // OR A,A
                 this.OR(this.A);
                 break;
-            case 184:
+            case 0xB8:  // CP B
                 this.CP(this.B.get());
                 break;
-            case 185:
+            case 0xB9:  // CP C
                 this.CP(this.C.get());
                 break;
-            case 186:
+            case 0xBA:  // CP D
                 this.CP(this.D.get());
                 break;
-            case 187:
+            case 0xBB:  // CP E
                 this.CP(this.E.get());
                 break;
-            case 188:
+            case 0xBC:  // CP H
                 this.CP(this.H.get());
                 break;
-            case 189:
+            case 0xBD:  // CP L
                 this.CP(this.L.get());
                 break;
-            case 190:
+            case 0xBE:  // CP (HL)
                 this.contend(this.HL, 3);
                 this.CP(this.machine.readbyte(this.HL.word));
                 break;
-            case 191:
+            case 0xBF:  // CP A
                 this.CP(this.A.get());
                 break;
-            case 192:
+            case 0xC0:  // RET NZ
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_Z) === 0)
-                {
+                if ((this.F.value & FLAG_Z) === 0)
                     this.RET();
-                }
                 break;
-            case 193:
+            case 0xC1:  // POP BC
                 this.BC.set(this.POP16());
                 break;
-            case 194:
+            case 0xC2:  // JP NZ,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_Z) === 0)
-                {
+                if ((this.F.value & FLAG_Z) === 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 195:
+            case 0xC3:  // JP nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
                 this.JP();
                 break;
-            case 196:
+            case 0xC4:  // CALL NZ,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_Z) === 0)
-                {
+                if ((this.F.value & FLAG_Z) === 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 197:
+            case 0xC5:  // PUSH BC
                 this.tstates++;
                 this.PUSH16(this.BC.word);
                 break;
-            case 198:
+            case 0xC6:  // ADD A,nn
                 this.contend(this.PC, 3);
                 this.ADD(this.machine.readbyte(this.PC++));
                 break;
-            case 199:
+            case 0xC7:  // RST 00
                 this.tstates++;
                 this.RST(0);
                 break;
-            case 200:
+            case 0xC8:  // RET Z
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_Z) !== 0)
-                {
+                if ((this.F.value & FLAG_Z) !== 0)
                     this.RET();
-                }
                 break;
-            case 201:
+            case 0xC9:  // RET
                 this.RET();
                 break;
-            case 202:
+            case 0xCA:  // JP Z,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_Z) > 0)
-                {
+                if ((this.F.value & FLAG_Z) > 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 203:
+            case 0xCB:  // CBxx opcodes
                 {
                     this.contend(this.PC, 4);
                     let opcode2: number = this.machine.opcode_fetch(this.PC++);
-                    this.R = (this.R + 1) & 255;
+                    this.R = (this.R + 1) & 0xFF;
                     this.do_opcode_CB(opcode2);
                 }
                 break;
-            case 204:
+            case 0xCC:  // CALL Z,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_Z) > 0)
-                {
+                if ((this.F.value & FLAG_Z) > 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 205:
+            case 0xCD:  // CALL nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
                 this.CALL();
                 break;
-            case 206:
+            case 0xCE:  // ADC A,nn
                 this.contend(this.PC, 3);
                 this.ADC(this.machine.readbyte(this.PC++));
                 break;
-            case 207:
+            case 0xCF:  // RST 8
                 this.tstates++;
                 this.RST(8);
                 break;
-            case 208:
+            case 0xD0:  // RET NC
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_C) === 0)
-                {
+                if ((this.F.value & FLAG_C) === 0)
                     this.RET();
-                }
                 break;
-            case 209:
+            case 0xD1:  // POP DE
                 this.DE.set(this.POP16());
                 break;
-            case 210:
+            case 0xD2:  // JP NC,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_C) === 0)
-                {
+                if ((this.F.value & FLAG_C) === 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 211:
+            case 0xD3:  // OUT (nn),A
                 this.contend(this.PC, 4);
                 this.OUT(this.machine.readbyte(this.PC++) + (this.A.value << 8), this.A);
                 break;
-            case 212:
+            case 0xD4:  // CALL NC,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_C) === 0)
-                {
+                if ((this.F.value & FLAG_C) === 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 213:
+            case 0xD5:  // PUSH DE
                 this.tstates++;
                 this.PUSH16(this.DE.word);
                 break;
-            case 214:
+            case 0xD6:  // SUB nn
                 this.contend(this.PC, 3);
                 this.SUB(this.machine.readbyte(this.PC++));
                 break;
-            case 215:
+            case 0xD7:  // RST 10
                 this.tstates++;
-                this.RST(16);
+                this.RST(0x10);
                 break;
-            case 216:
+            case 0xD8: // RET C
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_C) > 0)
-                {
+                if ((this.F.value & FLAG_C) > 0)
                     this.RET();
-                }
                 break;
-            case 217:
+            case 0xD9:  // EXX
                 {
-                    let wordtemp: number = this.BC.word;
-                    this.BC.set(this.BC_);
-                    this.BC_ = wordtemp;
-                    wordtemp = this.DE.word;
-                    this.DE.set(this.DE_);
-                    this.DE_ = wordtemp;
-                    wordtemp = this.HL.word;
-                    this.HL.set(this.HL_);
-                    this.HL_ = wordtemp;
+                    let wordtemp: number = this.BC.word; this.BC.set(this.BC_); this.BC_ = wordtemp;
+                    wordtemp = this.DE.word; this.DE.set(this.DE_); this.DE_ = wordtemp;
+                    wordtemp = this.HL.word; this.HL.set(this.HL_); this.HL_ = wordtemp;
                 }
                 break;
-            case 218:
+            case 0xDA:  // JP C,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_C) > 0)
-                {
+                if ((this.F.value & FLAG_C) > 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 219:
+            case 0xDB:  // IN A,(nn)
                 {
                     this.contend(this.PC, 4);
                     let intemp: number = this.machine.readbyte(this.PC++) + (this.A.value << 8);
@@ -1402,49 +1354,47 @@ export default class Z80
                     this.A.set(this.machine.readport(intemp));
                 }
                 break;
-            case 220:
+            case 0xDC:  // CALL C,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_C) > 0)
-                {
+                if ((this.F.value & FLAG_C) > 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 221:
+            case 0xDD:  // DDxx opcodes
                 {
                     this.contend(this.PC, 4);
                     let opcode2: number = this.machine.opcode_fetch(this.PC++);
-                    this.R = (this.R + 1) & 255;
+                    this.R = (this.R + 1) & 0xFF;
                     this.do_opcode_DDFD(opcode2, this.IX, this.IXL, this.IXH);
                 }
                 break;
-            case 222:
+            case 0xDE:  // SBC A,nn
                 this.contend(this.PC, 3);
                 this.SBC(this.machine.readbyte(this.PC++));
                 break;
-            case 223:
+            case 0xDF:  // RST 18
                 this.tstates++;
-                this.RST(24);
+                this.RST(0x18);
                 break;
-            case 224:
+            case 0xE0: // RET PO
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_P) === 0)
-                {
+                if ((this.F.value & FLAG_P) === 0)
                     this.RET();
-                }
                 break;
-            case 225:
+            case 0xE1:  // POP HL
                 this.HL.set(this.POP16());
                 break;
-            case 226:
+            case 0xE2:  // JP PO,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_P) === 0)
-                {
+                if ((this.F.value & FLAG_P) === 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 227:
+            case 0xE3:  // EX (SP),HL
                 {
                     let bytetempl: number = this.machine.readbyte(this.SP);
                     let bytetemph: number = this.machine.readbyte(this.SP + 1);
@@ -1458,536 +1408,532 @@ export default class Z80
                     this.H.set(bytetemph);
                 }
                 break;
-            case 228:
+            case 0xE4:  // CALL PO,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_P) === 0)
-                {
+                if ((this.F.value & FLAG_P) === 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 229:
+            case 0xE5:  // PUSH HL
                 this.tstates++;
                 this.PUSH16(this.HL.word);
                 break;
-            case 230:
+            case 0xE6:  // AND nn
                 this.contend(this.PC, 3);
                 this.AND(this.machine.readbyte(this.PC++));
                 break;
-            case 231:
+            case 0xE7:  // RST 20
                 this.tstates++;
-                this.RST(32);
+                this.RST(0x20);
                 break;
-            case 232:
+            case 0xE8:  // RET PE
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_P) > 0)
-                {
+                if ((this.F.value & FLAG_P) > 0)
                     this.RET();
-                }
                 break;
-            case 233:
+            case 0xE9:  // JP HL
                 this.PC = this.HL.word;
                 break;
-            case 234:
+            case 0xEA:  // JP PE,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_P) > 0)
-                {
+                if ((this.F.value & FLAG_P) > 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 235:
+            case 0xEB:  // EX DE,HL
                 {
                     let wordtemp: number = this.DE.word;
                     this.DE.set(this.HL.word);
                     this.HL.set(wordtemp);
                 }
                 break;
-            case 236:
+            case 0xEC:  // CALL PE,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_P) > 0)
-                {
+                if ((this.F.value & FLAG_P) > 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 237:
+            case 0xED:  // EDxx opcodes
                 {
                     this.contend(this.PC, 4);
                     let opcode2: number = this.machine.opcode_fetch(this.PC++);
-                    this.R = (this.R + 1) & 255;
+                    this.R = (this.R + 1) & 0xFF;
                     this.do_opcode_ED(opcode2);
                 }
                 break;
-            case 238:
+            case 0xEE:  // XOR A,nn
                 this.contend(this.PC, 3);
                 {
                     let bytetemp: number = this.machine.readbyte(this.PC++);
                     this.XOR(bytetemp);
                 }
                 break;
-            case 239:
+            case 0xEF:  // RST 28
                 this.tstates++;
-                this.RST(40);
+                this.RST(0x28);
                 break;
-            case 240:
+            case 0xF0:  // RET P
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_S) === 0)
-                {
+                if ((this.F.value & FLAG_S) === 0)
                     this.RET();
-                }
                 break;
-            case 241:
+            case 0xF1:  // POP AF
                 this.AF.set(this.POP16());
                 break;
-            case 242:
+            case 0xF2:  // JP P,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_S) === 0)
-                {
+                if ((this.F.value & FLAG_S) === 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 243:
+            case 0xF3:  // DI
                 this.IFF1 = this.IFF2 = 0;
                 break;
-            case 244:
+            case 0xF4:  // CALL P,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_S) === 0)
-                {
+                if ((this.F.value & FLAG_S) === 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 245:
+            case 0xF5:  // PUSH AF
                 this.tstates++;
                 this.PUSH16(this.AF.get());
                 break;
-            case 246:
+            case 0xF6:  // OR nn
                 this.contend(this.PC, 3);
-                {
-                    let bytetemp: number = this.machine.readbyte(this.PC++);
-                    this.OR(bytetemp);
-                }
+                this.OR(this.machine.readbyte(this.PC++));
                 break;
-            case 247:
+            case 0xF7:  // RST 30
                 this.tstates++;
-                this.RST(48);
+                this.RST(0x30);
                 break;
-            case 248:
+            case 0xF8:  // RET M
                 this.tstates++;
-                if ((this.F.value & Z80.FLAG_S) !== 0)
-                {
+                if ((this.F.value & FLAG_S) !== 0)
                     this.RET();
-                }
                 break;
-            case 249:
+            case 0xF9:  // LD SP,HL
                 this.tstates += 2;
                 this.SP = this.HL.word;
                 break;
-            case 250:
+            case 0xFA:  // JP M,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_S) > 0)
-                {
+                if ((this.F.value & FLAG_S) > 0)
                     this.JP();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 251:
+            case 0xFB:  // EI
                 this.IFF1 = this.IFF2 = 1;
                 break;
-            case 252:
+            case 0xFC:  // CALL M,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & Z80.FLAG_S) > 0)
-                {
+                if ((this.F.value & FLAG_S) > 0)
                     this.CALL();
-                } else this.PC += 2;
+                else
+                    this.PC += 2;
                 break;
-            case 253:
+            case 0xFD:  // FDxx opcodes
                 {
                     this.contend(this.PC, 4);
                     let opcode2: number = this.machine.opcode_fetch(this.PC++);
-                    this.R = (this.R + 1) & 255;
+                    this.R = (this.R + 1) & 0xFF;
                     this.do_opcode_DDFD(opcode2, this.IY, this.IYL, this.IYH);
                 }
                 break;
-            case 254:
+            case 0xFE:  // CP nn
                 this.contend(this.PC, 3);
-                {
-                    let bytetemp: number = this.machine.readbyte(this.PC++);
-                    this.CP(bytetemp);
-                }
+                this.CP(this.machine.readbyte(this.PC++));
                 break;
-            case 255:
+            case 0xFF:  // RST 38
                 this.tstates++;
-                this.RST(56);
+                this.RST(0x38);
                 break;
         }
-        this.R = this.R & 127;
+
+        this.R = this.R & 0x7f;
         return (this.tstates);
     }
 
     private do_opcode_CB(opcode2: number)
     {
-        switch ((opcode2))
+        switch (opcode2)
         {
-            case 0:
+            case 0x00:
                 this.RLC(this.B);
                 break;
-            case 1:
+            case 0x01:
                 this.RLC(this.C);
                 break;
-            case 2:
+            case 0x02:
                 this.RLC(this.D);
                 break;
-            case 3:
+            case 0x03:
                 this.RLC(this.E);
                 break;
-            case 4:
+            case 0x04:
                 this.RLC(this.H);
                 break;
-            case 5:
+            case 0x05:
                 this.RLC(this.L);
                 break;
-            case 6:
+            case 0x06:  // RLC (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.RLC(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 7:
+            case 0x07:
                 this.RLC(this.A);
                 break;
-            case 8:
+            case 0x08:
                 this.RRC(this.B);
                 break;
-            case 9:
+            case 0x09:
                 this.RRC(this.C);
                 break;
-            case 10:
+            case 0x0A:
                 this.RRC(this.D);
                 break;
-            case 11:
+            case 0x0B:
                 this.RRC(this.E);
                 break;
-            case 12:
+            case 0x0C:
                 this.RRC(this.H);
                 break;
-            case 13:
+            case 0x0D:
                 this.RRC(this.L);
                 break;
-            case 14:
+            case 0x0E:  // RRC (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.RRC(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 15:
+            case 0x0F:
                 this.RRC(this.A);
                 break;
-            case 16:
+            case 0x10:
                 this.RL(this.B);
                 break;
-            case 17:
+            case 0x11:
                 this.RL(this.C);
                 break;
-            case 18:
+            case 0x12:
                 this.RL(this.D);
                 break;
-            case 19:
+            case 0x13:
                 this.RL(this.E);
                 break;
-            case 20:
+            case 0x14:
                 this.RL(this.H);
                 break;
-            case 21:
+            case 0x15:
                 this.RL(this.L);
                 break;
-            case 22:
+            case 0x16:  // RL (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.RL(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 23:
+            case 0x17:
                 this.RL(this.A);
                 break;
-            case 24:
+            case 0x18:
                 this.RR(this.B);
                 break;
-            case 25:
+            case 0x19:
                 this.RR(this.C);
                 break;
-            case 26:
+            case 0x1A:
                 this.RR(this.D);
                 break;
-            case 27:
+            case 0x1B:
                 this.RR(this.E);
                 break;
-            case 28:
+            case 0x1C:
                 this.RR(this.H);
                 break;
-            case 29:
+            case 0x1D:
                 this.RR(this.L);
                 break;
-            case 30:
+            case 0x1E:  // RR (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.RR(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 31:
+            case 0x1F:
                 this.RR(this.A);
                 break;
-            case 32:
+            case 0x20:
                 this.SLA(this.B);
                 break;
-            case 33:
+            case 0x21:
                 this.SLA(this.C);
                 break;
-            case 34:
+            case 0x22:
                 this.SLA(this.D);
                 break;
-            case 35:
+            case 0x23:
                 this.SLA(this.E);
                 break;
-            case 36:
+            case 0x24:
                 this.SLA(this.H);
                 break;
-            case 37:
+            case 0x25:
                 this.SLA(this.L);
                 break;
-            case 38:
+            case 0x26:  // SLA (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.SLA(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 39:
+            case 0x27:
                 this.SLA(this.A);
                 break;
-            case 40:
+            case 0x28:
                 this.SRA(this.B);
                 break;
-            case 41:
+            case 0x29:
                 this.SRA(this.C);
                 break;
-            case 42:
+            case 0x2A:
                 this.SRA(this.D);
                 break;
-            case 43:
+            case 0x2B:
                 this.SRA(this.E);
                 break;
-            case 44:
+            case 0x2C:
                 this.SRA(this.H);
                 break;
-            case 45:
+            case 0x2D:
                 this.SRA(this.L);
                 break;
-            case 46:
+            case 0x2E:  // SRA (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.SRA(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 47:
+            case 0x2F:
                 this.SRA(this.A);
                 break;
-            case 48:
+            case 0x30:
                 this.SLL(this.B);
                 break;
-            case 49:
+            case 0x31:
                 this.SLL(this.C);
                 break;
-            case 50:
+            case 0x32:
                 this.SLL(this.D);
                 break;
-            case 51:
+            case 0x33:
                 this.SLL(this.E);
                 break;
-            case 52:
+            case 0x34:
                 this.SLL(this.H);
                 break;
-            case 53:
+            case 0x35:
                 this.SLL(this.L);
                 break;
-            case 54:
+            case 0x36:  // SLL (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.SLL(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 55:
+            case 0x37:
                 this.SLL(this.A);
                 break;
-            case 56:
+            case 0x38:
                 this.SRL(this.B);
                 break;
-            case 57:
+            case 0x39:
                 this.SRL(this.C);
                 break;
-            case 58:
+            case 0x3A:
                 this.SRL(this.D);
                 break;
-            case 59:
+            case 0x3B:
                 this.SRL(this.E);
                 break;
-            case 60:
+            case 0x3C:
                 this.SRL(this.H);
                 break;
-            case 61:
+            case 0x3D:
                 this.SRL(this.L);
                 break;
-            case 62:
+            case 0x3E:  // SRL (HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
                     this.contend(this.HL, 3);
                     this.SRL(bytetemp);
                     this.machine.writebyte(this.HL.word, bytetemp.get());
                 }
                 break;
-            case 63:
+            case 0x3F:
                 this.SRL(this.A);
                 break;
-            case 64:
+            case 0x40:
                 this.BIT(0, this.B);
                 break;
-            case 65:
+            case 0x41:
                 this.BIT(0, this.C);
                 break;
-            case 66:
+            case 0x42:
                 this.BIT(0, this.D);
                 break;
-            case 67:
+            case 0x43:
                 this.BIT(0, this.E);
                 break;
-            case 68:
+            case 0x44:
                 this.BIT(0, this.H);
                 break;
-            case 69:
+            case 0x45:
                 this.BIT(0, this.L);
                 break;
-            case 70:
+            case 0x46:  // BIT 0,(HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(0, this.tempreg);
+                    this.BIT(0, bytetemp);
                 }
                 break;
-            case 71:
+            case 0x47:
                 this.BIT(0, this.A);
                 break;
-            case 72:
+            case 0x48:
                 this.BIT(1, this.B);
                 break;
-            case 73:
+            case 0x49:
                 this.BIT(1, this.C);
                 break;
-            case 74:
+            case 0x4A:
                 this.BIT(1, this.D);
                 break;
-            case 75:
+            case 0x4B:
                 this.BIT(1, this.E);
                 break;
-            case 76:
+            case 0x4C:
                 this.BIT(1, this.H);
                 break;
-            case 77:
+            case 0x4D:
                 this.BIT(1, this.L);
                 break;
-            case 78:
+            case 0x4E:  // BIT 1,(HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(1, this.tempreg);
+                    this.BIT(1, bytetemp);
                 }
                 break;
-            case 79:
+            case 0x4F:
                 this.BIT(1, this.A);
                 break;
-            case 80:
+            case 0x50:
                 this.BIT(2, this.B);
                 break;
-            case 81:
+            case 0x51:
                 this.BIT(2, this.C);
                 break;
-            case 82:
+            case 0x52:
                 this.BIT(2, this.D);
                 break;
-            case 83:
+            case 0x53:
                 this.BIT(2, this.E);
                 break;
-            case 84:
+            case 0x54:
                 this.BIT(2, this.H);
                 break;
-            case 85:
+            case 0x55:
                 this.BIT(2, this.L);
                 break;
-            case 86:
-                this.tempreg.set(this.machine.readbyte(this.HL.word));
-                this.contend(this.HL, 4);
-                this.BIT(2, this.tempreg);
-                break;
-            case 87:
-                this.BIT(2, this.A);
-                break;
-            case 88:
-                this.BIT(3, this.B);
-                break;
-            case 89:
-                this.BIT(3, this.C);
-                break;
-            case 90:
-                this.BIT(3, this.D);
-                break;
-            case 91:
-                this.BIT(3, this.E);
-                break;
-            case 92:
-                this.BIT(3, this.H);
-                break;
-            case 93:
-                this.BIT(3, this.L);
-                break;
-            case 94:
+            case 0x56:  // BIT 2,(HL)
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(3, this.tempreg);
+                    this.BIT(2, bytetemp);
                 }
                 break;
-            case 95:
+
+            case 0x57:
+                this.BIT(2, this.A);
+                break;
+            case 0x58:
+                this.BIT(3, this.B);
+                break;
+            case 0x59:
+                this.BIT(3, this.C);
+                break;
+            case 0x5A:
+                this.BIT(3, this.D);
+                break;
+            case 0x5B:
+                this.BIT(3, this.E);
+                break;
+            case 0x5C:
+                this.BIT(3, this.H);
+                break;
+            case 0x5D:
+                this.BIT(3, this.L);
+                break;
+            case 0x5E:  // BIT 3,(HL)
+                {
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
+                    this.contend(this.HL, 4);
+                    this.BIT(3, bytetemp);
+                }
+                break;
+            case 0x5F:
                 this.BIT(3, this.A);
                 break;
             case 96:
@@ -2010,9 +1956,10 @@ export default class Z80
                 break;
             case 102:
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(4, this.tempreg);
+                    this.BIT(4, bytetemp);
                 }
                 break;
             case 103:
@@ -2038,9 +1985,10 @@ export default class Z80
                 break;
             case 110:
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(5, this.tempreg);
+                    this.BIT(5, bytetemp);
                 }
                 break;
             case 111:
@@ -2066,9 +2014,10 @@ export default class Z80
                 break;
             case 118:
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT(6, this.tempreg);
+                    this.BIT(6, bytetemp);
                 }
                 break;
             case 119:
@@ -2094,15 +2043,16 @@ export default class Z80
                 break;
             case 126:
                 {
-                    this.tempreg.set(this.machine.readbyte(this.HL.word));
+                    let bytetemp: value8 = new value8();
+                    bytetemp.set(this.machine.readbyte(this.HL.word));
                     this.contend(this.HL, 4);
-                    this.BIT7(this.tempreg);
+                    this.BIT7(bytetemp);
                 }
                 break;
-            case 127:
+            case 0x7f:
                 this.BIT7(this.A);
                 break;
-            case 128:
+            case 0x80:
                 this.B.and(254);
                 break;
             case 129:
@@ -2128,7 +2078,7 @@ export default class Z80
             case 135:
                 this.A.and(254);
                 break;
-            case 136:
+            case 0x88:
                 this.B.and(253);
                 break;
             case 137:
@@ -2171,38 +2121,38 @@ export default class Z80
                 break;
             case 149:
                 break;
-            case 150:
+            case 0x0f0:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 251);
                 break;
-            case 151:
+            case 0x0f1:
                 this.A.and(251);
                 break;
-            case 152:
+            case 0x0f2:
                 this.B.and(247);
                 break;
-            case 153:
+            case 0x0f3:
                 this.C.and(247);
                 break;
-            case 154:
+            case 0x0f4:
                 this.D.and(247);
                 break;
-            case 155:
+            case 0x0f5:
                 this.E.and(247);
                 break;
-            case 156:
+            case 0x0f6:
                 this.H.and(247);
                 break;
-            case 157:
+            case 0x0f7:
                 this.L.and(247);
                 break;
-            case 158:
+            case 0x0f8:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
                 this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 247);
                 break;
-            case 159:
+            case 0x0f9:
                 this.A.and(247);
                 break;
             case 160:
@@ -2284,30 +2234,30 @@ export default class Z80
                 this.A.and(191);
                 break;
             case 184:
-                this.B.and(127);
+                this.B.and(0x7f);
                 break;
             case 185:
-                this.C.and(127);
+                this.C.and(0x7f);
                 break;
             case 186:
-                this.D.and(127);
+                this.D.and(0x7f);
                 break;
             case 187:
-                this.E.and(127);
+                this.E.and(0x7f);
                 break;
             case 188:
-                this.H.and(127);
+                this.H.and(0x7f);
                 break;
             case 189:
-                this.L.and(127);
+                this.L.and(0x7f);
                 break;
             case 190:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
-                this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 127);
+                this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) & 0x7f);
                 break;
             case 191:
-                this.A.and(127);
+                this.A.and(0x7f);
                 break;
             case 192:
                 this.B.or(1);
@@ -2492,37 +2442,37 @@ export default class Z80
                 this.A.or(64);
                 break;
             case 248:
-                this.B.or(128);
+                this.B.or(0x80);
                 break;
             case 249:
-                this.C.or(128);
+                this.C.or(0x80);
                 break;
             case 250:
-                this.D.or(128);
+                this.D.or(0x80);
                 break;
             case 251:
-                this.E.or(128);
+                this.E.or(0x80);
                 break;
             case 252:
-                this.H.or(128);
+                this.H.or(0x80);
                 break;
             case 253:
-                this.L.or(128);
+                this.L.or(0x80);
                 break;
             case 254:
                 this.contend(this.HL, 4);
                 this.contend(this.HL, 3);
-                this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) | 128);
+                this.machine.writebyte(this.HL.word, this.machine.readbyte(this.HL.word) | 0x80);
                 break;
-            case 255:
-                this.A.or(128);
+            case 0xFF:
+                this.A.or(0x80);
                 break;
         }
     }
 
     private do_opcode_ED(opcode2: number)
     {
-        switch ((opcode2))
+        switch (opcode2)
         {
             case 64:
                 this.tstates += 1;
@@ -2615,7 +2565,7 @@ export default class Z80
             case 87:
                 this.tstates += 1;
                 this.A.set(this.I);
-                this.F.set((this.F.value & Z80.FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? Z80.FLAG_V : 0));
+                this.F.set((this.F.value & FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? FLAG_V : 0));
                 break;
             case 88:
                 this.tstates += 1;
@@ -2638,8 +2588,8 @@ export default class Z80
                 break;
             case 95:
                 this.tstates += 1;
-                this.A.set((this.R & 127) | (this.R7 & 128));
-                this.F.set((this.F.value & Z80.FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? Z80.FLAG_V : 0));
+                this.A.set((this.R & 0x7f) | (this.R7 & 0x80));
+                this.F.set((this.F.value & FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? FLAG_V : 0));
                 break;
             case 96:
                 this.tstates += 1;
@@ -2662,8 +2612,8 @@ export default class Z80
                     this.contend(this.HL, 7);
                     this.contend(this.HL, 3);
                     this.machine.writebyte(this.HL.word, (this.A.value << 4) | (bytetemp >> 4));
-                    this.A.set((this.A.value & 240) | (bytetemp & 15));
-                    this.F.set((this.F.value & Z80.FLAG_C) | Z80.sz53p_table[this.A.value]);
+                    this.A.set((this.A.value & 240) | (bytetemp & 0x0f));
+                    this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[this.A.value]);
                 }
                 break;
             case 104:
@@ -2686,9 +2636,9 @@ export default class Z80
                     let bytetemp: number = this.machine.readbyte(this.HL.word);
                     this.contend(this.HL, 7);
                     this.contend(this.HL, 3);
-                    this.machine.writebyte(this.HL.word, (bytetemp << 4) | (this.A.value & 15));
+                    this.machine.writebyte(this.HL.word, (bytetemp << 4) | (this.A.value & 0x0f));
                     this.A.set((this.A.value & 240) | (bytetemp >> 4));
-                    this.F.set((this.F.value & Z80.FLAG_C) | Z80.sz53p_table[this.A.value]);
+                    this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[this.A.value]);
                 }
                 break;
             case 112:
@@ -2736,7 +2686,7 @@ export default class Z80
                     this.DE.inc();
                     this.HL.inc();
                     bytetemp += this.A.value;
-                    this.F.set((this.F.value & (Z80.FLAG_C | Z80.FLAG_Z | Z80.FLAG_S)) | (this.BC.word !== 0 ? Z80.FLAG_V : 0) | (bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 161:
@@ -2752,9 +2702,9 @@ export default class Z80
                     this.contend(this.HL, 1);
                     this.HL.inc();
                     this.BC.dec();
-                    this.F.set((this.F.value & Z80.FLAG_C) | (this.BC.word !== 0 ? (Z80.FLAG_V | Z80.FLAG_N) : Z80.FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : Z80.FLAG_Z) | (bytetemp & Z80.FLAG_S));
-                    if ((this.F.value & Z80.FLAG_H) !== 0) bytetemp--;
-                    this.F.or((bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 162:
@@ -2766,7 +2716,7 @@ export default class Z80
                     this.machine.writebyte(this.HL.word, initemp);
                     this.B.dec();
                     this.HL.inc();
-                    this.F.set(((initemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                 }
                 break;
             case 163:
@@ -2778,7 +2728,7 @@ export default class Z80
                     this.contend_io(this.BC, 3);
                     this.HL.inc();
                     this.machine.writeport(this.BC.word, outitemp);
-                    this.F.set(((outitemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((outitemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                 }
                 break;
             case 168:
@@ -2793,7 +2743,7 @@ export default class Z80
                     this.DE.dec();
                     this.HL.dec();
                     bytetemp += this.A.value;
-                    this.F.set((this.F.value & (Z80.FLAG_C | Z80.FLAG_Z | Z80.FLAG_S)) | (this.BC.word !== 0 ? Z80.FLAG_V : 0) | (bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 169:
@@ -2809,9 +2759,9 @@ export default class Z80
                     this.contend(this.HL, 1);
                     this.HL.dec();
                     this.BC.dec();
-                    this.F.set((this.F.value & Z80.FLAG_C) | (this.BC.word !== 0 ? (Z80.FLAG_V | Z80.FLAG_N) : Z80.FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : Z80.FLAG_Z) | (bytetemp & Z80.FLAG_S));
-                    if ((this.F.value & Z80.FLAG_H) !== 0) bytetemp--;
-                    this.F.or((bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 170:
@@ -2823,7 +2773,7 @@ export default class Z80
                     this.machine.writebyte(this.HL.word, initemp);
                     this.B.dec();
                     this.HL.dec();
-                    this.F.set(((initemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                 }
                 break;
             case 171:
@@ -2835,7 +2785,7 @@ export default class Z80
                     this.contend_io(this.BC, 3);
                     this.HL.dec();
                     this.machine.writeport(this.BC.word, outitemp);
-                    this.F.set(((outitemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((outitemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                 }
                 break;
             case 176:
@@ -2850,7 +2800,7 @@ export default class Z80
                     this.DE.inc();
                     this.BC.dec();
                     bytetemp += this.A.value;
-                    this.F.set((this.F.value & (Z80.FLAG_C | Z80.FLAG_Z | Z80.FLAG_S)) | (this.BC.word !== 0 ? Z80.FLAG_V : 0) | (bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.DE, 1)
@@ -2867,10 +2817,10 @@ export default class Z80
                     for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
                     this.HL.inc();
                     this.BC.dec();
-                    this.F.set((this.F.value & Z80.FLAG_C) | (this.BC.word !== 0 ? (Z80.FLAG_V | Z80.FLAG_N) : Z80.FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : Z80.FLAG_Z) | (bytetemp & Z80.FLAG_S));
-                    if ((this.F.value & Z80.FLAG_H) !== 0) bytetemp--;
-                    this.F.or((bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
-                    if ((this.F.value & (Z80.FLAG_V | Z80.FLAG_Z)) === Z80.FLAG_V)
+                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
+                    if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
                         this.PC -= 2;
@@ -2886,7 +2836,7 @@ export default class Z80
                     this.machine.writebyte(this.HL.word, initemp);
                     this.B.dec();
                     this.HL.inc();
-                    this.F.set(((initemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
@@ -2902,7 +2852,7 @@ export default class Z80
                     this.B.dec();
                     this.HL.inc();
                     this.machine.writeport(this.BC.word, outitemp);
-                    this.F.set(((outitemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((outitemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
                         this.contend_io(this.BC, 1);
@@ -2927,7 +2877,7 @@ export default class Z80
                     this.DE.dec();
                     this.BC.dec();
                     bytetemp += this.A.value;
-                    this.F.set((this.F.value & (Z80.FLAG_C | Z80.FLAG_Z | Z80.FLAG_S)) | (this.BC.word !== 0 ? Z80.FLAG_V : 0) | (bytetemp & Z80.FLAG_3) | ((bytetemp & 2) > 0 ? Z80.FLAG_5 : 0));
+                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) > 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.DE, 1)
@@ -2944,10 +2894,10 @@ export default class Z80
                     for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
                     this.HL.dec();
                     this.BC.dec();
-                    this.F.set((this.F.value & Z80.FLAG_C) | (this.BC.word !== 0 ? (Z80.FLAG_V | Z80.FLAG_N) : Z80.FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : Z80.FLAG_Z) | (bytetemp & Z80.FLAG_S));
-                    if ((this.F.value & Z80.FLAG_H) !== 0) bytetemp--;
-                    this.F.or((bytetemp & Z80.FLAG_3) | ((bytetemp & 2) !== 0 ? Z80.FLAG_5 : 0));
-                    if ((this.F.value & (Z80.FLAG_V | Z80.FLAG_Z)) === Z80.FLAG_V)
+                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
+                    if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
                         this.PC -= 2;
@@ -2963,7 +2913,7 @@ export default class Z80
                     this.machine.writebyte(this.HL.word, initemp);
                     this.B.dec();
                     this.HL.dec();
-                    this.F.set(((initemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((initemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
                         for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
@@ -2979,7 +2929,7 @@ export default class Z80
                     this.B.dec();
                     this.HL.dec();
                     this.machine.writeport(this.BC.word, outitemp);
-                    this.F.set(((outitemp & 128) !== 0 ? Z80.FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
+                    this.F.set(((outitemp & 0x80) !== 0 ? FLAG_N : 0) | Z80.sz53_table[this.B.get()]);
                     if (this.B.get() !== 0)
                     {
                         this.contend_io(this.BC, 1);
@@ -3053,24 +3003,24 @@ export default class Z80
                 REGISTERL.set(this.machine.readbyte(this.PC++));
                 break;
             case 52:
-                this.tstates += 15;
+                this.tstates += 0x0f;
                 {
                     let dist: number = this.machine.readbyte(this.PC++);
-                    dist = (dist < 128 ? dist : dist - 256);
+                    dist = (dist < 0x80 ? dist : dist - 0x100);
                     let wordtemp: number = REGISTER.get() + dist;
-                    this.tempreg.set(this.machine.readbyte(wordtemp));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(wordtemp));
                     this.INC(bytetemp);
                     this.machine.writebyte(wordtemp, bytetemp.get());
                 }
                 break;
             case 53:
-                this.tstates += 15;
+                this.tstates += 0x0f;
                 {
                     let dist: number = this.machine.readbyte(this.PC++);
-                    let wordtemp: number = REGISTER.get() + (dist < 128 ? dist : dist - 256);
-                    this.tempreg.set(this.machine.readbyte(wordtemp));
-                    let bytetemp: Register = this.tempreg;
+                    let wordtemp: number = REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100);
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(wordtemp));
                     this.DEC(bytetemp);
                     this.machine.writebyte(wordtemp, bytetemp.get());
                 }
@@ -3079,7 +3029,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     let dist: number = this.machine.readbyte(this.PC++);
-                    let wordtemp: number = REGISTER.get() + (dist < 128 ? dist : dist - 256);
+                    let wordtemp: number = REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100);
                     this.machine.writebyte(wordtemp, this.machine.readbyte(this.PC++));
                 }
                 break;
@@ -3095,7 +3045,7 @@ export default class Z80
             case 70:
                 this.tstates += 11;
                 let dist: number = this.machine.readbyte(this.PC++);
-                this.B.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.B.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 76:
                 this.C.set(REGISTERH);
@@ -3106,7 +3056,7 @@ export default class Z80
             case 78:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.C.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.C.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 84:
                 this.D.set(REGISTERH);
@@ -3117,7 +3067,7 @@ export default class Z80
             case 86:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.D.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.D.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 92:
                 this.E.set(REGISTERH);
@@ -3128,7 +3078,7 @@ export default class Z80
             case 94:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.E.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.E.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 96:
                 REGISTERH.set(this.B);
@@ -3150,7 +3100,7 @@ export default class Z80
             case 102:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.H.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.H.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 103:
                 REGISTERH.set(this.A);
@@ -3175,7 +3125,7 @@ export default class Z80
             case 110:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.L.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.L.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 111:
                 REGISTERL.set(this.A);
@@ -3183,37 +3133,37 @@ export default class Z80
             case 112:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.B.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.B.get());
                 break;
             case 113:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.C.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.C.get());
                 break;
             case 114:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.D.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.D.get());
                 break;
             case 115:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.E.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.E.get());
                 break;
             case 116:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.H.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.H.get());
                 break;
             case 117:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.L.get());
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.L.get());
                 break;
             case 119:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 128 ? dist : dist - 256), this.A.value);
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.A.value);
                 break;
             case 124:
                 this.A.set(REGISTERH);
@@ -3224,7 +3174,7 @@ export default class Z80
             case 126:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.A.set(this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256)));
+                this.A.set(this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100)));
                 break;
             case 132:
                 this.ADD(REGISTERH.get());
@@ -3236,7 +3186,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.ADD(bytetemp);
                 }
                 break;
@@ -3250,7 +3200,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.ADC(bytetemp);
                 }
                 break;
@@ -3260,25 +3210,25 @@ export default class Z80
             case 149:
                 this.SUB(REGISTERL.get());
                 break;
-            case 150:
+            case 0x0f0:
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.SUB(bytetemp);
                 }
                 break;
-            case 156:
+            case 0x0f6:
                 this.SBC(REGISTERH.get());
                 break;
-            case 157:
+            case 0x0f7:
                 this.SBC(REGISTERL.get());
                 break;
-            case 158:
+            case 0x0f8:
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.SBC(bytetemp);
                 }
                 break;
@@ -3292,7 +3242,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.AND(bytetemp);
                 }
                 break;
@@ -3306,7 +3256,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.XOR(bytetemp);
                 }
                 break;
@@ -3320,7 +3270,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.OR(bytetemp);
                 }
                 break;
@@ -3334,7 +3284,7 @@ export default class Z80
                 this.tstates += 11;
                 {
                     dist = this.machine.readbyte(this.PC++);
-                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 128 ? dist : dist - 256));
+                    let bytetemp: number = this.machine.readbyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100));
                     this.CP(bytetemp);
                 }
                 break;
@@ -3342,7 +3292,7 @@ export default class Z80
                 {
                     this.contend(this.PC, 3);
                     dist = this.machine.readbyte(this.PC++);
-                    let tempaddr: number = REGISTER.get() + (dist < 128 ? dist : dist - 256);
+                    let tempaddr: number = REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100);
                     this.contend(this.PC, 4);
                     let opcode3: number = this.machine.opcode_fetch(this.PC++);
                     this.do_opcode_DDFDCB(opcode3, tempaddr);
@@ -3379,14 +3329,14 @@ export default class Z80
                 break;
             default:
                 this.PC--;
-                this.R = (this.R - 1) & 255;
+                this.R = (this.R - 1) & 0xFF;
                 break;
         }
     }
 
     private do_opcode_DDFDCB(opcode3: number, tempaddr: number)
     {
-        switch ((opcode3))
+        switch (opcode3)
         {
             case 0:
                 this.tstates += 8;
@@ -3427,8 +3377,8 @@ export default class Z80
             case 6:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.RLC(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3478,8 +3428,8 @@ export default class Z80
             case 14:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.RRC(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3529,8 +3479,8 @@ export default class Z80
             case 22:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.RL(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3580,8 +3530,8 @@ export default class Z80
             case 30:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.RR(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3631,8 +3581,8 @@ export default class Z80
             case 38:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.SLA(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3682,8 +3632,8 @@ export default class Z80
             case 46:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.SRA(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3733,8 +3683,8 @@ export default class Z80
             case 54:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.SLL(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3784,8 +3734,8 @@ export default class Z80
             case 62:
                 this.tstates += 8;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    let bytetemp: Register = this.tempreg;
+                    let bytetemp = new value8();
+                    bytetemp.set(this.machine.readbyte(tempaddr));
                     this.SRL(bytetemp);
                     this.machine.writebyte(tempaddr, bytetemp.get());
                 }
@@ -3806,8 +3756,9 @@ export default class Z80
             case 71:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(0, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(0, tempreg);
                 }
                 break;
             case 72:
@@ -3820,8 +3771,9 @@ export default class Z80
             case 79:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(1, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(1, tempreg);
                 }
                 break;
             case 80:
@@ -3834,8 +3786,9 @@ export default class Z80
             case 87:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(2, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(2, tempreg);
                 }
                 break;
             case 88:
@@ -3848,8 +3801,9 @@ export default class Z80
             case 95:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(3, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(3, tempreg);
                 }
                 break;
             case 96:
@@ -3862,8 +3816,9 @@ export default class Z80
             case 103:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(4, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(4, tempreg);
                 }
                 break;
             case 104:
@@ -3876,8 +3831,9 @@ export default class Z80
             case 111:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(5, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(5, tempreg);
                 }
                 break;
             case 112:
@@ -3890,8 +3846,9 @@ export default class Z80
             case 119:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT(6, this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT(6, tempreg);
                 }
                 break;
             case 120:
@@ -3901,14 +3858,15 @@ export default class Z80
             case 124:
             case 125:
             case 126:
-            case 127:
+            case 0x7f:
                 this.tstates += 5;
                 {
-                    this.tempreg.set(this.machine.readbyte(tempaddr));
-                    this.BIT7(this.tempreg);
+                    let tempreg = new value8();
+                    tempreg.set(this.machine.readbyte(tempaddr));
+                    this.BIT7(tempreg);
                 }
                 break;
-            case 128:
+            case 0x80:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 254);
                 this.machine.writebyte(tempaddr, this.B.get());
@@ -3947,7 +3905,7 @@ export default class Z80
                 this.A.set(this.machine.readbyte(tempaddr) & 254);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
-            case 136:
+            case 0x88:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 253);
                 this.machine.writebyte(tempaddr, this.B.get());
@@ -4016,50 +3974,50 @@ export default class Z80
                 this.L.set(this.machine.readbyte(tempaddr) & 251);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
-            case 150:
+            case 0x0f0:
                 this.tstates += 8;
                 this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 251);
                 break;
-            case 151:
+            case 0x0f1:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 251);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
-            case 152:
+            case 0x0f2:
                 this.tstates += 8;
                 this.B.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.B.get());
                 break;
-            case 153:
+            case 0x0f3:
                 this.tstates += 8;
                 this.C.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.C.get());
                 break;
-            case 154:
+            case 0x0f4:
                 this.tstates += 8;
                 this.D.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.D.get());
                 break;
-            case 155:
+            case 0x0f5:
                 this.tstates += 8;
                 this.E.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.E.get());
                 break;
-            case 156:
+            case 0x0f6:
                 this.tstates += 8;
                 this.H.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.H.get());
                 break;
-            case 157:
+            case 0x0f7:
                 this.tstates += 8;
                 this.L.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
-            case 158:
+            case 0x0f8:
                 this.tstates += 8;
                 this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 247);
                 break;
-            case 159:
+            case 0x0f9:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 247);
                 this.machine.writebyte(tempaddr, this.A.value);
@@ -4183,41 +4141,41 @@ export default class Z80
                 break;
             case 184:
                 this.tstates += 8;
-                this.B.set(this.machine.readbyte(tempaddr) & 127);
+                this.B.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.B.get());
                 break;
             case 185:
                 this.tstates += 8;
-                this.C.set(this.machine.readbyte(tempaddr) & 127);
+                this.C.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.C.get());
                 break;
             case 186:
                 this.tstates += 8;
-                this.D.set(this.machine.readbyte(tempaddr) & 127);
+                this.D.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.D.get());
                 break;
             case 187:
                 this.tstates += 8;
-                this.E.set(this.machine.readbyte(tempaddr) & 127);
+                this.E.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.E.get());
                 break;
             case 188:
                 this.tstates += 8;
-                this.H.set(this.machine.readbyte(tempaddr) & 127);
+                this.H.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.H.get());
                 break;
             case 189:
                 this.tstates += 8;
-                this.L.set(this.machine.readbyte(tempaddr) & 127);
+                this.L.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
             case 190:
                 this.tstates += 8;
-                this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 127);
+                this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) & 0x7f);
                 break;
             case 191:
                 this.tstates += 8;
-                this.A.set(this.machine.readbyte(tempaddr) & 127);
+                this.A.set(this.machine.readbyte(tempaddr) & 0x7f);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
             case 192:
@@ -4495,41 +4453,41 @@ export default class Z80
                 break;
             case 248:
                 this.tstates += 8;
-                this.B.set(this.machine.readbyte(tempaddr) | 128);
+                this.B.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.B.get());
                 break;
             case 249:
                 this.tstates += 8;
-                this.C.set(this.machine.readbyte(tempaddr) | 128);
+                this.C.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.C.get());
                 break;
             case 250:
                 this.tstates += 8;
-                this.D.set(this.machine.readbyte(tempaddr) | 128);
+                this.D.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.D.get());
                 break;
             case 251:
                 this.tstates += 8;
-                this.E.set(this.machine.readbyte(tempaddr) | 128);
+                this.E.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.E.get());
                 break;
             case 252:
                 this.tstates += 8;
-                this.H.set(this.machine.readbyte(tempaddr) | 128);
+                this.H.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.H.get());
                 break;
             case 253:
                 this.tstates += 8;
-                this.L.set(this.machine.readbyte(tempaddr) | 128);
+                this.L.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.L.get());
                 break;
             case 254:
                 this.tstates += 8;
-                this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) | 128);
+                this.machine.writebyte(tempaddr, this.machine.readbyte(tempaddr) | 0x80);
                 break;
-            case 255:
+            case 0xFF:
                 this.tstates += 8;
-                this.A.set(this.machine.readbyte(tempaddr) | 128);
+                this.A.set(this.machine.readbyte(tempaddr) | 0x80);
                 this.machine.writebyte(tempaddr, this.A.value);
                 break;
         }

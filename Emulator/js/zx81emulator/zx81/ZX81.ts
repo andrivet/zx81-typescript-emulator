@@ -20,7 +20,6 @@
  */
 
 import Z80 from "../z80/Z80";
-import Tape from "../io/Tape";
 import {KBStatus} from "../io/KBStatus";
 import Scanline from "../display/Scanline";
 import Resource from "../io/Resource";
@@ -43,11 +42,11 @@ export default class ZX81
     private shift_reg_inv: number = 0;
     private int_pending: boolean = false;
     private z80: Z80 = new Z80(this);
-    private tape: Tape = new Tape();
+    private program: Uint8Array = null;
 
     public tperscanline: number = 207;
     public tperframe: number = 312 * 207;
-    public memory: number[] = new Array(64 * 1024);
+    public memory: Uint8Array = new Uint8Array(64 * 1024);
     public NMI_generator: boolean = false;
     public HSYNC_generator: boolean = false;
     public rowcounter: number = 0;
@@ -137,7 +136,7 @@ export default class ZX81
             return (opcode);
     }
 
-    public writeport(address: number, Data: number)
+    public writeport(address: number, data: number)
     {
         switch (address & 255)
         {
@@ -196,14 +195,12 @@ export default class ZX81
         let b: number = this.memory[this.z80.PC];
         if (this.z80.PC === 854 && b === 31)
         {
-            let currentProgram: Uint8Array = this.getTape().getNextEntry();
-            if (currentProgram != null)
+            if (this.program != null)
             {
                 let pos: number = 0;
-                while ((currentProgram[pos++] & 128) === 0)
-                    ;
-                for (let i: number = pos; i < currentProgram.length; i++)
-                    this.memory[16393 + i - pos] = currentProgram[i] & 255
+                while ((this.program[pos++] & 128) === 0)
+                    /* skip */;
+                ZX81.copy_mem(this.program, this.memory, 16393);
                 this.pop16();
                 return 519;
             }
@@ -327,23 +324,32 @@ export default class ZX81
         return tstotal;
     }
 
+    private static copy_mem(from: Uint8Array, to: Uint8Array, toPosition: number = 0, maxLength: number = -1): number
+    {
+        let size = (from.length < maxLength) ? from.length : maxLength;
+        for (let i = 0; i < size; ++i)
+            to[toPosition + i] = from[i];
+        return size;
+    }
+
     private memory_load(filename: string, address: number, length: number, callback: (this: void) => void): void
     {
         let resource: Resource = new Resource();
 
-        let cb = (data: Uint8Array): void => {
-            let size = (data.length < length) ? data.length : length;
-            for (let i = 0; i < size; ++i)
-                this.memory[address + i] = data[i];
+        resource.get(filename, (data: Uint8Array): void => {
+            ZX81.copy_mem(data, this.memory, address, length);
             callback();
-        };
-
-        resource.get(filename, cb);
+        });
     }
 
-    public getTape(): Tape
+    public load_program(filename: string): void
     {
-        return this.tape;
+        let program = new Resource();
+        program.get(filename, (data: Uint8Array): void => {
+            this.program = new Uint8Array(data.length);
+            ZX81.copy_mem(data, this.program);
+            this.z80.reset();
+        });
     }
 }
 

@@ -34,7 +34,7 @@ export class ZX81Emulator
     {
     }
 
-    public load(tzxFileName: string, scale: number, canvasID: string): void
+    public load(fileName: string, scale: number, canvasID: string): void
     {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
         if (canvas == null)
@@ -45,20 +45,10 @@ export class ZX81Emulator
         this.keyboard = new KBStatus();
         this.drawer = new Drawer(this.machine, scale, canvas);
 
-        if (tzxFileName != null)
-        {
-            let tzxEntry: string;
-            let entryNum: number = 0;
-            let atPos: number = tzxFileName.indexOf('@');
-            if (atPos !== -1)
-            {
-                tzxEntry = tzxFileName.substring(atPos + 1);
-                tzxFileName = tzxFileName.substring(0, atPos);
-                entryNum = +tzxEntry;
-            }
-            //this.mConfig.machine.getTape().loadTZX(this.mConfig, this.mKeyboard, tzxFileName, entryNum);
-            this.start();
-        }
+        if (fileName != null)
+            this.machine.load_program(fileName);
+
+        this.start();
     }
 
     public start()
@@ -109,7 +99,7 @@ export class ZX81Emulator
 let emulator: ZX81Emulator = new ZX81Emulator;
 window.onload = () =>
 {
-    emulator.load("USINE.tzx", 3, "canvas");
+    emulator.load("PROGS/FACTORY.P", 3, "canvas");
 };
 
 window.onunload = () =>

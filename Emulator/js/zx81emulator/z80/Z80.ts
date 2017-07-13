@@ -379,8 +379,7 @@ export default class Z80
     public OR(r: number): void;
     public OR(r: Register | number): void
     {
-        let value = r instanceof Register ? r.get() : r;
-        this.A.value |= value;
+        this.A.value |= r instanceof Register ? r.get() : r;
         this.F.set(Z80.sz53p_table[this.A.value]);
     }
 

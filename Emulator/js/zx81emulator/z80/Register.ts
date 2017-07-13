@@ -97,7 +97,7 @@ export class value8 extends Register
 {
     private value: number;
 
-    constructor(name: string)
+    constructor(name: string = "value8")
     {
         super();
         this.value = 0;

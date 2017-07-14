@@ -20,7 +20,7 @@
  */
 
 import Z80 from "../z80/Z80";
-import {KBStatus} from "../io/Keyboard";
+import Keyboard from "../io/Keyboard";
 import Scanline from "../display/Scanline";
 import Resource from "../io/Resource";
 
@@ -36,6 +36,7 @@ export default class ZX81
     static WHITE = 0;
     static BLACK = 0xFF;
 
+    private keyboard: Keyboard = new Keyboard();
     private hsync_counter: number = 207;
     private lastInstruction: number = 0;
     private shift_register: number = 0;
@@ -163,7 +164,7 @@ export default class ZX81
             for (let i = 0; i < 8; i++)
             {
                 if ((keyb & (1 << i)) === 0)
-                    data |= KBStatus.ZXKeyboard[i];
+                    data |= this.keyboard.get(i);
             }
             return (~data) & 255;
         }
@@ -350,6 +351,16 @@ export default class ZX81
             ZX81.copy_mem(data, this.program);
             this.z80.reset();
         });
+    }
+
+    public onKeyDown(e: KeyboardEvent)
+    {
+        this.keyboard.keyDown(e.which, e.shiftKey);
+    }
+
+    public onKeyUp(e: KeyboardEvent)
+    {
+        this.keyboard.keyUp(e.which, e.shiftKey);
     }
 }
 

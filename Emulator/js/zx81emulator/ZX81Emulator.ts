@@ -21,14 +21,12 @@
 
 
 import Drawer from "./display/Drawer";
-import {KBStatus} from "./io/Keyboard";
 import ZX81 from "./zx81/ZX81";
 
 export class ZX81Emulator
 {
     private machine: ZX81;
     private drawer: Drawer;
-    private keyboard: KBStatus;
 
     public constructor()
     {
@@ -42,7 +40,6 @@ export class ZX81Emulator
 
         this.installListeners(canvas);
         this.machine = new ZX81();
-        this.keyboard = new KBStatus();
         this.drawer = new Drawer(this.machine, scale, canvas);
 
         if (fileName != null)
@@ -56,9 +53,6 @@ export class ZX81Emulator
         this.drawer.start();
     }
 
-    /**
-     * Stops the applet.
-     */
     public stop()
     {
         this.drawer.stop();
@@ -68,26 +62,17 @@ export class ZX81Emulator
     {
         window.addEventListener("keydown", (event) =>
         {
-            this.onKeyDown(event);
+            event.preventDefault();
+            this.machine.onKeyDown(event);
             return null;
         }, false);
+
         window.addEventListener("keyup", (event) =>
         {
-            this.onKeyUp(event);
+            event.preventDefault();
+            this.machine.onKeyUp(event);
             return null;
         }, false);
-    }
-
-    private onKeyDown(e: KeyboardEvent)
-    {
-        e.preventDefault();
-        this.keyboard.PCKeyDown(e.which, e.shiftKey, e.ctrlKey, e.altKey);
-    }
-
-    private onKeyUp(e: KeyboardEvent)
-    {
-        e.preventDefault();
-        this.keyboard.PCKeyUp(e.which, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
     private windowActive(active: boolean)

@@ -194,16 +194,14 @@ export default class ZX81
     private PatchTest(): number
     {
         let b: number = this.memory[this.z80.PC];
-        if (this.z80.PC === 854 && b === 31)
+        if (this.z80.PC === 0x0356 && b === 0x1f) // ZX81, start loading
         {
             if (this.program != null)
             {
-                let pos: number = 0;
-                while ((this.program[pos++] & 128) === 0)
-                    /* skip */;
-                ZX81.copy_mem(this.program, this.memory, 16393);
+                for(let i: number = 0; i < this.program.length; i++)
+                    this.memory[0x4009 + i] = this.program[i];
                 this.pop16();
-                return 519;
+                return 0x0207;  // ZX81, load complete.
             }
         }
 
@@ -325,20 +323,14 @@ export default class ZX81
         return tstotal;
     }
 
-    private static copy_mem(from: Uint8Array, to: Uint8Array, toPosition: number = 0, maxLength: number = -1): number
-    {
-        let size = (from.length < maxLength) ? from.length : maxLength;
-        for (let i = 0; i < size; ++i)
-            to[toPosition + i] = from[i];
-        return size;
-    }
-
     private memory_load(filename: string, address: number, length: number, callback: (this: void) => void): void
     {
         let resource: Resource = new Resource();
 
         resource.get(filename, (data: Uint8Array): void => {
-            ZX81.copy_mem(data, this.memory, address, length);
+            let maxLength = (data.length < length) ? data.length : length;
+            for (let i = 0; i < maxLength; ++i)
+                this.memory[address + i] = data[i];
             callback();
         });
     }
@@ -347,9 +339,7 @@ export default class ZX81
     {
         let program = new Resource();
         program.get(filename, (data: Uint8Array): void => {
-            this.program = new Uint8Array(data.length);
-            ZX81.copy_mem(data, this.program);
-            this.z80.reset();
+            this.program = data;
         });
     }
 

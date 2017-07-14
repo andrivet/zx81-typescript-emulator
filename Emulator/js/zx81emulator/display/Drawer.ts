@@ -45,6 +45,12 @@ const TVH: number = 380;
 
 const targetFrameTime: number = 1000 / 50; // Target frame time should result in 50Hz display
 
+const enum COLOR
+{
+    BLACK  = 0xFF000000,
+    WHITE  = 0xFFFFFFFF
+}
+
 export default class Drawer
 {
     private machine: ZX81;
@@ -120,7 +126,7 @@ export default class Drawer
         {
             let c: number = line.scanline[i];
 
-            this.argb[bufferPos + this.rasterX] = c ? 0xFFFFFFFF : 0xFF000000;
+            this.argb[bufferPos + this.rasterX] = c ? COLOR.WHITE : COLOR.BLACK;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -166,7 +172,7 @@ export default class Drawer
         {
             while(x <= WinR)
             {
-                this.argb[dest + x] = 0;
+                this.argb[dest + x] = COLOR.BLACK;
                 x += 1;
             }
             x = 0;

@@ -129,7 +129,6 @@ export class MasterRegister extends Register
     {
         super();
         this.value = 0;
-        this.value = 0;
         this.name = name;
     }
 

@@ -21,7 +21,7 @@
 
 
 import Drawer from "./display/Drawer";
-import {KBStatus} from "./io/KBStatus";
+import {KBStatus} from "./io/Keyboard";
 import ZX81 from "./zx81/ZX81";
 
 export class ZX81Emulator
@@ -66,28 +66,28 @@ export class ZX81Emulator
 
     private installListeners(container: HTMLElement)
     {
-        container.addEventListener("keydown", (event) =>
+        window.addEventListener("keydown", (event) =>
         {
             this.onKeyDown(event);
             return null;
-        }, true);
-        container.addEventListener("keyup", (event) =>
+        }, false);
+        window.addEventListener("keyup", (event) =>
         {
             this.onKeyUp(event);
             return null;
-        }, true);
+        }, false);
     }
 
     private onKeyDown(e: KeyboardEvent)
     {
         e.preventDefault();
-        this.keyboard.PCKeyDown(e.key, e.shiftKey, e.ctrlKey, e.altKey);
+        this.keyboard.PCKeyDown(e.which, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
     private onKeyUp(e: KeyboardEvent)
     {
         e.preventDefault();
-        this.keyboard.PCKeyUp(e.key, e.shiftKey, e.ctrlKey, e.altKey);
+        this.keyboard.PCKeyUp(e.which, e.shiftKey, e.ctrlKey, e.altKey);
     }
 
     private windowActive(active: boolean)

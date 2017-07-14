@@ -20,7 +20,7 @@
  */
 
 import Z80 from "../z80/Z80";
-import {KBStatus} from "../io/KBStatus";
+import {KBStatus} from "../io/Keyboard";
 import Scanline from "../display/Scanline";
 import Resource from "../io/Resource";
 

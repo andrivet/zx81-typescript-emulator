@@ -19,18 +19,29 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export class kb
+/* Keyboard is arranged by rows (address A) and column (data D).
+It is splitted into two parts as the following:
+
+      D0 D1 D2 D3 D4 | D4 D3 D2 D1 D0
+      --------------------------------
+A11 |  1  2  3  4  5 |  6  7  8  9  0 | A12
+A10 |  Q  W  E  R  T |  Y  U  I  O  P | A13
+A9  |  A  S  D  F  G |  H  J  K  L NL | A14
+A8  | SH  Z  X  C  V |  B  N  M  . SP | A15
+
+NL: New Line, SH: Shift, SP: Space
+*/
+
+export class Key
 {
-    Shift: number;
     Code: number;
     Addr1: number;
     Data1: number;
     Addr2: number;
     Data2: number;
 
-    constructor(s: number, c: number, a1: number, d1: number, a2: number, d2: number)
+    constructor(c: number, a1: number, d1: number, a2: number, d2: number)
     {
-        this.Shift = s;
         this.Code = c;
         this.Addr1 = a1;
         this.Data1 = d1;
@@ -39,76 +50,74 @@ export class kb
     }
 }
 
-const kbD0: number = 1;
-const kbD1: number = 2;
-const kbD2: number = 4;
-const kbD3: number = 8;
-const kbD4: number = 16;
-const kbA8: number = 0;
-const kbA9: number = 1;
-const kbA10: number = 2;
-const kbA11: number = 3;
-const kbA12: number = 4;
-const kbA13: number = 5;
-const kbA14: number = 6;
-const kbA15: number = 7;
+const D0: number = 1;
+const D1: number = 2;
+const D2: number = 4;
+const D3: number = 8;
+const D4: number = 16;
+const A8: number = 0;
+const A9: number = 1;
+const A10: number = 2;
+const A11: number = 3;
+const A12: number = 4;
+const A13: number = 5;
+const A14: number = 6;
+const A15: number = 7;
 
 const VKSHIFT: number = 16;
 
 export class KBStatus
 {
-    private PCShift: number = 1;
-
-    static KeyMap: kb[] = [
-        new kb(0,  16, kbA8, kbD0, 255, 255),           // Shift
-        new kb(0,  13, kbA14, kbD0, 255, 255),          // Return
-        new kb(0,   8, kbA12, kbD0, kbA8, kbD0),        // Backspace
-        new kb(0,  37, kbA11, kbD4, kbA8, kbD0),        // Arrow Left
-        new kb(0,  38, kbA12, kbD3, kbA8, kbD0),        // Arrow Up
-        new kb(0,  39, kbA12, kbD2, kbA8, kbD0),        // Arrow Right
-        new kb(0,  40, kbA12, kbD4, kbA8, kbD0),        // Arrow Down
-        new kb(0,  17, kbA14, kbD0, kbA8 , kbD0),       // Control
-        new kb(0,  32, kbA15, kbD0, 255, 255),          // space
-        new kb(0,  65, kbA9, kbD0, 255, 255),           // A
-        new kb(0,  66, kbA15, kbD4, 255, 255),          // B
-        new kb(0,  67, kbA8, kbD3, 255, 255),           // C
-        new kb(0,  68, kbA9, kbD2, 255, 255),           // D
-        new kb(0,  69, kbA10, kbD2, 255, 255),          // E
-        new kb(0,  70, kbA9, kbD3, 255, 255),           // F
-        new kb(0,  71, kbA9, kbD4, 255, 255),           // G
-        new kb(0,  72, kbA14, kbD4, 255, 255),          // H
-        new kb(0,  73, kbA13, kbD2, 255, 255),          // I
-        new kb(0,  74, kbA14, kbD3, 255, 255),          // J
-        new kb(0,  75, kbA14, kbD2, 255, 255),          // K
-        new kb(0,  76, kbA14, kbD1, 255, 255),          // L
-        new kb(0,  77, kbA15, kbD2, 255, 255),          // M
-        new kb(0,  78, kbA15, kbD3, 255, 255),          // N
-        new kb(0,  79, kbA13, kbD1, 255, 255),          // O
-        new kb(0,  80, kbA13, kbD0, 255, 255),          // P
-        new kb(0,  81, kbA10, kbD0, 255, 255),          // Q
-        new kb(0,  82, kbA10, kbD3, 255, 255),          // R
-        new kb(0,  83, kbA9, kbD1, 255, 255),           // S
-        new kb(0,  84, kbA10, kbD4, 255, 255),          // T
-        new kb(0,  85, kbA13, kbD3, 255, 255),          // U
-        new kb(0,  86, kbA8, kbD4, 255, 255),           // V
-        new kb(0,  87, kbA10, kbD1, 255, 255),          // W
-        new kb(0,  88, kbA8, kbD2, 255, 255),           // X
-        new kb(0,  89, kbA13, kbD4, 255, 255),          // Y
-        new kb(0,  90, kbA8, kbD1, 255, 255),           // Z
-        new kb(0,  49, kbA11, kbD0, 255, 255),          // 1
-        new kb(0,  50, kbA11, kbD1, 255, 255),          // 2
-        new kb(0,  51, kbA11, kbD2, 255, 255),          // 3
-        new kb(0,  52, kbA11, kbD3, 255, 255),          // 4
-        new kb(0,  53, kbA11, kbD4, 255, 255),          // 5
-        new kb(0,  54, kbA12, kbD4, 255, 255),          // 6
-        new kb(0,  55, kbA12, kbD3, 255, 255),          // 7
-        new kb(0,  56, kbA12, kbD2, 255, 255),          // 8
-        new kb(0,  57, kbA12, kbD1, 255, 255),          // 9
-        new kb(0,  48, kbA12, kbD0, 255, 255),          // 0
-        new kb(0, 186, kbA15, kbD1, 255, 255),          // , Shift
-        new kb(0, 188, kbA15, kbD1, 255, 255),          // ,
-        new kb(0, 190, kbA15, kbD1, 255, 255),          // .
-        new kb(0, 0, 0, 0, 0, 0)
+    static KeyMap: Key[] = [
+        new Key( 16, A8, D0, 255, 255),           // Shift
+        new Key( 13, A14, D0, 255, 255),          // Return
+        new Key(  8, A12, D0, A8, D0),        // Backspace
+        new Key( 37, A11, D4, A8, D0),        // Arrow Left
+        new Key( 38, A12, D3, A8, D0),        // Arrow Up
+        new Key( 39, A12, D2, A8, D0),        // Arrow Right
+        new Key( 40, A12, D4, A8, D0),        // Arrow Down
+        new Key( 17, A14, D0, A8 , D0),       // Control
+        new Key( 32, A15, D0, 255, 255),          // space
+        new Key( 65, A9, D0, 255, 255),           // A
+        new Key( 66, A15, D4, 255, 255),          // B
+        new Key( 67, A8, D3, 255, 255),           // C
+        new Key( 68, A9, D2, 255, 255),           // D
+        new Key( 69, A10, D2, 255, 255),          // E
+        new Key( 70, A9, D3, 255, 255),           // F
+        new Key( 71, A9, D4, 255, 255),           // G
+        new Key( 72, A14, D4, 255, 255),          // H
+        new Key( 73, A13, D2, 255, 255),          // I
+        new Key( 74, A14, D3, 255, 255),          // J
+        new Key( 75, A14, D2, 255, 255),          // K
+        new Key( 76, A14, D1, 255, 255),          // L
+        new Key( 77, A15, D2, 255, 255),          // M
+        new Key( 78, A15, D3, 255, 255),          // N
+        new Key( 79, A13, D1, 255, 255),          // O
+        new Key( 80, A13, D0, 255, 255),          // P
+        new Key( 81, A10, D0, 255, 255),          // Q
+        new Key( 82, A10, D3, 255, 255),          // R
+        new Key( 83, A9, D1, 255, 255),           // S
+        new Key( 84, A10, D4, 255, 255),          // T
+        new Key( 85, A13, D3, 255, 255),          // U
+        new Key( 86, A8, D4, 255, 255),           // V
+        new Key( 87, A10, D1, 255, 255),          // W
+        new Key( 88, A8, D2, 255, 255),           // X
+        new Key( 89, A13, D4, 255, 255),          // Y
+        new Key( 90, A8, D1, 255, 255),           // Z
+        new Key( 49, A11, D0, 255, 255),          // 1
+        new Key( 50, A11, D1, 255, 255),          // 2
+        new Key( 51, A11, D2, 255, 255),          // 3
+        new Key( 52, A11, D3, 255, 255),          // 4
+        new Key( 53, A11, D4, 255, 255),          // 5
+        new Key( 54, A12, D4, 255, 255),          // 6
+        new Key( 55, A12, D3, 255, 255),          // 7
+        new Key( 56, A12, D2, 255, 255),          // 8
+        new Key( 57, A12, D1, 255, 255),          // 9
+        new Key( 48, A12, D0, 255, 255),          // 0
+        new Key(186, A15, D1, 255, 255),          // , Shift
+        new Key(188, A15, D1, 255, 255),          // ,
+        new Key(190, A15, D1, 255, 255),          // .
+        new Key(0, 0, 0, 0, 0)
     ];
 
     public static ZXKeyboard: number[] = new Array(8);
@@ -121,15 +130,14 @@ export class KBStatus
 
     public PCKeyDown(code: number, shift: boolean = false, ctrl: boolean = false, alt: boolean = false)
     {
-        if(shift)
-            this.PCShift = 2;
 
         let i: number = 0;
         while (KBStatus.KeyMap[i].Code !== 0)
         {
-            if (KBStatus.KeyMap[i].Code === code &&  ((KBStatus.KeyMap[i].Shift == this.PCShift) || (KBStatus.KeyMap[i].Shift == 0)))
+            if (KBStatus.KeyMap[i].Code === code)
             {
                 KBStatus.ZXKeyboard[KBStatus.KeyMap[i].Addr1] |= KBStatus.KeyMap[i].Data1;
+
                 if (KBStatus.KeyMap[i].Addr2 !== 255)
                     KBStatus.ZXKeyboard[KBStatus.KeyMap[i].Addr2] |= KBStatus.KeyMap[i].Data2;
                 break;
@@ -140,9 +148,6 @@ export class KBStatus
 
     public PCKeyUp(code: number, shift: boolean = false, ctrl: boolean = false, al: boolean = false)
     {
-        if(code === VKSHIFT)
-            this.PCShift = 1;
-
         let i: number = 0;
         while (KBStatus.KeyMap[i].Code !== 0)
         {
@@ -156,8 +161,8 @@ export class KBStatus
             i++;
         }
 
-        if(this.PCShift === 2)
-            KBStatus.ZXKeyboard[kbA8] |= kbD0;
+        if(shift)
+            KBStatus.ZXKeyboard[A8] |= D0;
     }
 }
 

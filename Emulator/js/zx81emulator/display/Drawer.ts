@@ -120,12 +120,12 @@ export default class Drawer
            0, 0, this.canvas.width, this.canvas.height);
     }
 
-    private Draw(line: Scanline)
+    private Draw()
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
-        for (let i: number = 0; i < line.scanline_len; i++)
+        for (let i: number = 0; i < this.buildLine.get_length(); i++)
         {
-            this.argb[bufferPos + this.rasterX] = line.scanline[i] ? COLOR.WHITE : COLOR.BLACK;
+            this.argb[bufferPos + this.rasterX] = this.buildLine.get_pixel(i) ? COLOR.WHITE : COLOR.BLACK;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -135,15 +135,11 @@ export default class Drawer
                 bufferPos = this.dest + this.frameNo * TVW;
                 this.rasterY += 1;
                 if (this.rasterY >= TVH)
-                {
-                    i = line.scanline_len + 1;
-                    line.sync_valid = 1;
-                }
+                    i = this.buildLine.next_line();
             }
         }
-        if (line.sync_len < HSYNC_MINLEN)
-            line.sync_valid = 0;
-        if (line.sync_valid)
+
+        if (this.buildLine.check_sync_length(HSYNC_MINLEN))
         {
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
@@ -151,7 +147,7 @@ export default class Drawer
                 this.rasterY += 1;
                 this.dest += TVW;
             }
-            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (line.sync_len > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
+            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (this.buildLine.get_sync_length() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
                 this.CompleteFrame();
                 this.rasterX = this.rasterY = 0;
@@ -180,8 +176,6 @@ export default class Drawer
         }
     }
 
-    private static scanLineNumber: number = 0;
-
     public run()
     {
         if(this.framesStartTime)
@@ -207,8 +201,7 @@ export default class Drawer
             while (j > 0)
             {
                 j -= this.machine.do_scanline(this.buildLine);
-                Drawer.scanLineNumber++;
-                this.Draw(this.buildLine);
+                this.Draw();
             }
             this.borrow = j;
 

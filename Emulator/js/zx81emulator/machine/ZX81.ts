@@ -21,9 +21,9 @@
 
 import Z80 from "../z80/Z80";
 import Keyboard from "../io/Keyboard";
-import Scanline from "../display/Scanline";
 import Resource from "../io/Resource";
 import Machine from "../machine/Machine";
+import Scanline from "../display/Scanline";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
@@ -210,15 +210,13 @@ export default class ZX81 extends Machine
     public do_scanline(scanLine: Scanline): number
     {
         let tstotal: number = 0;
-        scanLine.scanline_len = 0;
+        scanLine.reset();
 
         let maxScanLen: number = 420;
-        if (scanLine.sync_valid)
+        if (scanLine.get_sync_valid() !== 0)
         {
             scanLine.add_blank(this.borrow, this.HSYNC_generator ? COLOR.WHITE : COLOR.BLACK);
             this.borrow = 0;
-            scanLine.sync_valid = 0;
-            scanLine.sync_len = 0;
         }
 
         do
@@ -242,7 +240,7 @@ export default class ZX81 extends Machine
                 if (this.HSYNC_generator)
                     colour = (bit !== 0 ? COLOR.BLACK : COLOR.WHITE);
 
-                scanLine.scanline[scanLine.scanline_len++] = colour;
+                scanLine.add_pixel(colour);
 
                 this.shift_register <<= 1;
                 this.shift_reg_inv <<= 1;
@@ -254,31 +252,31 @@ export default class ZX81 extends Machine
                     this.NMI_generator = false;
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPE.V;
+                    if (scanLine.get_sync_length() !== 0)
+                        scanLine.set_sync_valid(SYNCTYPE.V);
                     this.HSYNC_generator = true;
                     break;
                 case LASTINST.OUTFE:
                     this.NMI_generator = true;
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPE.V;
+                    if (scanLine.get_sync_length() !== 0)
+                        scanLine.set_sync_valid(SYNCTYPE.V);
                     this.HSYNC_generator = true;
                     break;
                 case LASTINST.INFE:
                     if (!this.NMI_generator)
                     {
                         this.HSYNC_generator = false;
-                        if (scanLine.sync_len === 0)
-                            scanLine.sync_valid = 0;
+                        if (scanLine.get_sync_length() === 0)
+                            scanLine.set_sync_valid(0);
                     }
                     break;
                 case LASTINST.OUTFF:
                     if (!this.HSYNC_generator)
                         this.rowcounter = 0;
-                    if (scanLine.sync_len !== 0)
-                        scanLine.sync_valid = SYNCTYPE.V;
+                    if (scanLine.get_sync_length() !== 0)
+                        scanLine.set_sync_valid(SYNCTYPE.V);
                     this.HSYNC_generator = true;
                     break;
                 default:
@@ -290,33 +288,32 @@ export default class ZX81 extends Machine
             if ((this.z80.R & 64) === 0)
                 this.int_pending = true;
             if (!this.HSYNC_generator)
-                scanLine.sync_len += ts;
+                scanLine.add_sync_length(ts);
 
             if (this.hsync_counter <= 0)
             {
                 if (this.NMI_generator)
                 {
-                    let nmilen: number = this.z80.nmi(scanLine.scanline_len);
+                    let nmilen: number = this.z80.nmi(scanLine.get_length());
                     this.hsync_counter -= nmilen;
                     ts += nmilen;
                 }
 
                 this.borrow = -this.hsync_counter;
-                if (this.HSYNC_generator && scanLine.sync_len === 0)
+                if (this.HSYNC_generator && scanLine.get_sync_length() === 0)
                 {
-                    scanLine.sync_len = 10;
-                    scanLine.sync_valid = SYNCTYPE.H;
-                    if (scanLine.scanline_len >= (this.tperscanline * 2))
-                        scanLine.scanline_len = this.tperscanline * 2;
+                    scanLine.reset_sync(10, SYNCTYPE.H);
+                    if (scanLine.get_length() >= (this.tperscanline * 2))
+                        scanLine.reset(this.tperscanline * 2);
                     this.rowcounter = (++this.rowcounter) & 7;
                 }
                 this.hsync_counter += this.tperscanline;
             }
             tstotal += ts;
         }
-        while (scanLine.scanline_len < maxScanLen && scanLine.sync_valid === 0);
+        while (scanLine.get_length() < maxScanLen && scanLine.get_sync_valid() == 0);
 
-        if (scanLine.sync_valid === SYNCTYPE.V)
+        if (scanLine.get_sync_valid() === SYNCTYPE.V)
             this.hsync_counter = this.tperscanline;
 
         return tstotal;

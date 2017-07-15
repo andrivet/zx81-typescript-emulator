@@ -19,20 +19,83 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
 export default class Scanline
 {
-    public sync_len: number = 0;
-    public sync_valid: number = 0;
-    public scanline_len: number = 0;
-    public scanline: number[] = new Array(4000);
+    private sync_len: number = 0;
+    private sync_valid: number = 0;
+    private scanline_len: number = 0;
+    private scanline: number[] = new Array(4000);
 
-    public add_blank(tstates: number, colour: number)
+    public add_blank(tstates: number, color: number): void
     {
         while (tstates-- > 0)
         {
-            this.scanline[this.scanline_len++] = colour;
-            this.scanline[this.scanline_len++] = colour;
+            this.scanline[this.scanline_len++] = color;
+            this.scanline[this.scanline_len++] = color;
         }
+
+        this.sync_valid = 0;
+        this.sync_len = 0;
+    }
+
+    public get_length(): number
+    {
+        return this.scanline_len;
+    }
+
+    public reset(length: number = 0): void
+    {
+        this.scanline_len = length;
+    }
+
+    public get_pixel(i: number): number
+    {
+        return this.scanline[i];
+    }
+
+    public add_pixel(color: number): void
+    {
+        this.scanline[this.scanline_len++] = color;
+    }
+
+    public next_line(): number
+    {
+        this.sync_valid = 1;
+        return this.scanline_len + 1;
+    }
+
+    public get_sync_length(): number
+    {
+        return this.sync_len;
+    }
+
+    public check_sync_length(min: number): boolean
+    {
+        if(this.sync_len < min)
+            this.sync_valid = 0;
+        return this.sync_valid !== 0;
+    }
+
+    public get_sync_valid(): number
+    {
+        return this.sync_valid;
+    }
+
+    public set_sync_valid(sync_valid: number): void
+    {
+        this.sync_valid = sync_valid;
+    }
+
+    public reset_sync(length: number, valid: number): void
+    {
+        this.sync_len = length;
+        this.sync_valid = valid;
+    }
+
+    public add_sync_length(add: number): void
+    {
+        this.sync_len += add;
     }
 }
 

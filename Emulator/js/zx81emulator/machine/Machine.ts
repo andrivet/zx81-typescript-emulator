@@ -34,6 +34,8 @@ abstract class Machine
     public abstract readPort(address: number): number;
     public abstract writePort(address: number, data: number);
     public abstract opcodeFetch(address: number): number;
+
+    public static sleep(delay: number): Promise<void> { return new Promise((resolve) => { setTimeout(() => resolve(), delay); }); }
 }
 
 export default Machine;

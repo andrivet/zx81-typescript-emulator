@@ -20,7 +20,7 @@
  */
 
 import Z80 from "../z80/Z80";
-import Keyboard from "../io/Keyboard";
+import Keyboard, {VK_J, VK_P, VK_ENTER, VK_SHIFT} from "../io/Keyboard";
 import Resource from "../io/Resource";
 import Machine from "../machine/Machine";
 import Scanline from "../display/Scanline";
@@ -338,14 +338,42 @@ export default class ZX81 extends Machine
         this.program = data;
     }
 
-    public onKeyDown(e: KeyboardEvent)
+    public keyDown(code: number, shift: boolean = false)
     {
-        this.keyboard.keyDown(e.which, e.shiftKey);
+        this.keyboard.keyDown(code, shift);
     }
 
-    public onKeyUp(e: KeyboardEvent)
+    public keyUp(code: number, shift: boolean = false)
     {
-        this.keyboard.keyUp(e.which, e.shiftKey);
+        this.keyboard.keyUp(code, shift);
+    }
+
+    private async key(code: number, shift: boolean = false)
+    {
+        if(shift)
+        {
+            this.keyDown(VK_SHIFT, true);
+            await Machine.sleep(200);
+        }
+        this.keyDown(code, shift);
+        await Machine.sleep(200);
+        this.keyUp(code);
+        await Machine.sleep(200);
+        if(shift)
+        {
+            this.keyUp(VK_SHIFT);
+            await Machine.sleep(200);
+        }
+    }
+
+    public async autoLoad()
+    {
+        await Machine.sleep(4000);
+
+        await this.key(VK_J);
+        await this.key(VK_P, true);
+        await this.key(VK_P, true);
+        await this.key(VK_ENTER);
     }
 }
 

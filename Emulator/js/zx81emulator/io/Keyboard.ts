@@ -64,6 +64,10 @@ const A13: number = 5;
 const A14: number = 6;
 const A15: number = 7;
 
+export const VK_J:number = 74;
+export const VK_P = 80;
+export const VK_ENTER: number = 13;
+export const VK_SHIFT: number = 16;
 
 export default class Keyboard
 {
@@ -76,7 +80,7 @@ export default class Keyboard
         new Key( 39, A12, D2, A8, D0),      // Arrow Right
         new Key( 40, A12, D4, A8, D0),      // Arrow Down
         new Key( 17, A14, D0, A8 , D0),     // Control
-        new Key( 32, A15, D0, 255, 255),    // space
+        new Key( 32, A15, D0, 255, 255),    // Space
         new Key( 65, A9, D0, 255, 255),     // A
         new Key( 66, A15, D4, 255, 255),    // B
         new Key( 67, A8, D3, 255, 255),     // C

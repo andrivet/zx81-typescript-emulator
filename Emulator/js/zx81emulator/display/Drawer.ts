@@ -51,8 +51,6 @@ const enum COLOR
     WHITE = 0xFF000000
 }
 
-function sleep(delay: number): Promise<void> { return new Promise((resolve) => { setTimeout(() => resolve(), delay); }); }
-
 export default class Drawer
 {
     private machine: Machine;
@@ -188,7 +186,7 @@ export default class Drawer
             {
                 if (this.paused)
                 {
-                    await sleep(1000);
+                    await Machine.sleep(1000);
                     fps = 0;
                     framesStartTime = Drawer.currentTimeMillis();
                     return;
@@ -208,7 +206,7 @@ export default class Drawer
                 let delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
                 if (delay > 0)
                 {
-                    await sleep(delay);
+                    await Machine.sleep(delay);
                 }
 
                 if (fps === 100)

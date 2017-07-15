@@ -30,25 +30,28 @@ export class ZX81Emulator
 
     public async load(fileNameID: string, scale: number, canvasID: string): Promise<void>
     {
-        let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
-        if (canvas == null)
-            throw new Error("No HTML element found with id \'canvas\'");
-
-        let filename: string = null;
-        let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
-        if(filenameInput != null)
-            filename = filenameInput.value;
-
-        this.installListeners();
-        this.machine = new ZX81();
-        this.drawer = new Drawer(this.machine, scale, canvas);
-
         try
         {
+            let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
+            if (canvas == null)
+                throw new Error("No HTML element found with id \'canvas\'");
+
+            let filename: string = null;
+            let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
+            if(filenameInput != null)
+                filename = filenameInput.value;
+
+            this.installListeners();
+            this.machine = new ZX81();
+            this.drawer = new Drawer(this.machine, scale, canvas);
+
             await this.start();
 
             if (filename != null && filename.length > 0)
+            {
                 await this.machine.load_program(filename);
+                await this.machine.autoLoad();
+            }
         }
         catch(err)
         {
@@ -72,14 +75,14 @@ export class ZX81Emulator
         window.addEventListener("keydown", (event) =>
         {
             event.preventDefault();
-            this.machine.onKeyDown(event);
+            this.machine.keyDown(event.which, event.shiftKey);
             return null;
         }, false);
 
         window.addEventListener("keyup", (event) =>
         {
             event.preventDefault();
-            this.machine.onKeyUp(event);
+            this.machine.keyUp(event.which, event.shiftKey);
             return null;
         }, false);
     }

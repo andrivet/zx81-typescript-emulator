@@ -34,19 +34,19 @@ NL: New Line, SH: Shift, SP: Space
 
 export class Key
 {
-    Code: number;
-    Addr1: number;
-    Data1: number;
-    Addr2: number;
-    Data2: number;
+    code: number;
+    addr1: number;
+    data1: number;
+    addr2: number;
+    data2: number;
 
     constructor(c: number, a1: number, d1: number, a2: number, d2: number)
     {
-        this.Code = c;
-        this.Addr1 = a1;
-        this.Data1 = d1;
-        this.Addr2 = a2;
-        this.Data2 = d2;
+        this.code = c;
+        this.addr1 = a1;
+        this.data1 = d1;
+        this.addr2 = a2;
+        this.data2 = d2;
     }
 }
 
@@ -67,7 +67,7 @@ const A15: number = 7;
 
 export default class Keyboard
 {
-    static KeyMap: Key[] = [
+    static keyMap: Key[] = [
         new Key( 16, A8, D0, 255, 255),     // Shift
         new Key( 13, A14, D0, 255, 255),    // Return
         new Key(  8, A12, D0, A8, D0),      // Backspace
@@ -130,14 +130,14 @@ export default class Keyboard
     public keyDown(code: number, shift: boolean)
     {
         let i: number = 0;
-        while (Keyboard.KeyMap[i].Code !== 0)
+        while (Keyboard.keyMap[i].code !== 0)
         {
-            if (Keyboard.KeyMap[i].Code === code)
+            if (Keyboard.keyMap[i].code === code)
             {
-                this.map[Keyboard.KeyMap[i].Addr1] |= Keyboard.KeyMap[i].Data1;
+                this.map[Keyboard.keyMap[i].addr1] |= Keyboard.keyMap[i].data1;
 
-                if (Keyboard.KeyMap[i].Addr2 !== 255)
-                    this.map[Keyboard.KeyMap[i].Addr2] |= Keyboard.KeyMap[i].Data2;
+                if (Keyboard.keyMap[i].addr2 !== 255)
+                    this.map[Keyboard.keyMap[i].addr2] |= Keyboard.keyMap[i].data2;
                 break;
             }
             i++;
@@ -147,13 +147,13 @@ export default class Keyboard
     public keyUp(code: number, shift: boolean)
     {
         let i: number = 0;
-        while (Keyboard.KeyMap[i].Code !== 0)
+        while (Keyboard.keyMap[i].code !== 0)
         {
-            if (Keyboard.KeyMap[i].Code === code)
+            if (Keyboard.keyMap[i].code === code)
             {
-                this.map[Keyboard.KeyMap[i].Addr1] &= ~Keyboard.KeyMap[i].Data1;
-                if (Keyboard.KeyMap[i].Addr2 !== 255)
-                    this.map[Keyboard.KeyMap[i].Addr2] &= ~Keyboard.KeyMap[i].Data2;
+                this.map[Keyboard.keyMap[i].addr1] &= ~Keyboard.keyMap[i].data1;
+                if (Keyboard.keyMap[i].addr2 !== 255)
+                    this.map[Keyboard.keyMap[i].addr2] &= ~Keyboard.keyMap[i].data2;
                 break;
             }
             i++;

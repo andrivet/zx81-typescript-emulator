@@ -78,7 +78,7 @@ export default class Drawer
         this.scale = scale;
         this.canvas = canvas;
         this.machine = machine;
-        this.scanLen = 2 + this.machine.tperscanline * 2;
+        this.scanLen = 2 + this.machine.tPerScanLine * 2;
 
         this.canvas.width = WinW * this.scale;
         this.canvas.height = WinH * this.scale;
@@ -100,18 +100,18 @@ export default class Drawer
         return +new Date();
     }
 
-    private UpdateDisplay()
+    private updateDisplay()
     {
         let currentTime: number = Drawer.currentTimeMillis();
         // Aim for 50Hz display
         if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
         {
-            this.RedrawDisplay();
+            this.redrawDisplay();
             this.lastDisplayUpdate = currentTime;
         }
     }
 
-    public RedrawDisplay()
+    public redrawDisplay()
     {
         this.srcContext.putImageData(this.imageData, 0, 0, 0, 0, TVW, TVH);
         this.context.drawImage(this.srcCanvas,
@@ -119,12 +119,12 @@ export default class Drawer
            0, 0, this.canvas.width, this.canvas.height);
     }
 
-    private Draw(scanline: Scanline)
+    private draw(scanline: Scanline)
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
-        for (let i: number = 0; i < scanline.get_length(); i++)
+        for (let i: number = 0; i < scanline.getLength(); i++)
         {
-            this.argb[bufferPos + this.rasterX] = scanline.get_pixel(i) ? COLOR.WHITE : COLOR.BLACK;
+            this.argb[bufferPos + this.rasterX] = scanline.getPixel(i) ? COLOR.WHITE : COLOR.BLACK;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -134,11 +134,11 @@ export default class Drawer
                 bufferPos = this.dest + this.frameNo * TVW;
                 this.rasterY += 1;
                 if (this.rasterY >= TVH)
-                    i = scanline.next_line();
+                    i = scanline.nextLine();
             }
         }
 
-        if (scanline.check_sync_length(HSYNC_MINLEN))
+        if (scanline.checkSyncLength(HSYNC_MINLEN))
         {
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
@@ -146,18 +146,18 @@ export default class Drawer
                 this.rasterY += 1;
                 this.dest += TVW;
             }
-            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (scanline.get_sync_length() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
+            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (scanline.getSyncLength() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
-                this.CompleteFrame();
+                this.completeFrame();
                 this.rasterX = this.rasterY = 0;
                 this.dest = 0;
                 this.frameNo = 0;
-                this.UpdateDisplay();
+                this.updateDisplay();
             }
         }
     }
 
-    private CompleteFrame()
+    private completeFrame()
     {
         let x: number = this.rasterX;
         let y: number = this.rasterY;
@@ -196,11 +196,11 @@ export default class Drawer
 
                 fps++;
 
-                let j: number = this.machine.tperframe + this.borrow;
+                let j: number = this.machine.tPerFrame + this.borrow;
                 while (j > 0)
                 {
-                    j -= this.machine.do_scanline(buildLine);
-                    this.Draw(buildLine);
+                    j -= this.machine.doScanline(buildLine);
+                    this.draw(buildLine);
                 }
                 this.borrow = j;
 

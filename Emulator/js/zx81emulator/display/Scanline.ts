@@ -22,80 +22,80 @@
 
 export default class Scanline
 {
-    private sync_len: number = 0;
-    private sync_valid: number = 0;
-    private scanline_len: number = 0;
+    private syncLength: number = 0;
+    private syncValid: number = 0;
+    private scanlineLength: number = 0;
     private scanline: number[] = new Array(4000);
 
-    public add_blank(tstates: number, color: number): void
+    public addBlank(tstates: number, color: number): void
     {
         while (tstates-- > 0)
         {
-            this.scanline[this.scanline_len++] = color;
-            this.scanline[this.scanline_len++] = color;
+            this.scanline[this.scanlineLength++] = color;
+            this.scanline[this.scanlineLength++] = color;
         }
 
-        this.sync_valid = 0;
-        this.sync_len = 0;
+        this.syncValid = 0;
+        this.syncLength = 0;
     }
 
-    public get_length(): number
+    public getLength(): number
     {
-        return this.scanline_len;
+        return this.scanlineLength;
     }
 
     public reset(length: number = 0): void
     {
-        this.scanline_len = length;
+        this.scanlineLength = length;
     }
 
-    public get_pixel(i: number): number
+    public getPixel(i: number): number
     {
         return this.scanline[i];
     }
 
-    public add_pixel(color: number): void
+    public addPixel(color: number): void
     {
-        this.scanline[this.scanline_len++] = color;
+        this.scanline[this.scanlineLength++] = color;
     }
 
-    public next_line(): number
+    public nextLine(): number
     {
-        this.sync_valid = 1;
-        return this.scanline_len + 1;
+        this.syncValid = 1;
+        return this.scanlineLength + 1;
     }
 
-    public get_sync_length(): number
+    public getSyncLength(): number
     {
-        return this.sync_len;
+        return this.syncLength;
     }
 
-    public check_sync_length(min: number): boolean
+    public checkSyncLength(min: number): boolean
     {
-        if(this.sync_len < min)
-            this.sync_valid = 0;
-        return this.sync_valid !== 0;
+        if(this.syncLength < min)
+            this.syncValid = 0;
+        return this.syncValid !== 0;
     }
 
-    public get_sync_valid(): number
+    public getSyncValid(): number
     {
-        return this.sync_valid;
+        return this.syncValid;
     }
 
-    public set_sync_valid(sync_valid: number): void
+    public setSynValid(sync_valid: number): void
     {
-        this.sync_valid = sync_valid;
+        this.syncValid = sync_valid;
     }
 
-    public reset_sync(length: number, valid: number): void
+    public resetSync(length: number, valid: number): void
     {
-        this.sync_len = length;
-        this.sync_valid = valid;
+        this.syncLength = length;
+        this.syncValid = valid;
     }
 
-    public add_sync_length(add: number): void
+    public addSyncLength(add: number): void
     {
-        this.sync_len += add;
+        this.syncLength += add;
     }
 }
 

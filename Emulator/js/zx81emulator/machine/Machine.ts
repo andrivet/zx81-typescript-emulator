@@ -23,17 +23,17 @@ import Scanline from "../display/Scanline";
 
 abstract class Machine
 {
-    public readonly tperscanline: number = 207;
-    public readonly tperframe: number = 312 * 207;
+    public readonly tPerScanLine: number = 207;
+    public readonly tPerFrame: number = 312 * 207;
 
-    public abstract do_scanline(scanLine: Scanline): number;
-    public abstract readbyte(address: number): number;
-    public abstract writebyte(address: number, data: number);
-    public abstract contendmem(address: number, states: number, time: number): number;
-    public abstract contendio(address: number, states: number, time: number): number;
-    public abstract readport(address: number): number;
-    public abstract writeport(address: number, data: number);
-    public abstract opcode_fetch(address: number): number;
+    public abstract doScanline(scanLine: Scanline): number;
+    public abstract readByte(address: number): number;
+    public abstract writeByte(address: number, data: number);
+    public abstract contendMem(address: number, states: number, time: number): number;
+    public abstract contendIO(address: number, states: number, time: number): number;
+    public abstract readPort(address: number): number;
+    public abstract writePort(address: number, data: number);
+    public abstract opcodeFetch(address: number): number;
 }
 
 export default Machine;

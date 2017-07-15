@@ -51,6 +51,8 @@ const enum COLOR
     WHITE = 0xFF000000
 }
 
+function sleep(delay: number): Promise<void> { return new Promise((resolve) => { setTimeout(() => resolve(), delay); }); }
+
 export default class Drawer
 {
     private machine: Machine;
@@ -69,10 +71,7 @@ export default class Drawer
     private rasterX: number = 0;
     private rasterY: number = 0;
     private frameNo: number = 0;
-    private framesStartTime: number = 0;
-    private fps: number = 0;
     private borrow: number = 0;
-    private buildLine = new Scanline();
 
     public constructor(machine: Machine, scale: number, canvas: HTMLCanvasElement)
     {
@@ -120,12 +119,12 @@ export default class Drawer
            0, 0, this.canvas.width, this.canvas.height);
     }
 
-    private Draw()
+    private Draw(scanline: Scanline)
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
-        for (let i: number = 0; i < this.buildLine.get_length(); i++)
+        for (let i: number = 0; i < scanline.get_length(); i++)
         {
-            this.argb[bufferPos + this.rasterX] = this.buildLine.get_pixel(i) ? COLOR.WHITE : COLOR.BLACK;
+            this.argb[bufferPos + this.rasterX] = scanline.get_pixel(i) ? COLOR.WHITE : COLOR.BLACK;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -135,11 +134,11 @@ export default class Drawer
                 bufferPos = this.dest + this.frameNo * TVW;
                 this.rasterY += 1;
                 if (this.rasterY >= TVH)
-                    i = this.buildLine.next_line();
+                    i = scanline.next_line();
             }
         }
 
-        if (this.buildLine.check_sync_length(HSYNC_MINLEN))
+        if (scanline.check_sync_length(HSYNC_MINLEN))
         {
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
@@ -147,7 +146,7 @@ export default class Drawer
                 this.rasterY += 1;
                 this.dest += TVW;
             }
-            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (this.buildLine.get_sync_length() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
+            if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (scanline.get_sync_length() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
                 this.CompleteFrame();
                 this.rasterX = this.rasterY = 0;
@@ -176,55 +175,58 @@ export default class Drawer
         }
     }
 
-    public run()
+    public async run()
     {
-        if(this.framesStartTime)
-        {
-            this.fps = 0;
-            this.framesStartTime = Drawer.currentTimeMillis();
-        }
+        let buildLine = new Scanline();
+        let framesStartTime: number = 0;
+        let fps: number = 0;
 
         this.keepGoing = true;
         while(this.keepGoing)
         {
-            if (this.paused)
+            try
             {
-                window.setTimeout((() => { return this.run() }), 1000);
-                this.fps = 0;
-                this.framesStartTime = Drawer.currentTimeMillis();
-                return;
+                if (this.paused)
+                {
+                    await sleep(1000);
+                    fps = 0;
+                    framesStartTime = Drawer.currentTimeMillis();
+                    return;
+                }
+
+                fps++;
+
+                let j: number = this.machine.tperframe + this.borrow;
+                while (j > 0)
+                {
+                    j -= this.machine.do_scanline(buildLine);
+                    this.Draw(buildLine);
+                }
+                this.borrow = j;
+
+                let currentTime: number = Drawer.currentTimeMillis();
+                let delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
+                if (delay > 0)
+                {
+                    await sleep(delay);
+                }
+
+                if (fps === 100)
+                {
+                    framesStartTime = Drawer.currentTimeMillis();
+                    fps = 0;
+                }
             }
-
-            this.fps++;
-
-            let j: number = this.machine.tperframe + this.borrow;
-            while (j > 0)
+            catch(err)
             {
-                j -= this.machine.do_scanline(this.buildLine);
-                this.Draw();
-            }
-            this.borrow = j;
-
-            let currentTime: number = Drawer.currentTimeMillis();
-            let delay: number = (targetFrameTime * this.fps) - (currentTime - this.framesStartTime);
-            if (delay > 0)
-            {
-                window.setTimeout((() => { return this.run() }), delay);
-                return;
-            }
-
-            if (this.fps === 100)
-            {
-                this.framesStartTime = Drawer.currentTimeMillis();
-                this.fps = 0;
+                // TODO
             }
         }
     }
 
     public start()
     {
-        this.keepGoing = true;
-        window.setTimeout((() => { return this.run(); }), 0);
+        this.run();
     }
 
     public stop()

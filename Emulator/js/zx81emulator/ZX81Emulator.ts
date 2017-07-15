@@ -43,12 +43,16 @@ export class ZX81Emulator
         this.machine = new ZX81();
         this.drawer = new Drawer(this.machine, scale, canvas);
 
-        await this.start();
-
-        if (filename != null && filename.length > 0)
+        try
         {
-            if(await this.machine.load_program(filename))
-                console.debug("Error loading program: " + filename);
+            await this.start();
+
+            if (filename != null && filename.length > 0)
+                await this.machine.load_program(filename);
+        }
+        catch(err)
+        {
+            console.debug(err);
         }
     }
 

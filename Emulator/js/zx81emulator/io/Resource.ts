@@ -28,9 +28,10 @@ export default class Resource
     {
         let pathname: string = window.location.pathname;
         let dir: string = pathname.substring(0, pathname.lastIndexOf('/'));
+        let resource = dir + "/" + name;
 
         this.request.responseType = "arraybuffer";
-        this.request.open("GET", dir + "/" + name, true);
+        this.request.open("GET", resource, true);
 
         const promise = new Promise<Uint8Array>((resolve, reject) =>
         {
@@ -42,7 +43,7 @@ export default class Resource
                 }
                 else if (this.request.status === 404)
                 {
-                    reject(404);
+                    reject("Resource not found: " + resource);
                 }
             };
 

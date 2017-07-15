@@ -32,6 +32,7 @@ const ROM: string = "ROM/ZX81.data";
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 const enum COLOR { BLACK = 0, WHITE = 1 }
+const MEMORY_SIZE = 64 * 1024;
 
 export default class ZX81 extends Machine
 {
@@ -43,21 +44,20 @@ export default class ZX81 extends Machine
     private int_pending: boolean = false;
     private z80: Z80 = new Z80(this);
     private program: Uint8Array = null;
-
-    public memory: Uint8Array = new Uint8Array(64 * 1024);
-    public NMI_generator: boolean = false;
-    public HSYNC_generator: boolean = false;
-    public rowcounter: number = 0;
-    public borrow: number = 0;
+    private memory: Uint8Array = new Uint8Array(MEMORY_SIZE);
+    private NMI_generator: boolean = false;
+    private HSYNC_generator: boolean = false;
+    private rowcounter: number = 0;
+    private borrow: number = 0;
 
     public constructor()
     {
         super();
-        
-        for (let i = 0; i < 65536; i++)
+
+        for (let i = 0; i < MEMORY_SIZE; i++)
             this.memory[i] = 7
 
-        this.memory_load(ROM, 0, 65536, () => {
+        this.memory_load(ROM, 0, MEMORY_SIZE, () => {
             this.NMI_generator = false;
             this.HSYNC_generator = false;
             this.z80.reset();
@@ -190,7 +190,7 @@ export default class ZX81 extends Machine
         return ((h << 8) | l);
     }
 
-    private PatchTest(): number
+    private patch(): number
     {
         let b: number = this.memory[this.z80.PC];
         if (this.z80.PC === 0x0356 && b === 0x1f) // ZX81, start loading
@@ -224,7 +224,7 @@ export default class ZX81 extends Machine
         do
         {
             this.lastInstruction = LASTINST.NONE;
-            this.z80.PC = this.PatchTest();
+            this.z80.PC = this.patch();
             let ts: number = this.z80.do_opcode();
 
             if (this.int_pending)

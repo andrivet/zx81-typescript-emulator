@@ -21,7 +21,7 @@
 
 import Scanline from "../display/Scanline";
 
-export default abstract class Machine
+abstract class Machine
 {
     public readonly tperscanline: number = 207;
     public readonly tperframe: number = 312 * 207;
@@ -35,3 +35,6 @@ export default abstract class Machine
     public abstract writeport(address: number, data: number);
     public abstract opcode_fetch(address: number): number;
 }
+
+export default Machine;
+

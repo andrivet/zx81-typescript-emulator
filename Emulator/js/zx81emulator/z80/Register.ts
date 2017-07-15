@@ -23,8 +23,6 @@ import { MasterRegisterPair } from "./RegisterPair";
 
 export abstract class Register
 {
-    public name: string;
-
     public abstract get(): number;
     public abstract set(v: number): void;
     public abstract set(r: Register): void;
@@ -33,19 +31,16 @@ export abstract class Register
     public abstract and(a: number): void;
     public abstract or(o: number): void;
     public abstract add(a: number): void;
-
-    public toString(): string { return "$" + (this.get() + 0x100).toString(0x10) .substring(1).toUpperCase(); }
 }
 
 export class RegisterHigh extends Register
 {
     private rp: MasterRegisterPair;
 
-    constructor(rp: MasterRegisterPair, name: string)
+    constructor(rp: MasterRegisterPair)
     {
         super();
         this.rp = rp;
-        this.name = name;
     }
 
     public get(): number { return this.rp.hi(); }
@@ -69,11 +64,10 @@ export class RegisterLow extends Register
 {
     private rp: MasterRegisterPair;
 
-    constructor(rp: MasterRegisterPair, name: string)
+    constructor(rp: MasterRegisterPair)
     {
         super();
         this.rp = rp;
-        this.name = name;
     }
 
     public get(): number { return this.rp.lo(); }
@@ -95,14 +89,7 @@ export class RegisterLow extends Register
 
 export class value8 extends Register
 {
-    private value: number;
-
-    constructor(name: string = "value8")
-    {
-        super();
-        this.value = 0;
-        this.name = name;
-    }
+    private value: number = 0;
 
     public get(): number { return this.value; }
 
@@ -123,14 +110,7 @@ export class value8 extends Register
 
 export class MasterRegister extends Register
 {
-    value: number;
-
-    constructor(name: string)
-    {
-        super();
-        this.value = 0;
-        this.name = name;
-    }
+    value: number = 0;
 
     public get(): number { return this.value; }
 

@@ -28,10 +28,8 @@ export interface RegisterPair
     inc(): void;
     dec(): void;
     add(a: number): void;
-    getRH(name: string): Register;
-    getRL(name: string): Register;
-    toString(): string;
-    getName(): string;
+    getRH(): Register;
+    getRL(): Register;
 }
 
 export function isRegisterPair(p: any): p is RegisterPair
@@ -41,14 +39,7 @@ export function isRegisterPair(p: any): p is RegisterPair
 
 export class MasterRegisterPair implements RegisterPair
 {
-    word: number;
-    private name: string;
-
-    constructor(name: string)
-    {
-        this.word = 0;
-        this.name = name;
-    }
+    word: number = 0;
 
     public hi(): number     { return this.word >> 8; }
     public lo(): number     { return this.word & 0xFF; }
@@ -66,23 +57,14 @@ export class MasterRegisterPair implements RegisterPair
     public inc(): void                      { this.word = (this.word + 1) & 0XFFFF; }
     public dec(): void                      { this.word = (this.word - 1) & 0XFFFF; }
     public add(a: number): void             { this.word = (this.word + a) & 0XFFFF; }
-    public getRH(name: string): Register    { return new RegisterHigh(this, name); }
-    public getRL(name: string): Register    { return new RegisterLow(this, name); }
-
-    public toString(): string   { return "$" + (this.get() + 0x10000).toString(0x10) .substring(1).toUpperCase(); }
-    public getName(): string    { return this.name; }
+    public getRH(): Register                { return new RegisterHigh(this); }
+    public getRL(): Register                { return new RegisterLow(this); }
 }
 
 export class SlaveRegisterPair implements RegisterPair
 {
     private hi: MasterRegister;
     private low: MasterRegister;
-    private name: string;
-
-    constructor(name: string)
-    {
-        this.name = name;
-    }
 
     public get(): number { return (this.hi.value << 8) + this.low.value; }
 
@@ -116,18 +98,15 @@ export class SlaveRegisterPair implements RegisterPair
         this.low.value = word & 0xFF;
     }
 
-    public getRH(name: string): Register
+    public getRH(): Register
     {
-        this.hi = new MasterRegister(name);
+        this.hi = new MasterRegister();
         return this.hi;
     }
 
-    public getRL(name: string): Register
+    public getRL(): Register
     {
-        this.low = new MasterRegister(name);
+        this.low = new MasterRegister();
         return this.low;
     }
-
-    public toString(): string   { return "$" + (this.get() + 0x10000).toString(0x10) .substring(1).toUpperCase(); }
-    public getName(): string    { return this.name; }
 }

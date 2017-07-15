@@ -59,50 +59,42 @@ export class MasterRegisterPair extends RegisterPair
 
 export class SlaveRegisterPair extends RegisterPair
 {
-    private hi: MasterRegister;
-    private low: MasterRegister;
+    private hi: MasterRegister = new MasterRegister();
+    private low: MasterRegister = new MasterRegister();
 
-    public get(): number { return (this.hi.value << 8) + this.low.value; }
+    public get(): number { return (this.hi.get() << 8) + this.low.get(); }
 
     public set(v: number): void;
     public set(r: Register): void;
     public set(p: number | Register): void
     {
-        let word: number = p instanceof Register ? p.get() : p;
-        this.hi.value = word >> 8;
-        this.low.value = word & 0xFF;
+        let word: number = (p instanceof Register ? p.get() : p) & 0XFFFF;
+        this.hi.set(word >> 8);
+        this.low.set(word & 0xFF);
     }
 
     public inc()
     {
-        let word: number = ((this.hi.value << 8) + this.low.value + 1) & 0XFFFF;
-        this.hi.value = word >> 8;
-        this.low.value = word & 0xFF;
+        this.set((this.hi.get() << 8) + this.low.get() + 1);
     }
 
     public dec()
     {
-        let word: number = ((this.hi.value << 8) + this.low.value - 1) & 0XFFFF;
-        this.hi.value = word >> 8;
-        this.low.value = word & 0xFF;
+        this.set((this.hi.get() << 8) + this.low.get() - 1);
     }
 
     public add(a: number)
     {
-        let word: number = ((this.hi.value << 8) + this.low.value + a) & 0XFFFF;
-        this.hi.value = word >> 8;
-        this.low.value = word & 0xFF;
+        this.set((this.hi.get() << 8) + this.low.get() + a);
     }
 
     public getRH(): Register
     {
-        this.hi = new MasterRegister();
         return this.hi;
     }
 
     public getRL(): Register
     {
-        this.low = new MasterRegister();
         return this.low;
     }
 }

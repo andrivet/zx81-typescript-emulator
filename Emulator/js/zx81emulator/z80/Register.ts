@@ -110,7 +110,7 @@ export class value8 extends Register
 
 export class MasterRegister extends Register
 {
-    value: number = 0;
+    private value: number = 0;
 
     public get(): number { return this.value; }
 

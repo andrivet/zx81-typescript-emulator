@@ -20,7 +20,7 @@
  */
 
 import Machine from "../machine/Machine";
-import {MasterRegisterPair, RegisterPair, SlaveRegisterPair, isRegisterPair} from "./RegisterPair";
+import {MasterRegisterPair, RegisterPair, SlaveRegisterPair} from "./RegisterPair";
 import {Register, MasterRegister, value8} from "./Register";
 
 const FLAG_C: number = 0x01;
@@ -199,35 +199,35 @@ export default class Z80
     private contend(address: RegisterPair, time: number): void;
     private contend(address: number | RegisterPair, time: number): void
     {
-        this.tstates += this.machine.contendmem(isRegisterPair(address) ? address.get() : address, this.tstates, time);
+        this.tstates += this.machine.contendmem((address instanceof RegisterPair) ? address.get() : address, this.tstates, time);
     }
 
     private contend_io(port: number, time: number): void;
     private contend_io(port: RegisterPair, time: number): void;
     private contend_io(port: number | RegisterPair, time: number): void
     {
-        this.tstates += this.machine.contendio(isRegisterPair(port) ? port.get() : port, this.tstates, time);
+        this.tstates += this.machine.contendio((port instanceof RegisterPair) ? port.get() : port, this.tstates, time);
     }
 
     public AND(value: number): void;
     public AND(value: Register): void;
     public AND(value: Register | number): void
     {
-        this.A.value &= (value instanceof Register ? value.get() : value);
-        this.F.set(FLAG_H | Z80.sz53p_table[this.A.value]);
+        this.A.set(this.A.get() & (value instanceof Register ? value.get() : value));
+        this.F.set(FLAG_H | Z80.sz53p_table[this.A.get()]);
     }
 
     private ADC(value: number)
     {
-        let adctemp: number = this.A.value + value + (this.F.value & FLAG_C);
-        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((adctemp & 0x88) >> 1);
+        let adctemp: number = this.A.get() + value + (this.F.get() & FLAG_C);
+        let lookup: number = ((this.A.get() & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((adctemp & 0x88) >> 1);
         this.A.set(adctemp);
-        this.F.set(((adctemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((adctemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.get()]);
     }
 
     private ADC16(value: number)
     {
-        let add16temp: number = this.HL.word + value + (this.F.value & FLAG_C);
+        let add16temp: number = this.HL.word + value + (this.F.get() & FLAG_C);
         let lookup: number = ((this.HL.word & 0x8800) >> 11) | ((value & 0x8800) >> 10) | ((add16temp & 0x8800) >> 9);
         this.HL.set(add16temp);
         this.F.set(((add16temp & 0x10000) > 0 ? FLAG_C : 0) | Z80.overflow_add_table[lookup >> 4] | (this.H.get() & (FLAG_3 | FLAG_5 | FLAG_S)) | Z80.halfcarry_add_table[lookup & 7] | (this.HL.word === 0 ? 0 : FLAG_Z));
@@ -235,10 +235,10 @@ export default class Z80
 
     private ADD(value: number)
     {
-        let addtemp: number = this.A.value + value;
-        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((addtemp & 0x88) >> 1);
+        let addtemp: number = this.A.get() + value;
+        let lookup: number = ((this.A.get() & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((addtemp & 0x88) >> 1);
         this.A.set(addtemp);
-        this.F.set(((addtemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((addtemp & 0x100) > 0 ? FLAG_C : 0) | Z80.halfcarry_add_table[lookup & 7] | Z80.overflow_add_table[lookup >> 4] | Z80.sz53_table[this.A.get()]);
     }
 
     public ADD16(rp1: RegisterPair, rp2: RegisterPair): void;
@@ -250,17 +250,17 @@ export default class Z80
         let lookup: number = ((rp1.get() & 0x0800) >> 11) | ((value2 & 0x0800) >> 10) | ((add16temp & 0x0800) >> 9);
         this.tstates += 7;
         rp1.set(add16temp);
-        this.F.set((this.F.value & (FLAG_V | FLAG_Z | FLAG_S)) | ((add16temp & 0x10000) > 0 ? FLAG_C : 0) | ((add16temp >> 8) & (FLAG_3 | FLAG_5)) | Z80.halfcarry_add_table[lookup]);
+        this.F.set((this.F.get() & (FLAG_V | FLAG_Z | FLAG_S)) | ((add16temp & 0x10000) > 0 ? FLAG_C : 0) | ((add16temp >> 8) & (FLAG_3 | FLAG_5)) | Z80.halfcarry_add_table[lookup]);
     }
 
     private BIT(bit: number, value: Register)
     {
-        this.F.set((this.F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & (1 << bit)) > 0 ? FLAG_H : (FLAG_P | FLAG_H | FLAG_Z)));
+        this.F.set((this.F.get() & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & (1 << bit)) > 0 ? FLAG_H : (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
     private BIT7(value: Register)
     {
-        this.F.set((this.F.value & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & 0x80) > 0 ? (FLAG_H | FLAG_S) : (FLAG_P | FLAG_H | FLAG_Z)));
+        this.F.set((this.F.get() & FLAG_C) | (value.get() & (FLAG_3 | FLAG_5)) | ((value.get() & 0x80) > 0 ? (FLAG_H | FLAG_S) : (FLAG_P | FLAG_H | FLAG_Z)));
     }
 
     private CALL()
@@ -274,14 +274,14 @@ export default class Z80
 
     private CP(value: number)
     {
-        let cptemp: number = this.A.value - value;
-        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((cptemp & 0x88) >> 1);
+        let cptemp: number = this.A.get() - value;
+        let lookup: number = ((this.A.get() & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((cptemp & 0x88) >> 1);
         this.F.set(((cptemp & 0x100) > 0 ? FLAG_C : (cptemp > 0 ? 0 : FLAG_Z)) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | (value & (FLAG_3 | FLAG_5)) | (cptemp & FLAG_S));
     }
 
     private DEC(reg: Register)
     {
-        this.F.set((this.F.value & FLAG_C) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | FLAG_N);
+        this.F.set((this.F.get() & FLAG_C) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | FLAG_N);
         reg.dec();
         this.F.or((reg.get() === 0x7f ? FLAG_V : 0) | Z80.sz53_table[reg.get()]);
     }
@@ -292,18 +292,18 @@ export default class Z80
     public IN(reg: Register | number, rp: RegisterPair | number): void
     {
         let value: number = reg instanceof Register ? reg.get() : reg;
-        let port: number = isRegisterPair(rp) ? rp.get() : rp;
+        let port: number = (rp instanceof RegisterPair) ? rp.get() : rp;
 
         this.contend_io(port, 3);
         let result: number = this.machine.readport(port);
         if(reg instanceof Register) reg.set(result);
-        this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[value]);
+        this.F.set((this.F.get() & FLAG_C) | Z80.sz53p_table[value]);
     }
 
     private INC(reg: Register)
     {
         reg.inc();
-        this.F.set((this.F.value & FLAG_C) | (reg.get() === 0x80 ? FLAG_V : 0) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | Z80.sz53_table[reg.get()]);
+        this.F.set((this.F.get() & FLAG_C) | (reg.get() === 0x80 ? FLAG_V : 0) | ((reg.get() & 0x0f) > 0 ? 0 : FLAG_H) | Z80.sz53_table[reg.get()]);
     }
 
     private LD16_NNRR(value: number)
@@ -351,8 +351,8 @@ export default class Z80
     public OR(r: number): void;
     public OR(r: Register | number): void
     {
-        this.A.value |= r instanceof Register ? r.get() : r;
-        this.F.set(Z80.sz53p_table[this.A.value]);
+        this.A.set(this.A.get() | (r instanceof Register ? r.get() : r));
+        this.F.set(Z80.sz53p_table[this.A.get()]);
     }
 
     public OUT(rp: RegisterPair, reg: Register): void;
@@ -360,7 +360,7 @@ export default class Z80
     public OUT(port: number, reg: Register): void;
     public OUT(rp: RegisterPair | number, reg: Register | number): void
     {
-        let port: number = isRegisterPair(rp) ? rp.get() : rp;
+        let port: number = (rp instanceof RegisterPair) ? rp.get() : rp;
         let value: number = reg instanceof Register ? reg.get() : reg;
         this.contend_io(port, 3);
         this.machine.writeport(port, value);
@@ -391,7 +391,7 @@ export default class Z80
     private RL(reg: Register)
     {
         let rltemp: number = reg.get();
-        reg.set((rltemp << 1) | (this.F.value & FLAG_C));
+        reg.set((rltemp << 1) | (this.F.get() & FLAG_C));
         this.F.set((rltemp >> 7) | Z80.sz53p_table[reg.get()]);
     }
 
@@ -407,7 +407,7 @@ export default class Z80
     private RR(reg: Register)
     {
         let rrtemp: number = reg.get();
-        reg.set((reg.get() >> 1) | (this.F.value << 7));
+        reg.set((reg.get() >> 1) | (this.F.get() << 7));
         this.F.set((rrtemp & FLAG_C) | Z80.sz53p_table[reg.get()]);
     }
 
@@ -426,15 +426,15 @@ export default class Z80
 
     private SBC(value: number)
     {
-        let sbctemp: number = this.A.value - (value) - (this.F.value & FLAG_C);
-        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((sbctemp & 0x88) >> 1);
+        let sbctemp: number = this.A.get() - (value) - (this.F.get() & FLAG_C);
+        let lookup: number = ((this.A.get() & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((sbctemp & 0x88) >> 1);
         this.A.set(sbctemp);
-        this.F.set(((sbctemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((sbctemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.get()]);
     }
 
     private SBC16(value: number)
     {
-        let sub16temp: number = this.HL.word - (value) - (this.F.value & FLAG_C);
+        let sub16temp: number = this.HL.word - (value) - (this.F.get() & FLAG_C);
         let lookup: number = ((this.HL.word & 34816) >> 11) | (((value) & 34816) >> 10) | ((sub16temp & 34816) >> 9);
         this.HL.set(sub16temp);
         this.F.set(((sub16temp & 0x10000) > 0 ? FLAG_C : 0) | FLAG_N | Z80.overflow_sub_table[lookup >> 4] | (this.H.get() & (FLAG_3 | FLAG_5 | FLAG_S)) | Z80.halfcarry_sub_table[lookup & 7] | (this.HL.word > 0 ? 0 : FLAG_Z));
@@ -470,10 +470,10 @@ export default class Z80
 
     private SUB(value: number)
     {
-        let subtemp: number = this.A.value - (value);
-        let lookup: number = ((this.A.value & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((subtemp & 0x88) >> 1);
+        let subtemp: number = this.A.get() - (value);
+        let lookup: number = ((this.A.get() & 0x88) >> 3) | (((value) & 0x88) >> 2) | ((subtemp & 0x88) >> 1);
         this.A.set(subtemp);
-        this.F.set(((subtemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.value]);
+        this.F.set(((subtemp & 0x100) > 0 ? FLAG_C : 0) | FLAG_N | Z80.halfcarry_sub_table[lookup & 7] | Z80.overflow_sub_table[lookup >> 4] | Z80.sz53_table[this.A.get()]);
     }
 
     public XOR(r: Register): void;
@@ -481,8 +481,8 @@ export default class Z80
     public XOR(r: Register | number): void
     {
         let value = r instanceof Register ? r.get() : r;
-        this.A.set(this.A.value ^ value);
-        this.F.set(Z80.sz53p_table[this.A.value]);
+        this.A.set(this.A.get() ^ value);
+        this.F.set(Z80.sz53p_table[this.A.get()]);
     }
 
     public do_opcode(): number
@@ -504,7 +504,7 @@ export default class Z80
                 break;
             case 0x02:  // LD (BC),A
                 this.contend(this.BC, 3);
-                this.machine.writebyte(this.BC.word, this.A.value);
+                this.machine.writebyte(this.BC.word, this.A.get());
                 break;
             case 0x03:  // INC BC
                 this.tstates += 2;
@@ -521,8 +521,8 @@ export default class Z80
                 this.B.set(this.machine.readbyte(this.PC++));
                 break;
             case 0x07:  // RLCA
-                this.A.set((this.A.value << 1) | (this.A.value >> 7));
-                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_C | FLAG_3 | FLAG_5)));
+                this.A.set((this.A.get() << 1) | (this.A.get() >> 7));
+                this.F.set((this.F.get() & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.get() & (FLAG_C | FLAG_3 | FLAG_5)));
                 break;
             case 0x08:  // EX AF,AF'
                 {
@@ -553,9 +553,9 @@ export default class Z80
                 this.C.set(this.machine.readbyte(this.PC++));
                 break;
             case 0x0F:  // RRCA
-                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & FLAG_C));
-                this.A.set((this.A.value >> 1) | (this.A.value << 7));
-                this.F.or(this.A.value & (FLAG_3 | FLAG_5));
+                this.F.set((this.F.get() & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.get() & FLAG_C));
+                this.A.set((this.A.get() >> 1) | (this.A.get() << 7));
+                this.F.or(this.A.get() & (FLAG_3 | FLAG_5));
                 break;
             case 0x10:  // DJNZ offset
                 this.tstates++;
@@ -573,7 +573,7 @@ export default class Z80
                 break;
             case 0x12:  // LD (DE),A
                 this.contend(this.DE, 3);
-                this.machine.writebyte(this.DE.word, this.A.value);
+                this.machine.writebyte(this.DE.word, this.A.get());
                 break;
             case 0x13:  // INC DE
                 this.tstates += 2;
@@ -591,9 +591,9 @@ export default class Z80
                 break;
             case 0x17:  // RLA
                 {
-                    let bytetemp: number = this.A.value;
-                    this.A.set((this.A.value << 1) | (this.F.value & FLAG_C));
-                    this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_3 | FLAG_5)) | (bytetemp >> 7));
+                    let bytetemp: number = this.A.get();
+                    this.A.set((this.A.get() << 1) | (this.F.get() & FLAG_C));
+                    this.F.set((this.F.get() & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.get() & (FLAG_3 | FLAG_5)) | (bytetemp >> 7));
                 }
                 break;
             case 0x18:  // JR offset
@@ -624,14 +624,14 @@ export default class Z80
                 break;
             case 0x1F:  // RRA
                 {
-                    let bytetemp: number = this.A.value;
-                    this.A.set((this.A.value >> 1) | (this.F.value << 7));
-                    this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.value & (FLAG_3 | FLAG_5)) | (bytetemp & FLAG_C));
+                    let bytetemp: number = this.A.get();
+                    this.A.set((this.A.get() >> 1) | (this.F.get() << 7));
+                    this.F.set((this.F.get() & (FLAG_P | FLAG_Z | FLAG_S)) | (this.A.get() & (FLAG_3 | FLAG_5)) | (bytetemp & FLAG_C));
                 }
                 break;
             case 0x20:  // JR NZ,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & FLAG_Z) === 0)
+                if ((this.F.get() & FLAG_Z) === 0)
                     this.JR();
                 this.PC++;
                 break;
@@ -661,24 +661,27 @@ export default class Z80
             case 0x27:  // DAA
                 {
                     let add: number = 0;
-                    let carry: number = (this.F.value & FLAG_C);
-                    if (((this.F.value & FLAG_H) !== 0) || (this.A.value & 0x0f) > 9) add = 6;
-                    if (carry !== 0 || (this.A.value > 0x0f9)) add |= 0x60;
-                    if (this.A.value > 0x99) carry = 1;
-                    if ((this.F.value & FLAG_N) !== 0)
+                    let carry: number = (this.F.get() & FLAG_C);
+                    if (((this.F.get() & FLAG_H) !== 0) || (this.A.get() & 0x0f) > 9)
+                        add = 6;
+                    if (carry !== 0 || (this.A.get() > 0x0f9))
+                        add |= 0x60;
+                    if (this.A.get() > 0x99)
+                        carry = 1;
+                    if ((this.F.get() & FLAG_N) !== 0)
                         this.SUB(add);
                     else
                     {
-                        if ((this.A.value > 0x90) && ((this.A.value & 0x0f) > 9))
+                        if ((this.A.get() > 0x90) && ((this.A.get() & 0x0f) > 9))
                             add |= 0x60;
                         this.ADD(add);
                     }
-                    this.F.set((this.F.value & ~(FLAG_C | FLAG_P)) | carry | Z80.parity_table[this.A.value]);
+                    this.F.set((this.F.get() & ~(FLAG_C | FLAG_P)) | carry | Z80.parity_table[this.A.get()]);
                 }
                 break;
             case 0x28:  // JR Z,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & FLAG_Z) !== 0)
+                if ((this.F.get() & FLAG_Z) !== 0)
                     this.JR();
                 this.PC++;
                 break;
@@ -703,13 +706,13 @@ export default class Z80
                 this.L.set(this.machine.readbyte(this.PC++));
                 break;
             case 0x2F:  // CPL
-                this.A.set(this.A.value ^ 0xFF);
-                this.F.set((this.F.value & (FLAG_C | FLAG_P | FLAG_Z | FLAG_S)) |
-                           (this.A.value & (FLAG_3 | FLAG_5)) | (FLAG_N | FLAG_H));
+                this.A.set(this.A.get() ^ 0xFF);
+                this.F.set((this.F.get() & (FLAG_C | FLAG_P | FLAG_Z | FLAG_S)) |
+                           (this.A.get() & (FLAG_3 | FLAG_5)) | (FLAG_N | FLAG_H));
                 break;
             case 0x30:  // JR NC,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & FLAG_C) === 0)
+                if ((this.F.get() & FLAG_C) === 0)
                     this.JR();
                 this.PC++;
                 break;
@@ -725,7 +728,7 @@ export default class Z80
                     this.contend(this.PC, 3);
                     wordtemp |= this.machine.readbyte(this.PC++) << 8;
                     this.contend(wordtemp, 3);
-                    this.machine.writebyte(wordtemp, this.A.value);
+                    this.machine.writebyte(wordtemp, this.A.get());
                 }
                 break;
             case 0x33:  // INC SP
@@ -759,11 +762,11 @@ export default class Z80
                 break;
             case 0x37:  // SCF
                 this.F.and(~(FLAG_N | FLAG_H));
-                this.F.or((this.A.value & (FLAG_3 | FLAG_5)) | FLAG_C);
+                this.F.or((this.A.get() & (FLAG_3 | FLAG_5)) | FLAG_C);
                 break;
             case 0x38:  // JR C,offset
                 this.contend(this.PC, 3);
-                if ((this.F.value & FLAG_C) !== 0)
+                if ((this.F.get() & FLAG_C) !== 0)
                     this.JR();
                 this.PC++;
                 break;
@@ -795,9 +798,9 @@ export default class Z80
                 this.A.set(this.machine.readbyte(this.PC++));
                 break;
             case 0x3F:  // CCF
-                this.F.set((this.F.value & (FLAG_P | FLAG_Z | FLAG_S)) |
-                          ((this.F.value & FLAG_C) !== 0 ? FLAG_H : FLAG_C) |
-                           (this.A.value & (FLAG_3 | FLAG_5)));
+                this.F.set((this.F.get() & (FLAG_P | FLAG_Z | FLAG_S)) |
+                          ((this.F.get() & FLAG_C) !== 0 ? FLAG_H : FLAG_C) |
+                           (this.A.get() & (FLAG_3 | FLAG_5)));
                 break;
             case 0x40:  // LD B,B
                 break;
@@ -973,7 +976,7 @@ export default class Z80
                 break;
             case 0x77:  // LD (HL),A
                 this.contend(this.HL, 3);
-                this.machine.writebyte(this.HL.word, this.A.value);
+                this.machine.writebyte(this.HL.word, this.A.get());
                 break;
             case 0x78:  // LD A,B
                 this.A.set(this.B);
@@ -1201,7 +1204,7 @@ export default class Z80
                 break;
             case 0xC0:  // RET NZ
                 this.tstates++;
-                if ((this.F.value & FLAG_Z) === 0)
+                if ((this.F.get() & FLAG_Z) === 0)
                     this.RET();
                 break;
             case 0xC1:  // POP BC
@@ -1210,7 +1213,7 @@ export default class Z80
             case 0xC2:  // JP NZ,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_Z) === 0)
+                if ((this.F.get() & FLAG_Z) === 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1223,7 +1226,7 @@ export default class Z80
             case 0xC4:  // CALL NZ,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_Z) === 0)
+                if ((this.F.get() & FLAG_Z) === 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1242,7 +1245,7 @@ export default class Z80
                 break;
             case 0xC8:  // RET Z
                 this.tstates++;
-                if ((this.F.value & FLAG_Z) !== 0)
+                if ((this.F.get() & FLAG_Z) !== 0)
                     this.RET();
                 break;
             case 0xC9:  // RET
@@ -1251,7 +1254,7 @@ export default class Z80
             case 0xCA:  // JP Z,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_Z) > 0)
+                if ((this.F.get() & FLAG_Z) > 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1267,7 +1270,7 @@ export default class Z80
             case 0xCC:  // CALL Z,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_Z) > 0)
+                if ((this.F.get() & FLAG_Z) > 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1287,7 +1290,7 @@ export default class Z80
                 break;
             case 0xD0:  // RET NC
                 this.tstates++;
-                if ((this.F.value & FLAG_C) === 0)
+                if ((this.F.get() & FLAG_C) === 0)
                     this.RET();
                 break;
             case 0xD1:  // POP DE
@@ -1296,19 +1299,19 @@ export default class Z80
             case 0xD2:  // JP NC,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_C) === 0)
+                if ((this.F.get() & FLAG_C) === 0)
                     this.JP();
                 else
                     this.PC += 2;
                 break;
             case 0xD3:  // OUT (nn),A
                 this.contend(this.PC, 4);
-                this.OUT(this.machine.readbyte(this.PC++) + (this.A.value << 8), this.A);
+                this.OUT(this.machine.readbyte(this.PC++) + (this.A.get() << 8), this.A);
                 break;
             case 0xD4:  // CALL NC,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_C) === 0)
+                if ((this.F.get() & FLAG_C) === 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1327,7 +1330,7 @@ export default class Z80
                 break;
             case 0xD8: // RET C
                 this.tstates++;
-                if ((this.F.value & FLAG_C) > 0)
+                if ((this.F.get() & FLAG_C) > 0)
                     this.RET();
                 break;
             case 0xD9:  // EXX
@@ -1340,7 +1343,7 @@ export default class Z80
             case 0xDA:  // JP C,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_C) > 0)
+                if ((this.F.get() & FLAG_C) > 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1348,7 +1351,7 @@ export default class Z80
             case 0xDB:  // IN A,(nn)
                 {
                     this.contend(this.PC, 4);
-                    let intemp: number = this.machine.readbyte(this.PC++) + (this.A.value << 8);
+                    let intemp: number = this.machine.readbyte(this.PC++) + (this.A.get() << 8);
                     this.contend_io(intemp, 3);
                     this.A.set(this.machine.readport(intemp));
                 }
@@ -1356,7 +1359,7 @@ export default class Z80
             case 0xDC:  // CALL C,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_C) > 0)
+                if ((this.F.get() & FLAG_C) > 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1379,7 +1382,7 @@ export default class Z80
                 break;
             case 0xE0: // RET PO
                 this.tstates++;
-                if ((this.F.value & FLAG_P) === 0)
+                if ((this.F.get() & FLAG_P) === 0)
                     this.RET();
                 break;
             case 0xE1:  // POP HL
@@ -1388,7 +1391,7 @@ export default class Z80
             case 0xE2:  // JP PO,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_P) === 0)
+                if ((this.F.get() & FLAG_P) === 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1410,7 +1413,7 @@ export default class Z80
             case 0xE4:  // CALL PO,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_P) === 0)
+                if ((this.F.get() & FLAG_P) === 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1429,7 +1432,7 @@ export default class Z80
                 break;
             case 0xE8:  // RET PE
                 this.tstates++;
-                if ((this.F.value & FLAG_P) > 0)
+                if ((this.F.get() & FLAG_P) > 0)
                     this.RET();
                 break;
             case 0xE9:  // JP HL
@@ -1438,7 +1441,7 @@ export default class Z80
             case 0xEA:  // JP PE,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_P) > 0)
+                if ((this.F.get() & FLAG_P) > 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1453,7 +1456,7 @@ export default class Z80
             case 0xEC:  // CALL PE,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_P) > 0)
+                if ((this.F.get() & FLAG_P) > 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1479,7 +1482,7 @@ export default class Z80
                 break;
             case 0xF0:  // RET P
                 this.tstates++;
-                if ((this.F.value & FLAG_S) === 0)
+                if ((this.F.get() & FLAG_S) === 0)
                     this.RET();
                 break;
             case 0xF1:  // POP AF
@@ -1488,7 +1491,7 @@ export default class Z80
             case 0xF2:  // JP P,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_S) === 0)
+                if ((this.F.get() & FLAG_S) === 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1499,7 +1502,7 @@ export default class Z80
             case 0xF4:  // CALL P,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_S) === 0)
+                if ((this.F.get() & FLAG_S) === 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -1518,7 +1521,7 @@ export default class Z80
                 break;
             case 0xF8:  // RET M
                 this.tstates++;
-                if ((this.F.value & FLAG_S) !== 0)
+                if ((this.F.get() & FLAG_S) !== 0)
                     this.RET();
                 break;
             case 0xF9:  // LD SP,HL
@@ -1528,7 +1531,7 @@ export default class Z80
             case 0xFA:  // JP M,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_S) > 0)
+                if ((this.F.get() & FLAG_S) > 0)
                     this.JP();
                 else
                     this.PC += 2;
@@ -1539,7 +1542,7 @@ export default class Z80
             case 0xFC:  // CALL M,nnnn
                 this.contend(this.PC, 3);
                 this.contend(this.PC + 1, 3);
-                if ((this.F.value & FLAG_S) > 0)
+                if ((this.F.get() & FLAG_S) > 0)
                     this.CALL();
                 else
                     this.PC += 2;
@@ -2497,7 +2500,7 @@ export default class Z80
             case 116:
             case 124:
                 {
-                    let bytetemp: number = this.A.value;
+                    let bytetemp: number = this.A.get();
                     this.A.set(0);
                     this.SUB(bytetemp);
                 }
@@ -2521,7 +2524,7 @@ export default class Z80
                 break;
             case 71:
                 this.tstates += 1;
-                this.I = this.A.value;
+                this.I = this.A.get();
                 break;
             case 72:
                 this.tstates += 1;
@@ -2540,7 +2543,7 @@ export default class Z80
                 break;
             case 79:
                 this.tstates += 1;
-                this.R = this.R7 = this.A.value;
+                this.R = this.R7 = this.A.get();
                 break;
             case 80:
                 this.tstates += 1;
@@ -2564,7 +2567,7 @@ export default class Z80
             case 87:
                 this.tstates += 1;
                 this.A.set(this.I);
-                this.F.set((this.F.value & FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? FLAG_V : 0));
+                this.F.set((this.F.get() & FLAG_C) | Z80.sz53_table[this.A.get()] | (this.IFF2 !== 0 ? FLAG_V : 0));
                 break;
             case 88:
                 this.tstates += 1;
@@ -2588,7 +2591,7 @@ export default class Z80
             case 95:
                 this.tstates += 1;
                 this.A.set((this.R & 0x7f) | (this.R7 & 0x80));
-                this.F.set((this.F.value & FLAG_C) | Z80.sz53_table[this.A.value] | (this.IFF2 !== 0 ? FLAG_V : 0));
+                this.F.set((this.F.get() & FLAG_C) | Z80.sz53_table[this.A.get()] | (this.IFF2 !== 0 ? FLAG_V : 0));
                 break;
             case 96:
                 this.tstates += 1;
@@ -2610,9 +2613,9 @@ export default class Z80
                     let bytetemp: number = this.machine.readbyte(this.HL.word);
                     this.contend(this.HL, 7);
                     this.contend(this.HL, 3);
-                    this.machine.writebyte(this.HL.word, (this.A.value << 4) | (bytetemp >> 4));
-                    this.A.set((this.A.value & 240) | (bytetemp & 0x0f));
-                    this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[this.A.value]);
+                    this.machine.writebyte(this.HL.word, (this.A.get() << 4) | (bytetemp >> 4));
+                    this.A.set((this.A.get() & 240) | (bytetemp & 0x0f));
+                    this.F.set((this.F.get() & FLAG_C) | Z80.sz53p_table[this.A.get()]);
                 }
                 break;
             case 104:
@@ -2635,9 +2638,9 @@ export default class Z80
                     let bytetemp: number = this.machine.readbyte(this.HL.word);
                     this.contend(this.HL, 7);
                     this.contend(this.HL, 3);
-                    this.machine.writebyte(this.HL.word, (bytetemp << 4) | (this.A.value & 0x0f));
-                    this.A.set((this.A.value & 240) | (bytetemp >> 4));
-                    this.F.set((this.F.value & FLAG_C) | Z80.sz53p_table[this.A.value]);
+                    this.machine.writebyte(this.HL.word, (bytetemp << 4) | (this.A.get() & 0x0f));
+                    this.A.set((this.A.get() & 240) | (bytetemp >> 4));
+                    this.F.set((this.F.get() & FLAG_C) | Z80.sz53p_table[this.A.get()]);
                 }
                 break;
             case 112:
@@ -2681,15 +2684,15 @@ export default class Z80
                     this.machine.writebyte(this.DE.word, bytetemp);
                     this.DE.inc();
                     this.HL.inc();
-                    bytetemp += this.A.value;
-                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
+                    bytetemp += this.A.get();
+                    this.F.set((this.F.get() & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 161:
                 {
                     let value: number = this.machine.readbyte(this.HL.word);
-                    let bytetemp: number = this.A.value - value;
-                    let lookup: number = ((this.A.value & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
+                    let bytetemp: number = this.A.get() - value;
+                    let lookup: number = ((this.A.get() & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
                     this.contend(this.HL, 3);
                     this.contend(this.HL, 1);
                     this.contend(this.HL, 1);
@@ -2698,8 +2701,8 @@ export default class Z80
                     this.contend(this.HL, 1);
                     this.HL.inc();
                     this.BC.dec();
-                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
-                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.set((this.F.get() & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.get() & FLAG_H) !== 0) bytetemp--;
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
@@ -2738,15 +2741,15 @@ export default class Z80
                     this.machine.writebyte(this.DE.word, bytetemp);
                     this.DE.dec();
                     this.HL.dec();
-                    bytetemp += this.A.value;
-                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
+                    bytetemp += this.A.get();
+                    this.F.set((this.F.get() & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
             case 169:
                 {
                     let value: number = this.machine.readbyte(this.HL.word);
-                    let bytetemp: number = this.A.value - value;
-                    let lookup: number = ((this.A.value & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
+                    let bytetemp: number = this.A.get() - value;
+                    let lookup: number = ((this.A.get() & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
                     this.contend(this.HL, 3);
                     this.contend(this.HL, 1);
                     this.contend(this.HL, 1);
@@ -2755,8 +2758,8 @@ export default class Z80
                     this.contend(this.HL, 1);
                     this.HL.dec();
                     this.BC.dec();
-                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
-                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.set((this.F.get() & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.get() & FLAG_H) !== 0) bytetemp--;
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                 }
                 break;
@@ -2795,8 +2798,8 @@ export default class Z80
                     this.HL.inc();
                     this.DE.inc();
                     this.BC.dec();
-                    bytetemp += this.A.value;
-                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
+                    bytetemp += this.A.get();
+                    this.F.set((this.F.get() & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
                         this.contend(this.DE, 1);
@@ -2811,8 +2814,8 @@ export default class Z80
             case 177:
                 {
                     let value: number = this.machine.readbyte(this.HL.word);
-                    let bytetemp: number = this.A.value - value;
-                    let lookup: number = ((this.A.value & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
+                    let bytetemp: number = this.A.get() - value;
+                    let lookup: number = ((this.A.get() & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
                     this.contend(this.HL, 3);
                     this.contend(this.HL, 1);
                     this.contend(this.HL, 1);
@@ -2821,10 +2824,10 @@ export default class Z80
                     this.contend(this.HL, 1);
                     this.HL.inc();
                     this.BC.dec();
-                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
-                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.set((this.F.get() & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.get() & FLAG_H) !== 0) bytetemp--;
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
-                    if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
+                    if ((this.F.get() & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
                         this.contend(this.HL, 1);
                         this.contend(this.HL, 1);
@@ -2894,8 +2897,8 @@ export default class Z80
                     this.HL.dec();
                     this.DE.dec();
                     this.BC.dec();
-                    bytetemp += this.A.value;
-                    this.F.set((this.F.value & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) > 0 ? FLAG_5 : 0));
+                    bytetemp += this.A.get();
+                    this.F.set((this.F.get() & (FLAG_C | FLAG_Z | FLAG_S)) | (this.BC.word !== 0 ? FLAG_V : 0) | (bytetemp & FLAG_3) | ((bytetemp & 2) > 0 ? FLAG_5 : 0));
                     if (this.BC.word !== 0)
                     {
                         this.contend(this.DE, 1);
@@ -2910,16 +2913,16 @@ export default class Z80
             case 185:
                 {
                     let value: number = this.machine.readbyte(this.HL.word);
-                    let bytetemp: number = this.A.value - value;
-                    let lookup: number = ((this.A.value & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
+                    let bytetemp: number = this.A.get() - value;
+                    let lookup: number = ((this.A.get() & 8) >> 3) | (((value) & 8) >> 2) | ((bytetemp & 8) >> 1);
                     this.contend(this.HL, 3);
                     for (let i: number = 0; i < 5; ++i) this.contend(this.HL, 1)
                     this.HL.dec();
                     this.BC.dec();
-                    this.F.set((this.F.value & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
-                    if ((this.F.value & FLAG_H) !== 0) bytetemp--;
+                    this.F.set((this.F.get() & FLAG_C) | (this.BC.word !== 0 ? (FLAG_V | FLAG_N) : FLAG_N) | Z80.halfcarry_sub_table[lookup] | (bytetemp !== 0 ? 0 : FLAG_Z) | (bytetemp & FLAG_S));
+                    if ((this.F.get() & FLAG_H) !== 0) bytetemp--;
                     this.F.or((bytetemp & FLAG_3) | ((bytetemp & 2) !== 0 ? FLAG_5 : 0));
-                    if ((this.F.value & (FLAG_V | FLAG_Z)) === FLAG_V)
+                    if ((this.F.get() & (FLAG_V | FLAG_Z)) === FLAG_V)
                     {
                         this.contend(this.HL, 3);
                         this.contend(this.HL, 1);
@@ -3200,7 +3203,7 @@ export default class Z80
             case 119:
                 this.tstates += 11;
                 dist = this.machine.readbyte(this.PC++);
-                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.A.value);
+                this.machine.writebyte(REGISTER.get() + (dist < 0x80 ? dist : dist - 0x100), this.A.get());
                 break;
             case 124:
                 this.A.set(REGISTERH);
@@ -3424,7 +3427,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.RLC(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 8:
                 this.tstates += 8;
@@ -3475,7 +3478,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.RRC(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 16:
                 this.tstates += 8;
@@ -3526,7 +3529,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.RL(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 24:
                 this.tstates += 8;
@@ -3577,7 +3580,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.RR(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 32:
                 this.tstates += 8;
@@ -3628,7 +3631,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.SLA(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 40:
                 this.tstates += 8;
@@ -3679,7 +3682,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.SRA(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 48:
                 this.tstates += 8;
@@ -3730,7 +3733,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.SLL(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 56:
                 this.tstates += 8;
@@ -3781,7 +3784,7 @@ export default class Z80
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr));
                 this.SRL(this.A);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 64:
             case 65:
@@ -3940,7 +3943,7 @@ export default class Z80
             case 135:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 254);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 136:
                 this.tstates += 8;
@@ -3979,7 +3982,7 @@ export default class Z80
             case 143:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 253);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 144:
                 this.tstates += 8;
@@ -4018,7 +4021,7 @@ export default class Z80
             case 151:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 251);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 152:
                 this.tstates += 8;
@@ -4057,7 +4060,7 @@ export default class Z80
             case 159:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 247);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 160:
                 this.tstates += 8;
@@ -4096,7 +4099,7 @@ export default class Z80
             case 167:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 239);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 168:
                 this.tstates += 8;
@@ -4135,7 +4138,7 @@ export default class Z80
             case 175:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 223);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 176:
                 this.tstates += 8;
@@ -4174,7 +4177,7 @@ export default class Z80
             case 183:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 191);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 184:
                 this.tstates += 8;
@@ -4213,7 +4216,7 @@ export default class Z80
             case 191:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) & 0x7f);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 192:
                 this.tstates += 8;
@@ -4252,7 +4255,7 @@ export default class Z80
             case 199:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 1);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 200:
                 this.tstates += 8;
@@ -4291,7 +4294,7 @@ export default class Z80
             case 207:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 2);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 208:
                 this.tstates += 8;
@@ -4330,7 +4333,7 @@ export default class Z80
             case 215:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 4);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 216:
                 this.tstates += 8;
@@ -4369,7 +4372,7 @@ export default class Z80
             case 223:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 8);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 224:
                 this.tstates += 8;
@@ -4408,7 +4411,7 @@ export default class Z80
             case 231:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 16);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 232:
                 this.tstates += 8;
@@ -4447,7 +4450,7 @@ export default class Z80
             case 239:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 32);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 240:
                 this.tstates += 8;
@@ -4486,7 +4489,7 @@ export default class Z80
             case 247:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 64);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
             case 248:
                 this.tstates += 8;
@@ -4525,7 +4528,7 @@ export default class Z80
             case 0xFF:
                 this.tstates += 8;
                 this.A.set(this.machine.readbyte(tempaddr) | 0x80);
-                this.machine.writebyte(tempaddr, this.A.value);
+                this.machine.writebyte(tempaddr, this.A.get());
                 break;
         }
     }

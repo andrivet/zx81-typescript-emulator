@@ -47,8 +47,8 @@ const targetFrameTime: number = 1000 / 50; // Target frame time should result in
 
 const enum COLOR
 {
-    BLACK  = 0xFF000000,
-    WHITE  = 0xFFFFFFFF
+    BLACK = 0xFFFFFFFF,
+    WHITE = 0xFF000000
 }
 
 export default class Drawer
@@ -72,6 +72,7 @@ export default class Drawer
     private framesStartTime: number = 0;
     private fps: number = 0;
     private borrow: number = 0;
+    private buildLine = new Scanline();
 
     public constructor(machine: ZX81, scale: number, canvas: HTMLCanvasElement)
     {
@@ -124,9 +125,7 @@ export default class Drawer
         let bufferPos: number = this.dest + this.frameNo * TVW;
         for (let i: number = 0; i < line.scanline_len; i++)
         {
-            let c: number = line.scanline[i];
-
-            this.argb[bufferPos + this.rasterX] = c ? COLOR.WHITE : COLOR.BLACK;
+            this.argb[bufferPos + this.rasterX] = line.scanline[i] ? COLOR.WHITE : COLOR.BLACK;
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -172,7 +171,7 @@ export default class Drawer
         {
             while(x <= WinR)
             {
-                this.argb[dest + x] = COLOR.BLACK;
+                this.argb[dest + x] = 0xFFAAAAAA; // Gray
                 x += 1;
             }
             x = 0;
@@ -181,11 +180,15 @@ export default class Drawer
         }
     }
 
+    private static scanLineNumber: number = 0;
+
     public run()
     {
-        let buildLine = new Scanline();
-        this.fps = 0;
-        this.framesStartTime = Drawer.currentTimeMillis();
+        if(this.framesStartTime)
+        {
+            this.fps = 0;
+            this.framesStartTime = Drawer.currentTimeMillis();
+        }
 
         this.keepGoing = true;
         while(this.keepGoing)
@@ -203,8 +206,9 @@ export default class Drawer
             let j: number = this.machine.tperframe + this.borrow;
             while (j > 0)
             {
-                j -= this.machine.do_scanline(buildLine);
-                this.Draw(buildLine);
+                j -= this.machine.do_scanline(this.buildLine);
+                Drawer.scanLineNumber++;
+                this.Draw(this.buildLine);
             }
             this.borrow = j;
 

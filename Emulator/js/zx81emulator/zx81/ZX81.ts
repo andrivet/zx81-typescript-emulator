@@ -30,12 +30,10 @@ const ROM: string = "ROM/ZX81.data";
 
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
+const enum COLOR { BLACK = 0, WHITE = 1 }
 
 export default class ZX81
 {
-    static WHITE = 0;
-    static BLACK = 0xFF;
-
     private keyboard: Keyboard = new Keyboard();
     private hsync_counter: number = 207;
     private lastInstruction: number = 0;
@@ -216,7 +214,7 @@ export default class ZX81
         let maxScanLen: number = 420;
         if (scanLine.sync_valid)
         {
-            scanLine.add_blank(this.borrow, this.HSYNC_generator ? ZX81.WHITE : ZX81.BLACK);
+            scanLine.add_blank(this.borrow, this.HSYNC_generator ? COLOR.WHITE : COLOR.BLACK);
             this.borrow = 0;
             scanLine.sync_valid = 0;
             scanLine.sync_len = 0;
@@ -241,7 +239,7 @@ export default class ZX81
 
                 let colour: number = 0;
                 if (this.HSYNC_generator)
-                    colour = (bit !== 0 ? ZX81.BLACK : ZX81.WHITE);
+                    colour = (bit !== 0 ? COLOR.BLACK : COLOR.WHITE);
 
                 scanLine.scanline[scanLine.scanline_len++] = colour;
 

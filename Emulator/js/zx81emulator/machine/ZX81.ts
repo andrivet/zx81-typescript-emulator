@@ -23,6 +23,7 @@ import Z80 from "../z80/Z80";
 import Keyboard from "../io/Keyboard";
 import Scanline from "../display/Scanline";
 import Resource from "../io/Resource";
+import Machine from "../machine/Machine";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
@@ -32,7 +33,7 @@ const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 const enum COLOR { BLACK = 0, WHITE = 1 }
 
-export default class ZX81
+export default class ZX81 extends Machine
 {
     private keyboard: Keyboard = new Keyboard();
     private hsync_counter: number = 207;
@@ -43,8 +44,6 @@ export default class ZX81
     private z80: Z80 = new Z80(this);
     private program: Uint8Array = null;
 
-    public tperscanline: number = 207;
-    public tperframe: number = 312 * 207;
     public memory: Uint8Array = new Uint8Array(64 * 1024);
     public NMI_generator: boolean = false;
     public HSYNC_generator: boolean = false;
@@ -53,6 +52,8 @@ export default class ZX81
 
     public constructor()
     {
+        super();
+        
         for (let i = 0; i < 65536; i++)
             this.memory[i] = 7
 

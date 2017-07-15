@@ -19,7 +19,7 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ZX81 from "../zx81/ZX81";
+import Machine from "../machine/Machine";
 import {MasterRegisterPair, RegisterPair, SlaveRegisterPair, isRegisterPair} from "./RegisterPair";
 import {Register, MasterRegister, value8} from "./Register";
 
@@ -55,7 +55,7 @@ export default class Z80
     static parity_table: number[] = new Array(0x100);   /* The parity of the lookup value */
     static sz53p_table: number[] = new Array(0x100);    /* OR the above two tables together */
 
-    private machine: ZX81;
+    private machine: Machine;
 
     public AF: RegisterPair = new SlaveRegisterPair("AF");
     public BC: MasterRegisterPair = new MasterRegisterPair("BC");
@@ -91,7 +91,7 @@ export default class Z80
     private tstates: number = 0;
 
     /* Set up the z80 emulation */
-    public constructor(machine: ZX81)
+    public constructor(machine: Machine)
     {
         this.machine = machine;
         Z80.init_tables();

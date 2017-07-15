@@ -21,7 +21,7 @@
 
 
 import Drawer from "./display/Drawer";
-import ZX81 from "./zx81/ZX81";
+import ZX81 from "./machine/ZX81";
 
 export class ZX81Emulator
 {

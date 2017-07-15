@@ -19,7 +19,7 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ZX81 from "../zx81/ZX81";
+import Machine from "../machine/Machine";
 import Scanline from "./Scanline";
 
 const HTOL: number = 405;
@@ -53,7 +53,7 @@ const enum COLOR
 
 export default class Drawer
 {
-    private machine: ZX81;
+    private machine: Machine;
     private scanLen: number = 0;
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
@@ -74,7 +74,7 @@ export default class Drawer
     private borrow: number = 0;
     private buildLine = new Scanline();
 
-    public constructor(machine: ZX81, scale: number, canvas: HTMLCanvasElement)
+    public constructor(machine: Machine, scale: number, canvas: HTMLCanvasElement)
     {
         this.scale = scale;
         this.canvas = canvas;

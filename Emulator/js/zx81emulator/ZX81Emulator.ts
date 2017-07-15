@@ -28,22 +28,23 @@ export class ZX81Emulator
     private machine: ZX81;
     private drawer: Drawer;
 
-    public constructor()
-    {
-    }
-
-    public load(fileName: string, scale: number, canvasID: string): void
+    public load(fileNameID: string, scale: number, canvasID: string): void
     {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
         if (canvas == null)
             throw new Error("No HTML element found with id \'canvas\'");
 
+        let filename: string = null;
+        let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
+        if(filenameInput != null)
+            filename = filenameInput.value;
+
         this.installListeners(canvas);
         this.machine = new ZX81();
         this.drawer = new Drawer(this.machine, scale, canvas);
 
-        if (fileName != null)
-            this.machine.load_program(fileName);
+        if (filename != null && filename.length > 0)
+            this.machine.load_program(filename);
 
         this.start();
     }
@@ -84,7 +85,7 @@ export class ZX81Emulator
 let emulator: ZX81Emulator = new ZX81Emulator;
 window.onload = () =>
 {
-    emulator.load("PROGS/FACTORY.P", 3, "canvas");
+    emulator.load("program", 3, "canvas");
 };
 
 window.onunload = () =>

@@ -28,7 +28,7 @@ export class ZX81Emulator
     private machine: ZX81;
     private drawer: Drawer;
 
-    public load(fileNameID: string, scale: number, canvasID: string): void
+    public async load(fileNameID: string, scale: number, canvasID: string): Promise<void>
     {
         let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
         if (canvas == null)
@@ -39,19 +39,23 @@ export class ZX81Emulator
         if(filenameInput != null)
             filename = filenameInput.value;
 
-        this.installListeners(canvas);
+        this.installListeners();
         this.machine = new ZX81();
         this.drawer = new Drawer(this.machine, scale, canvas);
 
-        if (filename != null && filename.length > 0)
-            this.machine.load_program(filename);
+        await this.start();
 
-        this.start();
+        if (filename != null && filename.length > 0)
+        {
+            if(await this.machine.load_program(filename))
+                console.debug("Error loading program: " + filename);
+        }
     }
 
-    public start()
+    public async start(): Promise<void>
     {
         this.drawer.start();
+        await this.machine.loadROM();
     }
 
     public stop()
@@ -59,7 +63,7 @@ export class ZX81Emulator
         this.drawer.stop();
     }
 
-    private installListeners(container: HTMLElement)
+    private installListeners()
     {
         window.addEventListener("keydown", (event) =>
         {
@@ -83,14 +87,8 @@ export class ZX81Emulator
 }
 
 let emulator: ZX81Emulator = new ZX81Emulator;
-window.onload = () =>
-{
-    emulator.load("program", 3, "canvas");
-};
 
-window.onunload = () =>
-{
-    emulator.stop();
-};
+window.onload = () => { emulator.load("program", 3, "canvas"); };
+window.onunload = () => { emulator.stop(); };
 
 

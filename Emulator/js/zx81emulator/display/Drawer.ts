@@ -175,7 +175,7 @@ export default class Drawer
         }
     }
 
-    public async run()
+    public async run(): Promise<void>
     {
         let buildLine = new Scanline();
         let framesStartTime: number = 0;
@@ -226,7 +226,7 @@ export default class Drawer
 
     public start()
     {
-        this.run();
+        window.setTimeout(() => this.run(), 0);
     }
 
     public stop()

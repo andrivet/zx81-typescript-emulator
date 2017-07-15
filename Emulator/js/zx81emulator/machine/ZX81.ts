@@ -56,12 +56,14 @@ export default class ZX81 extends Machine
 
         for (let i = 0; i < MEMORY_SIZE; i++)
             this.memory[i] = 7
+    }
 
-        this.memory_load(ROM, 0, MEMORY_SIZE, () => {
-            this.NMI_generator = false;
-            this.HSYNC_generator = false;
-            this.z80.reset();
-        });
+    public async loadROM(): Promise<void>
+    {
+        await this.memory_load(ROM, 0, MEMORY_SIZE);
+        this.NMI_generator = false;
+        this.HSYNC_generator = false;
+        this.z80.reset();
     }
 
     public writebyte(address: number, data: number)
@@ -319,24 +321,21 @@ export default class ZX81 extends Machine
         return tstotal;
     }
 
-    private memory_load(filename: string, address: number, length: number, callback: (this: void) => void): void
+    private async memory_load(filename: string, address: number, length: number): Promise<void>
     {
         let resource: Resource = new Resource();
+        let data = await resource.get(filename);
 
-        resource.get(filename, (data: Uint8Array): void => {
-            let maxLength = (data.length < length) ? data.length : length;
-            for (let i = 0; i < maxLength; ++i)
-                this.memory[address + i] = data[i];
-            callback();
-        });
+        let maxLength = (data.length < length) ? data.length : length;
+        for (let i = 0; i < maxLength; ++i)
+            this.memory[address + i] = data[i];
     }
 
-    public load_program(filename: string): void
+    public async load_program(filename: string): Promise<void>
     {
         let program = new Resource();
-        program.get(filename, (data: Uint8Array): void => {
-            this.program = data;
-        });
+        let data = await program.get(filename);
+        this.program = data;
     }
 
     public onKeyDown(e: KeyboardEvent)

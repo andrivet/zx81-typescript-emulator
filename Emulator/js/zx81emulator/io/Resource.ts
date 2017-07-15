@@ -24,7 +24,7 @@ export default class Resource
 {
     private request: XMLHttpRequest = new XMLHttpRequest();
 
-    public get(name: string, callback: (data: Uint8Array) => void)
+    public get(name: string): Promise<Uint8Array>
     {
         let pathname: string = window.location.pathname;
         let dir: string = pathname.substring(0, pathname.lastIndexOf('/'));
@@ -32,19 +32,24 @@ export default class Resource
         this.request.responseType = "arraybuffer";
         this.request.open("GET", dir + "/" + name, true);
 
-        this.request.onreadystatechange = () =>
+        const promise = new Promise<Uint8Array>((resolve, reject) =>
         {
-            if (this.request.readyState === 4 && this.request.status === 200)
-            {
-                let data: Uint8Array = new Uint8Array(this.request.response);
-                callback(data);
-            }
-            else if (this.request.status === 404)
-            {
-            }
-        };
+            this.request.onreadystatechange = () => {
+                if (this.request.readyState === 4 && this.request.status === 200)
+                {
+                    let data: Uint8Array = new Uint8Array(this.request.response);
+                    resolve(data);
+                }
+                else if (this.request.status === 404)
+                {
+                    reject(404);
+                }
+            };
 
-        this.request.send();
+            this.request.send();
+        });
+
+        return promise;
     }
 }
 

@@ -21,23 +21,19 @@
 
 import { MasterRegister, Register, RegisterHigh, RegisterLow } from "./Register";
 
-export interface RegisterPair
+export abstract class RegisterPair
 {
-    get(): number;
-    set(rp: RegisterPair | number): void;
-    inc(): void;
-    dec(): void;
-    add(a: number): void;
-    getRH(): Register;
-    getRL(): Register;
+    public abstract get(): number;
+    public abstract set(rp: RegisterPair | number): void;
+    public abstract inc(): void;
+    public abstract dec(): void;
+    public abstract add(a: number): void;
+    public abstract getRH(): Register;
+    public abstract getRL(): Register;
 }
 
-export function isRegisterPair(p: any): p is RegisterPair
-{
-    return (<RegisterPair>p).get != undefined;
-}
 
-export class MasterRegisterPair implements RegisterPair
+export class MasterRegisterPair extends RegisterPair
 {
     word: number = 0;
 
@@ -61,7 +57,7 @@ export class MasterRegisterPair implements RegisterPair
     public getRL(): Register                { return new RegisterLow(this); }
 }
 
-export class SlaveRegisterPair implements RegisterPair
+export class SlaveRegisterPair extends RegisterPair
 {
     private hi: MasterRegister;
     private low: MasterRegister;

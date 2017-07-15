@@ -245,7 +245,7 @@ export default class Z80
     public ADD16(rp1: RegisterPair, rp2: number): void;
     public ADD16(rp1: RegisterPair, rp2: RegisterPair | number): void
     {
-        let value2: number = isRegisterPair(rp2) ? rp2.get() : rp2;
+        let value2: number = (rp2 instanceof RegisterPair) ? rp2.get() : rp2;
         let add16temp: number = rp1.get() + value2;
         let lookup: number = ((rp1.get() & 0x0800) >> 11) | ((value2 & 0x0800) >> 10) | ((add16temp & 0x0800) >> 9);
         this.tstates += 7;

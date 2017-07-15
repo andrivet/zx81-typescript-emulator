@@ -54,8 +54,8 @@ export class RegisterHigh extends Register
 
     public inc(): void          { this.rp.setHi(this.rp.hi() + 1); }
     public dec(): void          { this.rp.setHi(this.rp.hi() - 1); }
-    public and(a: number): void { this.rp.word &= ((a << 8) | 0xFF); }
-    public or(o: number): void  { this.rp.word |= (o << 8); }
+    public and(a: number): void { this.rp.set(this.rp.get() & ((a << 8) | 0xFF)); }
+    public or(o: number): void  { this.rp.set(this.rp.get() | (o << 8)); }
     public add(a: number): void { this.rp.setHi(this.rp.hi() + a); }
 }
 
@@ -81,8 +81,8 @@ export class RegisterLow extends Register
 
     public inc(): void              { this.rp.setLo(this.rp.lo() + 1); }
     public dec(): void              { this.rp.setLo(this.rp.lo() - 1); }
-    public and(a: number): void     { this.rp.word &= (a | 0xff00); }
-    public or(o: number): void      { this.rp.word |= o; }
+    public and(a: number): void     { this.rp.set(this.rp.get() & (a | 0xff00)); }
+    public or(o: number): void      { this.rp.set(this.rp.get() | o); }
     public add(a: number): void     { this.rp.setLo(this.rp.lo() + a); }
 }
 

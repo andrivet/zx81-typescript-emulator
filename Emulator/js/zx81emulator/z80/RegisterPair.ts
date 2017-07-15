@@ -35,7 +35,7 @@ export abstract class RegisterPair
 
 export class MasterRegisterPair extends RegisterPair
 {
-    word: number = 0;
+    private word: number = 0;
 
     public hi(): number     { return this.word >> 8; }
     public lo(): number     { return this.word & 0xFF; }

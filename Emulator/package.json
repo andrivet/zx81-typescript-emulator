@@ -7,7 +7,9 @@
     "scripts": {
         "webpack": "webpack"
     },
-    "dependencies": {},
+    "dependencies": {
+        "promise-polyfill": "6.0.2"
+    },
     "devDependencies": {
         "awesome-typescript-loader": "^3.2.1",
         "tslint": "^5.5.0",

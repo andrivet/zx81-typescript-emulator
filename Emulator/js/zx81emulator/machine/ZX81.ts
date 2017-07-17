@@ -21,7 +21,6 @@
 
 import Z80 from "../z80/Z80";
 import Keyboard, {VK_J, VK_P, VK_ENTER, VK_SHIFT} from "../io/Keyboard";
-import Resource from "../io/Resource";
 import Machine from "../machine/Machine";
 import Scanline from "../display/Scanline";
 
@@ -323,19 +322,25 @@ export default class ZX81 extends Machine
 
     private async memory_load(filename: string, address: number, length: number): Promise<void>
     {
-        let resource: Resource = new Resource();
-        let data = await resource.get(filename);
-
-        let maxLength = (data.length < length) ? data.length : length;
-        for (let i = 0; i < maxLength; ++i)
-            this.memory[address + i] = data[i];
+        return fetch(filename, { method: 'get'})
+            .then((response) => {
+                response.arrayBuffer().then((buffer) => {
+                    let data = new Uint8Array(buffer);
+                    let maxLength = (data.length < length) ? data.length : length;
+                    for (let i = 0; i < maxLength; ++i)
+                        this.memory[address + i] = data[i];
+                })
+            });
     }
 
     public async load_program(filename: string): Promise<void>
     {
-        let program = new Resource();
-        let data = await program.get(filename);
-        this.program = data;
+        return fetch(filename, { method: 'get'})
+            .then((response) => {
+                response.arrayBuffer().then((buffer) => {
+                    this.program = new Uint8Array(buffer);
+                })
+        });
     }
 
     public keyDown(code: number, shift: boolean = false)

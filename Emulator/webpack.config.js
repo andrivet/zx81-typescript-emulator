@@ -1,8 +1,16 @@
 
 const path = require('path');
+const webpack = require('webpack'); //to access built-in plugins
 
 module.exports = {
-    entry: "./js/zx81emulator/ZX81Emulator.ts",
+    entry: {
+        app: [
+            'es6-promise',
+            'whatwg-fetch',
+            "./js/zx81emulator/ZX81Emulator.ts"
+
+        ]
+    },
     output: {
         path: path.resolve(__dirname, "build"),
         filename: "bundle.js"
@@ -14,8 +22,11 @@ module.exports = {
     },
     module: {
         rules: [
-            { test: /\.ts$/, use: 'awesome-typescript-loader' }
+            { test: /\.ts$/, exclude: /node_modules/, use: 'awesome-typescript-loader' }
         ]
-    }
+    },
+    plugins: [
+        new webpack.ProvidePlugin({'Promise': 'es6-promise'})
+    ]
 };
 

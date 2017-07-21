@@ -41,9 +41,10 @@ export class ZX81Emulator
             if(filenameInput != null)
                 filename = filenameInput.value;
 
-            this.installListeners();
             this.machine = new ZX81();
             this.drawer = new Drawer(this.machine, scale, canvas);
+
+            this.installListeners();
 
             await this.start();
 
@@ -55,7 +56,7 @@ export class ZX81Emulator
         }
         catch(err)
         {
-            console.debug(err);
+            console.log("Error while initializing Emulator: " + err);
         }
     }
 
@@ -97,5 +98,3 @@ let emulator: ZX81Emulator = new ZX81Emulator;
 
 window.onload = () => { emulator.load("program", 3, "canvas"); };
 window.onunload = () => { emulator.stop(); };
-
-

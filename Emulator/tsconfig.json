@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "module": "CommonJS",
+        "moduleResolution": "node",
         "target": "es5",
         "removeComments": false,
         "sourceMap": true,

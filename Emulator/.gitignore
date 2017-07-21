@@ -1,2 +1,3 @@
 js/zx81emulator/**/*.js
 js/zx81emulator/**/*.js.map
+/build/

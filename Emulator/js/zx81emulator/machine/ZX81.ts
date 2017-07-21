@@ -33,6 +33,7 @@ const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 const enum COLOR { BLACK = 0, WHITE = 1 }
 const MEMORY_SIZE = 64 * 1024;
 
+
 export default class ZX81 extends Machine
 {
     private keyboard: Keyboard = new Keyboard();

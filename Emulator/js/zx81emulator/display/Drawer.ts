@@ -45,11 +45,6 @@ const TVH: number = 380;
 
 const targetFrameTime: number = 1000 / 50; // Target frame time should result in 50Hz display
 
-const enum COLOR
-{
-    BLACK = 0xFFFFFFFF,
-    WHITE = 0xFF000000
-}
 
 export default class Drawer
 {
@@ -58,8 +53,7 @@ export default class Drawer
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
-    private imageData: ImageData;
-    private argb: Uint32Array;
+    private argb: ImageData;
     private srcCanvas: HTMLCanvasElement;
     private srcContext: CanvasRenderingContext2D;
     private keepGoing: boolean = true;
@@ -89,8 +83,7 @@ export default class Drawer
         this.srcCanvas.height = TVH;
         this.srcCanvas.hidden = true;
         this.srcContext = this.srcCanvas.getContext("2d");
-        this.imageData = this.srcContext.getImageData(0, 0, TVW, TVH);
-        this.argb = new Uint32Array(this.imageData.data.buffer);
+        this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
     }
 
     private static currentTimeMillis(): number
@@ -111,7 +104,7 @@ export default class Drawer
 
     public redrawDisplay()
     {
-        this.srcContext.putImageData(this.imageData, 0, 0, 0, 0, TVW, TVH);
+        this.srcContext.putImageData(this.argb, 0, 0, 0, 0, TVW, TVH);
         this.context.drawImage(this.srcCanvas,
             WinL, WinT, WinW, WinH,
            0, 0, this.canvas.width, this.canvas.height);
@@ -122,7 +115,10 @@ export default class Drawer
         let bufferPos: number = this.dest + this.frameNo * TVW;
         for (let i: number = 0; i < scanline.getLength(); i++)
         {
-            this.argb[bufferPos + this.rasterX] = scanline.getPixel(i) ? COLOR.WHITE : COLOR.BLACK;
+            if(scanline.getPixel(i))
+                this.setPixel(bufferPos + this.rasterX, 0x00, 0x00, 0x00, 0xFF);
+            else
+                this.setPixel(bufferPos + this.rasterX, 0xFF, 0xFF, 0xFF, 0xFF);
             this.rasterX += 1;
 
             if (this.rasterX > this.scanLen)
@@ -155,6 +151,15 @@ export default class Drawer
         }
     }
 
+    private setPixel(i: number, r: number, g: number, b: number, a: number)
+    {
+        i *= 4;
+        this.argb.data[i    ] = r;
+        this.argb.data[i + 1] = g;
+        this.argb.data[i + 2] = b;
+        this.argb.data[i + 3] = a;
+    }
+
     private completeFrame()
     {
         let x: number = this.rasterX;
@@ -164,7 +169,7 @@ export default class Drawer
         {
             while(x <= WinR)
             {
-                this.argb[dest + x] = 0xFFAAAAAA; // Gray
+                this.setPixel(dest + x, 0xAA, 0xAA, 0xAA, 0xFF); // Gray
                 x += 1;
             }
             x = 0;

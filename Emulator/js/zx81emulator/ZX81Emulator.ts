@@ -87,11 +87,6 @@ export class ZX81Emulator
             return null;
         }, false);
     }
-
-    private windowActive(active: boolean)
-    {
-        this.drawer.setPaused(!active);
-    }
 }
 
 let emulator: ZX81Emulator = new ZX81Emulator;

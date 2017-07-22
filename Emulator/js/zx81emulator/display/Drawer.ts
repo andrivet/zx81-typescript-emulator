@@ -52,10 +52,10 @@ export default class Drawer
     private scanLen: number = 0;
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
-    private context: CanvasRenderingContext2D;
+    private context: CanvasRenderingContext2D | null;
     private argb: ImageData;
     private srcCanvas: HTMLCanvasElement;
-    private srcContext: CanvasRenderingContext2D;
+    private srcContext: CanvasRenderingContext2D | null;
     private keepGoing: boolean = true;
     private paused: boolean = false;
     private dest: number = 0;
@@ -76,14 +76,16 @@ export default class Drawer
         this.canvas.height = WinH * this.scale;
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
-        this.context.webkitImageSmoothingEnabled = false;
+        if(this.context != null)
+            this.context.webkitImageSmoothingEnabled = false;
 
         this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
         this.srcCanvas.width = TVW;
         this.srcCanvas.height = TVH;
         this.srcCanvas.hidden = true;
         this.srcContext = this.srcCanvas.getContext("2d");
-        this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
+        if(this.srcContext != null)
+            this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
     }
 
     private static currentTimeMillis(): number
@@ -104,6 +106,9 @@ export default class Drawer
 
     public redrawDisplay()
     {
+        if(this.srcContext == null || this.context == null)
+            return;
+
         this.srcContext.putImageData(this.argb, 0, 0, 0, 0, TVW, TVH);
         this.context.drawImage(this.srcCanvas,
             WinL, WinT, WinW, WinH,

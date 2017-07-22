@@ -12,7 +12,7 @@
         "noImplicitAny": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
-        "strictNullChecks": false,
+        "strictNullChecks": true,
         "lib": [
             "dom",
             "es5",

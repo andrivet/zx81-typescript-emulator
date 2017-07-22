@@ -43,7 +43,7 @@ export default class ZX81 extends Machine
     private shiftRegInv: number = 0;
     private intPending: boolean = false;
     private z80: Z80 = new Z80(this);
-    private program: Uint8Array = null;
+    private program: Uint8Array | null = null;
     private memory: Uint8Array = new Uint8Array(MEMORY_SIZE);
     private nmiGenerator: boolean = false;
     private hsyncGenerator: boolean = false;

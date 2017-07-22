@@ -2,6 +2,7 @@
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -35,7 +36,8 @@ module.exports = {
             template: './js/index.ejs',
             inject: true,
             filename: '../index.html'
-        })
+        }),
+        new UglifyJsPlugin()
     ]
 };
 

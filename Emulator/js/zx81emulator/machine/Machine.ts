@@ -28,11 +28,11 @@ abstract class Machine
 
     public abstract doScanline(scanLine: Scanline): number;
     public abstract readByte(address: number): number;
-    public abstract writeByte(address: number, data: number);
+    public abstract writeByte(address: number, data: number): void;
     public abstract contendMem(address: number, states: number, time: number): number;
     public abstract contendIO(address: number, states: number, time: number): number;
     public abstract readPort(address: number): number;
-    public abstract writePort(address: number, data: number);
+    public abstract writePort(address: number, data: number): void;
     public abstract opcodeFetch(address: number): number;
 
     public static sleep(delay: number): Promise<void> { return new Promise((resolve) => { setTimeout(() => resolve(), delay); }); }

@@ -6,10 +6,13 @@
         "removeComments": false,
         "sourceMap": true,
         "inlineSources": true,
+        "pretty": true,
+        "alwaysStrict": true,
         "noImplicitThis": true,
-        "noImplicitAny": false,
+        "noImplicitAny": true,
         "noImplicitReturns": true,
         "noFallthroughCasesInSwitch": true,
+        "strictNullChecks": false,
         "lib": [
             "dom",
             "es5",
@@ -18,6 +21,7 @@
         ]
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "build"
     ]
 }

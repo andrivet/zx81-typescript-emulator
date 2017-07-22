@@ -66,7 +66,7 @@ export default class ZX81 extends Machine
         this.z80.reset();
     }
 
-    public writeByte(address: number, data: number)
+    public writeByte(address: number, data: number): void
     {
         if (address > RAMTOP)
             address = address & RAMTOP;
@@ -138,7 +138,7 @@ export default class ZX81 extends Machine
             return (opcode);
     }
 
-    public writePort(address: number, data: number)
+    public writePort(address: number, data: number): void
     {
         switch (address & 255)
         {

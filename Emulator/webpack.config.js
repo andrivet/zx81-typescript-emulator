@@ -3,11 +3,12 @@ const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
     entry: {
-        polyfill: "./js/polyfill/polyfill.ts",
-        app: "./js/zx81emulator/ZX81Emulator.ts"
+        polyfill: "./src/polyfill/polyfill.ts",
+        app: "./src/zx81emulator/ZX81Emulator.ts"
     },
     output: {
         path: path.resolve(__dirname, "build"),
@@ -15,12 +16,19 @@ module.exports = {
     },
     watch: false,
     devtool: "source-map",
+    stats: "detailed",
     resolve: {
-        extensions: ['.ts']
+        extensions: ['.ts', '.css', '.js']
     },
     module: {
         rules: [
-            { test: /\.ts$/, exclude: /node_modules/, use: 'awesome-typescript-loader' }
+            {test: /\.ts$/, use: 'awesome-typescript-loader'},
+            {
+                test: /\.css$/, use: ExtractTextPlugin.extract({
+                    fallback: "style-loader",
+                    use: "css-loader"
+                })
+            }
         ]
     },
     plugins: [
@@ -33,11 +41,12 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             title: "ZX81 Emulator",
-            template: './js/index.ejs',
+            template: './src/index.ejs',
             inject: true,
             filename: '../index.html'
         }),
-        new UglifyJsPlugin()
+        new UglifyJsPlugin(),
+        new ExtractTextPlugin("styles.css")
     ]
 };
 

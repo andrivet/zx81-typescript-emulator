@@ -37,7 +37,7 @@ export class ZX81Emulator
             if (canvas == null)
                 throw new Error("No HTML element found with id \'canvas\'");
 
-            let filename: string = "";
+            let filename: string | null = null;
             let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
             if(filenameInput != null)
                 filename = filenameInput.value;

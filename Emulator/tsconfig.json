@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "module": "CommonJS",
+        "module": "commonjs",
         "moduleResolution": "node",
         "target": "es5",
         "removeComments": false,

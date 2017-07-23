@@ -1,3 +1,4 @@
+"use strict";
 
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
@@ -19,7 +20,10 @@ module.exports = {
     devtool: "source-map",
     stats: "detailed",
     resolve: {
-        extensions: ['.ts', '.css', '.js']
+        alias: {
+            ROM: path.resolve(__dirname, 'ROM/')
+        },
+        extensions: ['.ts', '.css', '.js', '.rom']
     },
     module: {
         rules: [
@@ -29,7 +33,8 @@ module.exports = {
                     fallback: "style-loader",
                     use: "css-loader"
                 })
-            }
+            },
+            {test: /\.rom$/, use: { loader: 'file-loader', query: { name: '[path][name].[ext]' }}}
         ]
     },
     plugins: [

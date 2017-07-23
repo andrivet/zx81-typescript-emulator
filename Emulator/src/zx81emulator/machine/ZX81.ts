@@ -24,9 +24,10 @@ import Keyboard, {VK_J, VK_P, VK_ENTER, VK_SHIFT} from "../io/Keyboard";
 import Machine from "../machine/Machine";
 import Scanline from "../display/Scanline";
 
+const ROM = require("ROM/ZX81.rom") as string;
+
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
-const ROM: string = "ROM/ZX81.rom";
 
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }

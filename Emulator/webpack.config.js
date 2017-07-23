@@ -51,7 +51,7 @@ module.exports = {
             inject: true,
             filename: '../index.html'
         }),
-        new UglifyJsPlugin(),
+        new UglifyJsPlugin({sourceMap: true}),
         new ExtractTextPlugin("styles.css")
     ]
 };

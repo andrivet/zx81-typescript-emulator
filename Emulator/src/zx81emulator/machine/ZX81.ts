@@ -26,7 +26,7 @@ import Scanline from "../display/Scanline";
 
 const RAMTOP: number = 32767;
 const ROMTOP: number = 8191;
-const ROM: string = "ROM/ZX81.data";
+const ROM: string = "ROM/ZX81.rom";
 
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }

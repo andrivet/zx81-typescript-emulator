@@ -15,7 +15,7 @@ module.exports = {
     },
     output: {
         path: path.resolve(__dirname, "build"),
-        filename: "[name].js"
+        filename: "js/[name].js"
     },
     watch: false,
     devtool: "source-map",
@@ -54,7 +54,7 @@ module.exports = {
         }),
         new UglifyJsPlugin({sourceMap: true}),
         new ExtractTextPlugin("styles.css"),
-        new CopyWebpackPlugin([{ from: 'PROGS/', to: 'PROGS/' }]),
+        new CopyWebpackPlugin([{from: 'PROGS/', to: 'PROGS/'}, {from: 'robots.txt'}]),
         new FaviconsWebpackPlugin({logo: './logo.png', prefix: 'icons/', inject: true, background: '#FFF'})
     ]
 };

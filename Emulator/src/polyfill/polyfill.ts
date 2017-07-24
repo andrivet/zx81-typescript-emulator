@@ -1,1 +1,3 @@
-import "core-js/client/shim.min.js";
+
+require('es6-promise/auto');
+

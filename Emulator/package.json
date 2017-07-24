@@ -8,7 +8,8 @@
         "webpack": "webpack"
     },
     "dependencies": {
-        "core-js": "^2.4.1"
+        "es6-promise": "^4.1.1",
+        "whatwg-fetch": "^2.0.3"
     },
     "devDependencies": {
         "awesome-typescript-loader": "^3.2.1",

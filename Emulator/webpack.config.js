@@ -6,6 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -49,11 +50,12 @@ module.exports = {
             title: "ZX81 Emulator",
             template: './src/index.ejs',
             inject: true,
-            filename: '../index.html'
+            filename: 'index.html'
         }),
         new UglifyJsPlugin({sourceMap: true}),
         new ExtractTextPlugin("styles.css"),
-        new CopyWebpackPlugin([{ from: 'PROGS/', to: 'PROGS/' }])
+        new CopyWebpackPlugin([{ from: 'PROGS/', to: 'PROGS/' }]),
+        new FaviconsWebpackPlugin({logo: './logo.png', prefix: 'icons/', inject: true, background: '#FFF'})
     ]
 };
 

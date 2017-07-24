@@ -43,7 +43,7 @@ module.exports = {
             names: [
                 "main",
                 "polyfill",
-                "bootstrap" // Extract the Webpack bootstrap logic into its own file by providing a name that wasn't listed in the "entry" file list.
+                "manifest" // Extract the Webpack bootstrap logic into its own file by providing a name that wasn't listed in the "entry" file list.
             ]
         }),
         new HtmlWebpackPlugin({

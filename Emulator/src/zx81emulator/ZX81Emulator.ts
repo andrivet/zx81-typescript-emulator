@@ -29,19 +29,10 @@ export default class ZX81Emulator
     private machine: ZX81;
     private drawer: Drawer;
 
-    public async load(fileNameID: string, scale: number, canvasID: string): Promise<void>
+    public async load(fileName: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
     {
         try
         {
-            let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
-            if (canvas == null)
-                throw new Error("No HTML element found with id \'canvas\'");
-
-            let filename: string | null = null;
-            let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
-            if(filenameInput != null)
-                filename = filenameInput.value;
-
             this.machine = new ZX81();
             this.drawer = new Drawer(this.machine, scale, canvas);
 
@@ -49,9 +40,9 @@ export default class ZX81Emulator
 
             await this.start();
 
-            if (filename != null && filename.length > 0)
+            if (fileName.length > 0)
             {
-                await this.machine.load_program(filename);
+                await this.machine.load_program(fileName);
                 await this.machine.autoLoad();
             }
         }

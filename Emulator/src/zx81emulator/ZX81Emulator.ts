@@ -24,7 +24,7 @@ import "../css/normalize.css";
 import Drawer from "./display/Drawer";
 import ZX81 from "./machine/ZX81";
 
-export class ZX81Emulator
+export default class ZX81Emulator
 {
     private machine: ZX81;
     private drawer: Drawer;
@@ -67,7 +67,7 @@ export class ZX81Emulator
         await this.machine.loadROM();
     }
 
-    public stop()
+    public stop(): void
     {
         this.drawer.stop();
     }
@@ -89,8 +89,3 @@ export class ZX81Emulator
         }, false);
     }
 }
-
-let emulator: ZX81Emulator = new ZX81Emulator;
-
-window.onload = () => { emulator.load("program", 3, "canvas"); };
-window.onunload = () => { emulator.stop(); };

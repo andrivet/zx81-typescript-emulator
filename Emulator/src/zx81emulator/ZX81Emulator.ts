@@ -65,18 +65,21 @@ export default class ZX81Emulator
 
     private installListeners()
     {
-        window.addEventListener("keydown", (event) =>
-        {
-            event.preventDefault();
-            this.machine.keyDown(event.which, event.shiftKey);
-            return null;
-        }, false);
+        window.addEventListener("keydown", (event) => this.onKeyDown(event), false);
+        window.addEventListener("keyup", (event) => this.onKeyUp(event), false);
+    }
 
-        window.addEventListener("keyup", (event) =>
-        {
-            event.preventDefault();
-            this.machine.keyUp(event.which, event.shiftKey);
-            return null;
-        }, false);
+    public onKeyDown(event: KeyboardEvent): any
+    {
+        event.preventDefault();
+        this.machine.keyDown(event.which, event.shiftKey);
+        return null;
+    }
+
+    public onKeyUp(event: KeyboardEvent): any
+    {
+        event.preventDefault();
+        this.machine.keyUp(event.which, event.shiftKey);
+        return null;
     }
 }

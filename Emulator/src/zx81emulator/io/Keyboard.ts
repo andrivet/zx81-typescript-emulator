@@ -124,6 +124,7 @@ export default class Keyboard
     ];
 
     private map: number[] = new Array(8);
+    private lastKeyDown = 0;
 
     public constructor()
     {
@@ -146,10 +147,20 @@ export default class Keyboard
             }
             i++;
         }
+
+        this.lastKeyDown = +new Date();
     }
 
     public keyUp(code: number, shift: boolean)
     {
+        // iPad send keyUp too quickly after keyDown so the emulator does not see the keys. Add some delays.
+        let currentTime = +new Date();
+        if(currentTime - this.lastKeyDown < 50)
+        {
+            setTimeout(() => this.keyUp(code, shift), 60);
+            return;
+        }
+
         let i: number = 0;
         while (Keyboard.keyMap[i].code !== 0)
         {

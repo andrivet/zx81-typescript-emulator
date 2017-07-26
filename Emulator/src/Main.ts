@@ -3,7 +3,18 @@ import ZX81Emulator from "./zx81emulator/ZX81Emulator";
 
 const canvasID = "canvas";
 const fileNameID = "program";
-const scale = 3;
+const keyboardInputID = "keyboardInput";
+const scale = 2;
+
+function ShowKeyboard(keyboardInput: HTMLInputElement): void
+{
+    if(null != keyboardInput)
+    {
+        keyboardInput.style.visibility = 'visible';
+        keyboardInput.focus();
+        keyboardInput.style.visibility = 'hidden';
+    }
+}
 
 function Main(): void
 {
@@ -16,10 +27,19 @@ function Main(): void
     if(filenameInput != null)
         filename = filenameInput.value;
 
-    let emulator: ZX81Emulator = new ZX81Emulator();
+    let keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
-    window.onload = () => { emulator.load(filename, scale, canvas); };
-    window.onunload = () => { emulator.stop(); };
+    let emulator = new ZX81Emulator();
+
+    window.addEventListener("load",  () =>
+    {
+        emulator.load(filename, scale, canvas);
+        ShowKeyboard(keyboardInput);
+        // When the iPad displays the keyboard, it scrolls the view so scroll it back to top
+        window.scrollTo(0, 0);
+    });
+
+    window.addEventListener("unload",  () => { emulator.stop(); });
 }
 
 Main();

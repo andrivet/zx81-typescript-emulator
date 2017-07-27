@@ -9,11 +9,12 @@ bootstrapVersion: 4
 useFlexbox: true
 
 # Webpack loaders, order matters
+# Specify ?sourceMap to avoid warnings (postcss removes source maps by default)
 styleLoaders:
   - style
-  - css
-  - postcss
-  - sass
+  - css?sourceMap
+  - postcss?sourceMap
+  - sass?sourceMap
 
 # Extract styles to stand-alone css file
 # Different settings for different environments can be used,

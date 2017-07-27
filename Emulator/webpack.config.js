@@ -10,6 +10,7 @@ const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
 
 module.exports = {
     entry: {
+        vendor: ["bootstrap-loader"],
         polyfill: ["./src/polyfill/polyfill.ts", "whatwg-fetch"],
         app: "./src/Main.ts"
     },

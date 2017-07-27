@@ -29,14 +29,15 @@ module.exports = {
     },
     module: {
         rules: [
-            {test: /\.ts$/, use: 'awesome-typescript-loader'},
-            {
-                test: /\.css$/, use: ExtractTextPlugin.extract({
+            { test: /\.ts$/, use: 'awesome-typescript-loader' },
+            { test: /\.css$/, use: ExtractTextPlugin.extract({
                     fallback: "style-loader",
                     use: "css-loader"
-                })
-            },
-            {test: /\.rom$/, use: { loader: 'file-loader', query: { name: '[path][name].[ext]' }}}
+            })},
+            { test: /\.rom$/, use: { loader: 'file-loader', query: { name: '[path][name].[ext]' }}},
+            { test: /bootstrap[\/\\]dist[\/\\]js[\/\\]umd[\/\\]/, loader: 'imports-loader?jQuery=jquery' },
+            { test: /\.(woff2?|svg)$/, loader: 'url-loader?limit=10000' },
+            { test: /\.(ttf|eot)$/, loader: 'file-loader' }
         ]
     },
     plugins: [

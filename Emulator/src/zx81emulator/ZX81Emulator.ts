@@ -19,8 +19,6 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import "../css/main.css";
-import "../css/normalize.css";
 import Drawer from "./display/Drawer";
 import ZX81 from "./machine/ZX81";
 

@@ -14,8 +14,23 @@
 <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
 <![endif]-->
 
-<canvas id="canvas"></canvas>
-<input id="program" style="visibility:hidden" value="PROGS/FACTORY.P"/>
-<input id="keyboardInput" style="width:10px; visibility: hidden; opacity: 0" />
+<div class="container">
+
+    <div class="row justify-content-center">
+        <div class="col-12 text-center">
+            <h3>ZX81 Emulator <small class="text-muted">written in Typescript</small></h3>
+            <canvas id="canvas" class="img-fluid"></canvas><br/>
+            <input id="program" style="visibility:hidden" value="PROGS/FACTORY.P"/>
+            <input id="keyboardInput" style="width:10px; visibility: hidden; opacity: 0" />
+        </div>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 text-center">
+            <div id="status" class="alert alert-success" role="alert"></div>
+        </div>
+    </div>
+
+</div>
 </body>
 </html>

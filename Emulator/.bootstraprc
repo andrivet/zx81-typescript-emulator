@@ -35,7 +35,6 @@ extractStyles: false
 #
 # preBootstrapCustomizations: ./path/to/bootstrap/pre-customizations.scss
 
-preBootstrapCustomizations: ./src/css/cyborg/_variables.scss
 
 # This gets loaded after bootstrap/variables is loaded
 # Thus, you may customize Bootstrap variables
@@ -49,7 +48,6 @@ preBootstrapCustomizations: ./src/css/cyborg/_variables.scss
 #
 # appStyles: ./path/to/your/app/styles/endpoint.scss
 
-appStyles: ./src/css/cyborg/theme.scss
 
 ### Bootstrap styles
 styles:

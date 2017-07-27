@@ -1,5 +1,4 @@
 
-import "./css/main.css";
 import ZX81Emulator from "./zx81emulator/ZX81Emulator";
 
 const canvasID = "canvas";

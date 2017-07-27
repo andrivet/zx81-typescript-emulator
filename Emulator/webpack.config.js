@@ -42,7 +42,7 @@ module.exports = {
     plugins: [
         new webpack.optimize.CommonsChunkPlugin({
             names: [
-                "main",
+                "app",
                 "polyfill",
                 "manifest" // Extract the Webpack bootstrap logic into its own file by providing a name that wasn't listed in the "entry" file list.
             ]

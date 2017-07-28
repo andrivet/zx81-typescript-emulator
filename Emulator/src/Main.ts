@@ -4,6 +4,7 @@ import ZX81Emulator from "./zx81emulator/ZX81Emulator";
 const canvasID = "canvas";
 const fileNameID = "program";
 const keyboardInputID = "keyboardInput";
+const statusID = "status";
 const scale = 2;
 
 function ShowKeyboard(keyboardInput: HTMLInputElement): void
@@ -18,9 +19,11 @@ function ShowKeyboard(keyboardInput: HTMLInputElement): void
 
 function Main(): void
 {
-    let canvas: HTMLCanvasElement = <HTMLCanvasElement>document.getElementById(canvasID);
+    let canvas = <HTMLCanvasElement>document.getElementById(canvasID);
     if (canvas == null)
         throw new Error("No HTML element found with id \'canvas\'");
+
+    let status = <HTMLDivElement>document.getElementById(statusID);
 
     let filename: string = "";
     let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
@@ -29,7 +32,7 @@ function Main(): void
 
     let keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
-    let emulator = new ZX81Emulator();
+    let emulator = new ZX81Emulator(status);
 
     window.addEventListener("load",  () =>
     {

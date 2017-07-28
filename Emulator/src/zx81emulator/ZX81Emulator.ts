@@ -22,15 +22,27 @@
 import Drawer from "./display/Drawer";
 import ZX81 from "./machine/ZX81";
 
+const enum StatusKind { OK, Info, Warning, Error }
+const mapStatus: string[] = ['alert-success', 'alert-info', 'alert-warning', 'alert-danger'];
+
 export default class ZX81Emulator
 {
+    private status: HTMLDivElement;
+    private lastStatusKind: StatusKind = StatusKind.OK;
     private machine: ZX81;
     private drawer: Drawer;
+
+    public constructor(status: HTMLDivElement)
+    {
+        this.status = status;
+    }
 
     public async load(fileName: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
     {
         try
         {
+            this.setStatus(StatusKind.Info, "Initializing emulator...");
+
             this.machine = new ZX81();
             this.drawer = new Drawer(this.machine, scale, canvas);
 
@@ -40,20 +52,51 @@ export default class ZX81Emulator
 
             if (fileName.length > 0)
             {
+                this.setStatus(StatusKind.Info, "Loading program " + fileName + "...");
                 await this.machine.load_program(fileName);
+                this.setStatus(StatusKind.Info, "Program " + fileName + " loaded, execute it...");
                 await this.machine.autoLoad();
             }
+
+            this.setStatus(StatusKind.OK, "Emulator ready and running");
         }
         catch(err)
         {
-            console.log("Error while initializing Emulator: " + err);
+            this.setStatus(StatusKind.Error,"Error while initializing Emulator: " + err);
         }
+    }
+
+    private showStatus(show: boolean): void
+    {
+        if(null == this.status)
+            return;
+
+        this.status.style.visibility = show ? 'visible': 'hidden';
+    }
+
+    private setStatus(kind: StatusKind, message: string): void
+    {
+        console.log(kind + ": " + message);
+
+        if(null == this.status)
+            return;
+
+        if(kind != this.lastStatusKind)
+        {
+            this.status.classList.remove(mapStatus[this.lastStatusKind]);
+            this.status.classList.add(mapStatus[kind]);
+        }
+
+        this.status.textContent = message;
+        this.lastStatusKind = kind;
     }
 
     public async start(): Promise<void>
     {
         this.drawer.start();
+        this.setStatus(StatusKind.Info, "Loading ROM...");
         await this.machine.loadROM();
+        this.setStatus(StatusKind.OK, "ROM loaded");
     }
 
     public stop(): void

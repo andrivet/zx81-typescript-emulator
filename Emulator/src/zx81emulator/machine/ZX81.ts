@@ -19,10 +19,10 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Z80 from "../z80/Z80";
-import Keyboard, {VK_J, VK_P, VK_ENTER, VK_SHIFT} from "../io/Keyboard";
-import Machine from "../machine/Machine";
 import Scanline from "../display/Scanline";
+import Keyboard, {VK_ENTER, VK_J, VK_P, VK_SHIFT} from "../io/Keyboard";
+import Machine from "../machine/Machine";
+import Z80 from "../z80/Z80";
 
 const ROM = require("ROM/ZX81.rom") as string;
 
@@ -33,7 +33,6 @@ const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
 const enum COLOR { BLACK = 0, WHITE = 1 }
 const MEMORY_SIZE = 64 * 1024;
-
 
 export default class ZX81 extends Machine
 {
@@ -56,7 +55,7 @@ export default class ZX81 extends Machine
         super();
 
         for (let i = 0; i < MEMORY_SIZE; i++)
-            this.memory[i] = 7
+            this.memory[i] = 7;
     }
 
     public async loadROM(): Promise<void>
@@ -109,11 +108,11 @@ export default class ZX81 extends Machine
 
         let data: number = this.readByte((address >= 49152) ? address & 32767 : address);
         let opcode: number = data;
-        let bit6: boolean = (opcode & 64) !== 0;
-        if (!bit6)
+        const bit6: boolean = (opcode & 64) !== 0;
+        if(!bit6)
             opcode = 0;
-        let inv: boolean = (data & 128) !== 0;
-        if (!bit6)
+        const inv: boolean = (data & 128) !== 0;
+        if(!bit6)
         {
             // standard ZX81 character sets are only 64 characters in size.
             data = data & 63;
@@ -162,15 +161,15 @@ export default class ZX81 extends Machine
         {
             let data: number = 128;
             this.lastInstruction = LASTINST.INFE;
-            let keyb: number = address / 256;
-            for (let i = 0; i < 8; i++)
+            const keyb: number = address / 256;
+            for(let i = 0; i < 8; i++)
             {
                 if ((keyb & (1 << i)) === 0)
                     data |= this.keyboard.get(i);
             }
             return (~data) & 255;
         }
-        else if ((address & 255) == 1)
+        else if((address & 255) === 1)
             return 0;
 
         return 255;
@@ -188,14 +187,14 @@ export default class ZX81 extends Machine
 
     private  pop16(): number
     {
-        let l = this.memory[this.z80.SP++];
-        let h = this.memory[this.z80.SP++];
+        const l = this.memory[this.z80.SP++];
+        const h = this.memory[this.z80.SP++];
         return ((h << 8) | l);
     }
 
     private patch(): number
     {
-        let b: number = this.memory[this.z80.PC];
+        const b: number = this.memory[this.z80.PC];
         if (this.z80.PC === 0x0356 && b === 0x1f) // ZX81, start loading
         {
             if (this.program != null)
@@ -215,7 +214,7 @@ export default class ZX81 extends Machine
         let tstotal: number = 0;
         scanLine.reset();
 
-        let maxScanLen: number = 420;
+        const maxScanLen: number = 420;
         if (scanLine.getSyncValid() !== 0)
         {
             scanLine.addBlank(this.borrow, this.hsyncGenerator ? COLOR.WHITE : COLOR.BLACK);
@@ -234,10 +233,10 @@ export default class ZX81 extends Machine
                 this.intPending = false;
             }
 
-            let pixels: number = ts << 1;
+            const pixels: number = ts << 1;
             for (let i: number = 0; i < pixels; i++)
             {
-                let bit: number = ((this.shiftRegister ^ this.shiftRegInv) & 32768);
+                const bit: number = ((this.shiftRegister ^ this.shiftRegInv) & 32768);
 
                 let colour: number = 0;
                 if (this.hsyncGenerator)
@@ -297,7 +296,7 @@ export default class ZX81 extends Machine
             {
                 if (this.nmiGenerator)
                 {
-                    let nmilen: number = this.z80.nmi(scanLine.getLength());
+                    const nmilen: number = this.z80.nmi(scanLine.getLength());
                     this.hsyncCounter -= nmilen;
                     ts += nmilen;
                 }
@@ -314,7 +313,7 @@ export default class ZX81 extends Machine
             }
             tstotal += ts;
         }
-        while (scanLine.getLength() < maxScanLen && scanLine.getSyncValid() == 0);
+        while (scanLine.getLength() < maxScanLen && scanLine.getSyncValid() === 0);
 
         if (scanLine.getSyncValid() === SYNCTYPE.V)
             this.hsyncCounter = this.tPerScanLine;
@@ -324,24 +323,24 @@ export default class ZX81 extends Machine
 
     private async memory_load(filename: string, address: number, length: number): Promise<void>
     {
-        return fetch(filename, { method: 'get'})
+        return fetch(filename, { method: "get"})
             .then((response) => {
                 response.arrayBuffer().then((buffer) => {
-                    let data = new Uint8Array(buffer);
-                    let maxLength = (data.length < length) ? data.length : length;
+                    const data = new Uint8Array(buffer);
+                    const maxLength = (data.length < length) ? data.length : length;
                     for (let i = 0; i < maxLength; ++i)
                         this.memory[address + i] = data[i];
-                })
+                });
             });
     }
 
     public async load_program(filename: string): Promise<void>
     {
-        return fetch(filename, { method: 'get'})
+        return fetch(filename, { method: "get"})
             .then((response) => {
                 response.arrayBuffer().then((buffer) => {
                     this.program = new Uint8Array(buffer);
-                })
+                });
         });
     }
 
@@ -383,4 +382,3 @@ export default class ZX81 extends Machine
         await this.key(VK_ENTER);
     }
 }
-

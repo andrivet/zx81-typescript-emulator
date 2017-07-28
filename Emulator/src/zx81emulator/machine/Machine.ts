@@ -39,4 +39,3 @@ abstract class Machine
 }
 
 export default Machine;
-

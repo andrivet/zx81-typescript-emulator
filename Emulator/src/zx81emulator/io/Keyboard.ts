@@ -34,11 +34,11 @@ NL: New Line, SH: Shift, SP: Space
 
 export class Key
 {
-    code: number;
-    addr1: number;
-    data1: number;
-    addr2: number;
-    data2: number;
+    public code: number;
+    public addr1: number;
+    public data1: number;
+    public addr2: number;
+    public data2: number;
 
     constructor(c: number, a1: number, d1: number, a2: number, d2: number)
     {
@@ -64,14 +64,14 @@ const A13: number = 5;
 const A14: number = 6;
 const A15: number = 7;
 
-export const VK_J:number = 74;
+export const VK_J= 74;
 export const VK_P = 80;
-export const VK_ENTER: number = 13;
-export const VK_SHIFT: number = 16;
+export const VK_ENTER = 13;
+export const VK_SHIFT = 16;
 
 export default class Keyboard
 {
-    static keyMap: Key[] = [
+    private static keyMap: Key[] = [
         new Key( 16, A8, D0, 255, 255),     // Shift
         new Key( 13, A14, D0, 255, 255),    // Return
         new Key(  8, A12, D0, A8, D0),      // Backspace
@@ -129,7 +129,7 @@ export default class Keyboard
     public constructor()
     {
         for (let i: number = 0; i < 8; i++)
-            this.map[i] = 0
+            this.map[i] = 0;
     }
 
     public keyDown(code: number, shift: boolean)
@@ -154,7 +154,7 @@ export default class Keyboard
     public keyUp(code: number, shift: boolean)
     {
         // iPad send keyUp too quickly after keyDown so the emulator does not see the keys. Add some delays.
-        let currentTime = +new Date();
+        const currentTime = +new Date();
         if(currentTime - this.lastKeyDown < 50)
         {
             setTimeout(() => this.keyUp(code, shift), 60);
@@ -183,4 +183,3 @@ export default class Keyboard
         return this.map[i];
     }
 }
-

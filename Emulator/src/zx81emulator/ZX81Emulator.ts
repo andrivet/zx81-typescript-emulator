@@ -23,7 +23,7 @@ import Drawer from "./display/Drawer";
 import ZX81 from "./machine/ZX81";
 
 const enum StatusKind { OK, Info, Warning, Error }
-const mapStatus: string[] = ['alert-success', 'alert-info', 'alert-warning', 'alert-danger'];
+const mapStatus: string[] = ["alert-success", "alert-info", "alert-warning", "alert-danger"];
 
 export default class ZX81Emulator
 {
@@ -71,17 +71,15 @@ export default class ZX81Emulator
         if(null == this.status)
             return;
 
-        this.status.style.visibility = show ? 'visible': 'hidden';
+        this.status.style.visibility = show ? "visible": "hidden";
     }
 
     private setStatus(kind: StatusKind, message: string): void
     {
-        console.log(kind + ": " + message);
-
         if(null == this.status)
             return;
 
-        if(kind != this.lastStatusKind)
+        if(kind !== this.lastStatusKind)
         {
             this.status.classList.remove(mapStatus[this.lastStatusKind]);
             this.status.classList.add(mapStatus[kind]);

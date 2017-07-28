@@ -24,8 +24,7 @@ import { MasterRegisterPair } from "./RegisterPair";
 export abstract class Register
 {
     public abstract get(): number;
-    public abstract set(v: number): void;
-    public abstract set(r: Register): void;
+    public abstract set(r: Register | number): void;
     public abstract inc(): void;
     public abstract dec(): void;
     public abstract and(a: number): void;
@@ -44,9 +43,6 @@ export class RegisterHigh extends Register
     }
 
     public get(): number { return this.rp.hi(); }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
         this.rp.setHi(p instanceof Register ? p.get() : p);
@@ -59,7 +55,6 @@ export class RegisterHigh extends Register
     public add(a: number): void { this.rp.setHi(this.rp.hi() + a); }
 }
 
-
 export class RegisterLow extends Register
 {
     private rp: MasterRegisterPair;
@@ -71,9 +66,6 @@ export class RegisterLow extends Register
     }
 
     public get(): number { return this.rp.lo(); }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
         this.rp.setLo(p instanceof Register ? p.get() : p);
@@ -86,15 +78,11 @@ export class RegisterLow extends Register
     public add(a: number): void     { this.rp.setLo(this.rp.lo() + a); }
 }
 
-
-export class value8 extends Register
+export class Value8 extends Register
 {
     private value: number = 0;
 
     public get(): number { return this.value; }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
         this.value = (p instanceof Register ? p.get() : p) & 0xFF;
@@ -106,16 +94,12 @@ export class value8 extends Register
     public or(o: number)    { this.value = this.value | o; }
     public add(a: number)   { this.value = (this.value + a) & 0xFF; }
 }
-
 
 export class MasterRegister extends Register
 {
     private value: number = 0;
 
     public get(): number { return this.value; }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
         this.value = (p instanceof Register ? p.get() : p) & 0xFF;
@@ -127,5 +111,3 @@ export class MasterRegister extends Register
     public or(o: number)    { this.value = this.value | o; }
     public add(a: number)   { this.value = (this.value + a) & 0xFF; }
 }
-
-

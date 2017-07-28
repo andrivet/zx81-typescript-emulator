@@ -19,7 +19,6 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 export default class Scanline
 {
     private syncLength: number = 0;
@@ -82,9 +81,9 @@ export default class Scanline
         return this.syncValid;
     }
 
-    public setSynValid(sync_valid: number): void
+    public setSynValid(syncValid: number): void
     {
-        this.syncValid = sync_valid;
+        this.syncValid = syncValid;
     }
 
     public resetSync(length: number, valid: number): void
@@ -98,5 +97,3 @@ export default class Scanline
         this.syncLength += add;
     }
 }
-
-

@@ -45,7 +45,6 @@ const TVH: number = 380;
 
 const targetFrameTime: number = 1000 / 50; // Target frame time should result in 50Hz display
 
-
 export default class Drawer
 {
     private machine: Machine;
@@ -95,7 +94,7 @@ export default class Drawer
 
     private updateDisplay()
     {
-        let currentTime: number = Drawer.currentTimeMillis();
+        const currentTime: number = Drawer.currentTimeMillis();
         // Aim for 50Hz display
         if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
         {
@@ -185,7 +184,7 @@ export default class Drawer
 
     public async run(): Promise<void>
     {
-        let buildLine = new Scanline();
+        const buildLine = new Scanline();
         let framesStartTime: number = 0;
         let fps: number = 0;
 
@@ -212,8 +211,8 @@ export default class Drawer
                 }
                 this.borrow = j;
 
-                let currentTime: number = Drawer.currentTimeMillis();
-                let delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
+                const currentTime: number = Drawer.currentTimeMillis();
+                const delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
                 if (delay > 0)
                 {
                     await Machine.sleep(delay);
@@ -247,5 +246,3 @@ export default class Drawer
         this.paused = paused;
     }
 }
-
-

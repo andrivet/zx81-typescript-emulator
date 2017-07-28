@@ -24,14 +24,13 @@ import { MasterRegister, Register, RegisterHigh, RegisterLow } from "./Register"
 export abstract class RegisterPair
 {
     public abstract get(): number;
-    public abstract set(rp: RegisterPair | number): void;
+    public abstract set(rp: Register | number): void;
     public abstract inc(): void;
     public abstract dec(): void;
     public abstract add(a: number): void;
     public abstract getRH(): Register;
     public abstract getRL(): Register;
 }
-
 
 export class MasterRegisterPair extends RegisterPair
 {
@@ -42,9 +41,6 @@ export class MasterRegisterPair extends RegisterPair
     public get(): number    { return this.word; }
     public setHi(h: number) { this.word = ((h & 0xFF) << 8) + (this.word & 0xFF); }
     public setLo(l: number) { this.word = (this.word & 0xff00) + (l & 0xFF); }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
         this.word = (p instanceof Register ? p.get() : p) & 0xffff;
@@ -63,12 +59,9 @@ export class SlaveRegisterPair extends RegisterPair
     private low: MasterRegister = new MasterRegister();
 
     public get(): number { return (this.hi.get() << 8) + this.low.get(); }
-
-    public set(v: number): void;
-    public set(r: Register): void;
     public set(p: number | Register): void
     {
-        let word: number = (p instanceof Register ? p.get() : p) & 0XFFFF;
+        const word: number = (p instanceof Register ? p.get() : p) & 0XFFFF;
         this.hi.set(word >> 8);
         this.low.set(word & 0xFF);
     }

@@ -1,0 +1,20 @@
+{
+    "defaultSeverity": "warning",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "curly": false,
+        "space-before-function-paren": false,
+        "one-line": false,
+        "whitespace": false,
+        "no-angle-bracket-type-assertion": false,
+        "member-ordering": false,
+        "max-line-length": [true, 180],
+        "max-classes-per-file": [true, 5],
+        "trailing-comma": false,
+        "no-bitwise": false
+    },
+    "rulesDirectory": []
+}

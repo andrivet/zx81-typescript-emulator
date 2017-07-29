@@ -5,45 +5,47 @@ const canvasID = "canvas";
 const fileNameID = "program";
 const keyboardInputID = "keyboardInput";
 const statusID = "status";
-const scale = 2;
+const scale = 3;
 
 function ShowKeyboard(keyboardInput: HTMLInputElement): void
 {
     if(null != keyboardInput)
     {
-        keyboardInput.style.visibility = 'visible';
+        keyboardInput.style.visibility = "visible";
         keyboardInput.focus();
-        keyboardInput.style.visibility = 'hidden';
+        keyboardInput.style.visibility = "hidden";
     }
 }
 
 function Main(): void
 {
-    let canvas = <HTMLCanvasElement>document.getElementById(canvasID);
+    const canvas = <HTMLCanvasElement>document.getElementById(canvasID);
     if (canvas == null)
         throw new Error("No HTML element found with id \'canvas\'");
 
-    let status = <HTMLDivElement>document.getElementById(statusID);
+    const status = <HTMLDivElement>document.getElementById(statusID);
 
     let filename: string = "";
-    let filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
+    const filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
     if(filenameInput != null)
         filename = filenameInput.value;
 
-    let keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
+    const keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
-    let emulator = new ZX81Emulator(status);
+    const emulator = new ZX81Emulator(status);
 
     window.addEventListener("load",  () =>
     {
-        emulator.load(filename, scale, canvas);
-        ShowKeyboard(keyboardInput);
-        // When the iPad displays the keyboard, it scrolls the view so scroll it back to top
-        window.scrollTo(0, 0);
+        emulator.load(filename, scale, canvas).then(() =>
+            {
+                ShowKeyboard(keyboardInput);
+                // When the iPad displays the keyboard, it scrolls the view so scroll it back to top
+                window.scrollTo(0, 0);
+            })
+            .catch(/* nothing */);
     });
 
     window.addEventListener("unload",  () => { emulator.stop(); });
 }
 
 Main();
-

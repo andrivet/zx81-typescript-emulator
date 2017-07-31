@@ -23,8 +23,8 @@ import Scanline from "../display/Scanline";
 
 abstract class Machine
 {
-    public readonly tPerScanLine: number = 207;
-    public readonly tPerFrame: number = 312 * 207;
+    public readonly tPerScanLine = 207;
+    public readonly tPerFrame = 312 * 207;
 
     public abstract doScanline(scanLine: Scanline): number;
     public abstract readByte(address: number): number;

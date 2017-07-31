@@ -32,6 +32,8 @@ A8  | SH  Z  X  C  V |  B  N  M  . SP | A15
 NL: New Line, SH: Shift, SP: Space
 */
 
+import Time from "./Time";
+
 export class Key
 {
     public code: number;
@@ -50,19 +52,19 @@ export class Key
     }
 }
 
-const D0: number = 1;
-const D1: number = 2;
-const D2: number = 4;
-const D3: number = 8;
-const D4: number = 16;
-const A8: number = 0;
-const A9: number = 1;
-const A10: number = 2;
-const A11: number = 3;
-const A12: number = 4;
-const A13: number = 5;
-const A14: number = 6;
-const A15: number = 7;
+const D0  = 1;
+const D1  = 2;
+const D2  = 4;
+const D3  = 8;
+const D4  = 16;
+const A8  = 0;
+const A9  = 1;
+const A10 = 2;
+const A11 = 3;
+const A12 = 4;
+const A13 = 5;
+const A14 = 6;
+const A15 = 7;
 
 export const VK_J= 74;
 export const VK_P = 80;
@@ -128,16 +130,16 @@ export default class Keyboard
 
     public constructor()
     {
-        for (let i: number = 0; i < 8; i++)
+        for (let i = 0; i < 8; i++)
             this.map[i] = 0;
     }
 
     public keyDown(code: number, shift: boolean)
     {
-        let i: number = 0;
-        while (Keyboard.keyMap[i].code !== 0)
+        let i = 0;
+        while(Keyboard.keyMap[i].code !== 0)
         {
-            if (Keyboard.keyMap[i].code === code)
+            if(Keyboard.keyMap[i].code === code)
             {
                 this.map[Keyboard.keyMap[i].addr1] |= Keyboard.keyMap[i].data1;
 
@@ -148,7 +150,7 @@ export default class Keyboard
             i++;
         }
 
-        this.lastKeyDown = +new Date();
+        this.lastKeyDown = Time.currentTimeMillis();
     }
 
     public keyUp(code: number, shift: boolean)
@@ -161,7 +163,7 @@ export default class Keyboard
             return;
         }
 
-        let i: number = 0;
+        let i = 0;
         while (Keyboard.keyMap[i].code !== 0)
         {
             if (Keyboard.keyMap[i].code === code)

@@ -23,26 +23,26 @@ import Machine from "../machine/Machine";
 import Scanline from "./Scanline";
 import Time from "../io/Time";
 
-const HTOL: number = 405;
-const HMIN: number = 10;
-const VMIN: number = 350;
+const HTOL = 405;
+const HMIN = 10;
+const VMIN = 350;
 
-const HSYNC_TOLLERANCE: number = HTOL;
-const VSYNC_TOLLERANCEMIN: number = 283;
-const VSYNC_TOLLERANCEMAX: number = VSYNC_TOLLERANCEMIN + 40;
-const HSYNC_MINLEN: number = HMIN;
-const VSYNC_MINLEN: number = VMIN;
+const HSYNC_TOLLERANCE = HTOL;
+const VSYNC_TOLLERANCEMIN = 283;
+const VSYNC_TOLLERANCEMAX = VSYNC_TOLLERANCEMIN + 40;
+const HSYNC_MINLEN = HMIN;
+const VSYNC_MINLEN = VMIN;
 
-const WinW: number = 320;
-const WinH: number = 240;
+const WinW = 320;
+const WinH = 240;
 
-const WinL: number = 42;
-const WinT: number = 32;
-const WinR: number = WinL + WinW;
-const WinB: number = WinT + WinH;
+const WinL = 42;
+const WinT = 32;
+const WinR = WinL + WinW;
+const WinB = WinT + WinH;
 
-const TVW: number = 520;
-const TVH: number = 380;
+const TVW = 520;
+const TVH = 380;
 
 const Black = {r: 0x20, g: 0x20, b:0x20, a:0xFF};
 const White = {r: 0xFF, g: 0xFF, b:0xFF, a:0xFF};
@@ -81,7 +81,7 @@ export default class Drawer
         this.canvas.height = WinH * this.scale;
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
-        if(this.context != null)
+        if(this.context)
         {
             this.context.webkitImageSmoothingEnabled = false;
             this.context.fillStyle = "#808080";
@@ -93,13 +93,13 @@ export default class Drawer
         this.srcCanvas.height = TVH;
         this.srcCanvas.hidden = true;
         this.srcContext = this.srcCanvas.getContext("2d");
-        if(this.srcContext != null)
+        if(this.srcContext)
             this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
     }
 
     private updateDisplay()
     {
-        const currentTime: number = Time.currentTimeMillis();
+        const currentTime = Time.currentTimeMillis();
         if (currentTime - this.lastDisplayUpdate >= targetDisplayUpdate)
         {
             this.redrawDisplay();
@@ -109,7 +109,7 @@ export default class Drawer
 
     public redrawDisplay()
     {
-        if(this.srcContext == null || this.context == null)
+        if(!this.srcContext|| !this.context)
             return;
 
         this.srcContext.putImageData(this.argb, 0, 0, 0, 0, TVW, TVH);
@@ -120,9 +120,9 @@ export default class Drawer
 
     private draw(scanline: Scanline)
     {
-        let bufferPos: number = this.dest + this.frameNo * TVW;
+        let bufferPos = this.dest + this.frameNo * TVW;
         let p = (bufferPos + this.rasterX) * 4;
-        for (let i: number = 0; i < scanline.getLength(); i++)
+        for (let i = 0; i < scanline.getLength(); i++)
         {
             const color = scanline.getPixel(i) ? Black : White;
             this.argb.data[p    ] = color.r;
@@ -163,7 +163,7 @@ export default class Drawer
 
     private completeFrame()
     {
-        let dest: number = this.rasterY * TVW;
+        let dest = this.rasterY * TVW;
         let p = (dest + this.rasterX) * 4;
         while(this.rasterY <= WinB)
         {
@@ -189,8 +189,8 @@ export default class Drawer
     public async run(): Promise<void>
     {
         const buildLine = new Scanline();
-        let framesStartTime: number = 0;
-        let fps: number = 0;
+        let framesStartTime = 0;
+        let fps = 0;
 
         this.keepGoing = true;
         while(this.keepGoing)
@@ -205,7 +205,7 @@ export default class Drawer
 
             fps++;
 
-            let j: number = this.machine.tPerFrame + this.borrow;
+            let j = this.machine.tPerFrame + this.borrow;
             while (j > 0)
             {
                 j -= this.machine.doScanline(buildLine);
@@ -213,8 +213,8 @@ export default class Drawer
             }
             this.borrow = j;
 
-            const currentTime: number = Time.currentTimeMillis();
-            const delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
+            const currentTime = Time.currentTimeMillis();
+            const delay = (targetFrameTime * fps) - (currentTime - framesStartTime);
             if (delay > 0)
                 await Time.sleep(delay);
 

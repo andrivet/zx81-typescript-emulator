@@ -78,7 +78,7 @@ export default class ZX81Emulator
 
     private async displayStatus(kind: StatusKind, message: string): Promise<void>
     {
-        if(null == this.status)
+        if(!this.status)
             return;
 
         // Use while because several calls may be waiting. Be sure to have the same minimal delay between them

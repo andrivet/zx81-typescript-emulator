@@ -29,7 +29,7 @@ const scale = 3;
 
 function ShowKeyboard(keyboardInput: HTMLInputElement): void
 {
-    if(null != keyboardInput)
+    if(keyboardInput)
     {
         keyboardInput.style.visibility = "visible";
         keyboardInput.focus();
@@ -40,14 +40,14 @@ function ShowKeyboard(keyboardInput: HTMLInputElement): void
 function Main(): void
 {
     const canvas = <HTMLCanvasElement>document.getElementById(canvasID);
-    if (canvas == null)
+    if(!canvas)
         throw new Error("No HTML element found with id \'canvas\'");
 
     const status = <HTMLDivElement>document.getElementById(statusID);
 
-    let filename: string = "";
-    const filenameInput: HTMLInputElement = <HTMLInputElement>document.getElementById(fileNameID);
-    if(filenameInput != null)
+    let filename = "";
+    const filenameInput = <HTMLInputElement>document.getElementById(fileNameID);
+    if(filenameInput)
         filename = filenameInput.value;
 
     const keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);

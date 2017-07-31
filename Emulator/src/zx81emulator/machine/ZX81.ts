@@ -27,8 +27,8 @@ import Time from "../io/Time";
 
 const ROM = require("ROM/ZX81.rom") as string;
 
-const RAMTOP: number = 32767;
-const ROMTOP: number = 8191;
+const RAMTOP = 32767;
+const ROMTOP = 8191;
 
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
@@ -102,17 +102,17 @@ export default class ZX81 extends Machine
     // Fonts OR WRX style hi-res graphics, but never both.
     public opcodeFetch(address: number): number
     {
-        let update: boolean = false;
+        let update = false;
 
         if(address <= RAMTOP)
             return this.readByte(address);
 
-        let data: number = this.readByte((address >= 49152) ? address & 32767 : address);
-        let opcode: number = data;
-        const bit6: boolean = (opcode & 64) !== 0;
+        let data = this.readByte((address >= 49152) ? address & 32767 : address);
+        let opcode = data;
+        const bit6 = (opcode & 64) !== 0;
         if(!bit6)
             opcode = 0;
-        const inv: boolean = (data & 128) !== 0;
+        const inv = (data & 128) !== 0;
         if(!bit6)
         {
             // standard ZX81 character sets are only 64 characters in size.
@@ -160,9 +160,9 @@ export default class ZX81 extends Machine
     {
         if ((address & 1) === 0)
         {
-            let data: number = 128;
+            let data = 128;
             this.lastInstruction = LASTINST.INFE;
-            const keyb: number = address / 256;
+            const keyb = address / 256;
             for(let i = 0; i < 8; i++)
             {
                 if ((keyb & (1 << i)) === 0)
@@ -195,12 +195,12 @@ export default class ZX81 extends Machine
 
     private patch(): number
     {
-        const b: number = this.memory[this.z80.PC];
+        const b = this.memory[this.z80.PC];
         if (this.z80.PC === 0x0356 && b === 0x1f) // ZX81, start loading
         {
-            if (this.program != null)
+            if (this.program)
             {
-                for(let i: number = 0; i < this.program.length; i++)
+                for(let i = 0; i < this.program.length; i++)
                     this.memory[0x4009 + i] = this.program[i];
                 this.pop16();
                 return 0x0207;  // ZX81, load complete.
@@ -212,10 +212,10 @@ export default class ZX81 extends Machine
 
     public doScanline(scanLine: Scanline): number
     {
-        let tstotal: number = 0;
+        let tstotal = 0;
         scanLine.reset();
 
-        const maxScanLen: number = 420;
+        const maxScanLen = 420;
         if (scanLine.getSyncValid() !== 0)
         {
             scanLine.addBlank(this.borrow, this.hsyncGenerator ? COLOR.WHITE : COLOR.BLACK);
@@ -226,7 +226,7 @@ export default class ZX81 extends Machine
         {
             this.lastInstruction = LASTINST.NONE;
             this.z80.PC = this.patch();
-            let ts: number = this.z80.doOpcode();
+            let ts = this.z80.doOpcode();
 
             if (this.intPending)
             {
@@ -234,12 +234,12 @@ export default class ZX81 extends Machine
                 this.intPending = false;
             }
 
-            const pixels: number = ts << 1;
-            for (let i: number = 0; i < pixels; i++)
+            const pixels = ts << 1;
+            for (let i = 0; i < pixels; i++)
             {
-                const bit: number = ((this.shiftRegister ^ this.shiftRegInv) & 32768);
+                const bit = ((this.shiftRegister ^ this.shiftRegInv) & 32768);
 
-                let colour: number = 0;
+                let colour = 0;
                 if (this.hsyncGenerator)
                     colour = (bit !== 0 ? COLOR.BLACK : COLOR.WHITE);
 
@@ -297,7 +297,7 @@ export default class ZX81 extends Machine
             {
                 if (this.nmiGenerator)
                 {
-                    const nmilen: number = this.z80.nmi(scanLine.getLength());
+                    const nmilen = this.z80.nmi(scanLine.getLength());
                     this.hsyncCounter -= nmilen;
                     ts += nmilen;
                 }

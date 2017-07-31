@@ -17,8 +17,6 @@ module.exports = {
         path: path.resolve(__dirname, "build"),
         filename: "js/[name].js"
     },
-    watch: true,
-    devtool: "source-map",
     stats: "detailed",
     resolve: {
         alias: {

@@ -5,7 +5,8 @@
     "license": "GPL-3.0",
     "author": "Sebastien Andrivet <sebastien@andrivet.com>",
     "scripts": {
-        "webpack": "webpack"
+        "webpack:dev": "webpack --config webpack.dev.js",
+        "webpack:prod": "webpack --config webpack.prod.js"
     },
     "dependencies": {
         "bootstrap-loader": "^2.1.0",
@@ -32,6 +33,7 @@
         "tslint": "^5.5.0",
         "typescript": "^2.5.0-dev.20170727",
         "url-loader": "^0.5.9",
-        "webpack": "^3.4.1"
+        "webpack": "^3.4.1",
+        "webpack-merge": "^4.1.0"
     }
 }

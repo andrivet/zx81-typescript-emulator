@@ -156,12 +156,8 @@ export default class Keyboard
     public keyUp(code: number, shift: boolean)
     {
         // iPad send keyUp too quickly after keyDown so the emulator does not see the keys. Add some delays.
-        const currentTime = +new Date();
-        if(currentTime - this.lastKeyDown < 50)
-        {
-            setTimeout(() => this.keyUp(code, shift), 60);
-            return;
-        }
+        if(Time.currentTimeMillis() - this.lastKeyDown < 50)
+            Time.sleep(50);
 
         let i = 0;
         while (Keyboard.keyMap[i].code !== 0)

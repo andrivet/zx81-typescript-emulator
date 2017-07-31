@@ -1,3 +1,2 @@
 
-require('es6-promise/auto');
-
+require("es6-promise/auto");

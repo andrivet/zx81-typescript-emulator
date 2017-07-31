@@ -23,6 +23,7 @@ import Scanline from "../display/Scanline";
 import Keyboard, {VK_ENTER, VK_J, VK_P, VK_SHIFT} from "../io/Keyboard";
 import Machine from "../machine/Machine";
 import Z80 from "../z80/Z80";
+import Time from "../io/Time";
 
 const ROM = require("ROM/ZX81.rom") as string;
 
@@ -359,22 +360,22 @@ export default class ZX81 extends Machine
         if(shift)
         {
             this.keyDown(VK_SHIFT, true);
-            await Machine.sleep(200);
+            await Time.sleep(200);
         }
         this.keyDown(code, shift);
-        await Machine.sleep(200);
+        await Time.sleep(200);
         this.keyUp(code);
-        await Machine.sleep(200);
+        await Time.sleep(200);
         if(shift)
         {
             this.keyUp(VK_SHIFT);
-            await Machine.sleep(200);
+            await Time.sleep(200);
         }
     }
 
     public async autoLoad()
     {
-        await Machine.sleep(4000);
+        await Time.sleep(4000);
 
         await this.key(VK_J);
         await this.key(VK_P, true);

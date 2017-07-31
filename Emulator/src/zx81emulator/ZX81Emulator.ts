@@ -20,14 +20,18 @@
  */
 
 import Drawer from "./display/Drawer";
+import Time from "./io/Time";
 import ZX81 from "./machine/ZX81";
 
 export const enum StatusKind { OK, Info, Warning, Error }
 const mapStatus: string[] = ["alert-success", "alert-info", "alert-warning", "alert-danger"];
 
+const MinDayBetweenStatuses = 1000; // 1 sec
+
 export default class ZX81Emulator
 {
     private status: HTMLDivElement;
+    private lastStatusTime: number = 0;
     private lastStatusKind: StatusKind = StatusKind.OK;
     private machine: ZX81;
     private drawer: Drawer;
@@ -56,9 +60,10 @@ export default class ZX81Emulator
                 await this.machine.load_program(fileName);
                 this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
                 await this.machine.autoLoad();
+                this.setStatus(StatusKind.OK, "Emulator ready and programm running");
             }
-
-            this.setStatus(StatusKind.OK, "Emulator ready and running");
+            else
+                this.setStatus(StatusKind.OK, "Emulator ready");
         }
         catch(err)
         {
@@ -66,18 +71,22 @@ export default class ZX81Emulator
         }
     }
 
-    private showStatus(show: boolean): void
-    {
-        if(null == this.status)
-            return;
-
-        this.status.style.visibility = show ? "visible": "hidden";
-    }
-
     public setStatus(kind: StatusKind, message: string): void
     {
+        this.displayStatus(kind, message).catch();
+    }
+
+    private async displayStatus(kind: StatusKind, message: string): Promise<void>
+    {
         if(null == this.status)
             return;
+
+        // Use while because several calls may be waiting. Be sure to have the same minimal delay between them
+        while(Time.currentTimeMillis() - this.lastStatusTime < MinDayBetweenStatuses)
+        {
+            console.log("Sleep... " + message);
+            await Time.sleep(MinDayBetweenStatuses);
+        }
 
         if(kind !== this.lastStatusKind)
         {
@@ -85,8 +94,10 @@ export default class ZX81Emulator
             this.status.classList.add(mapStatus[kind]);
         }
 
+        console.log((Time.currentTimeMillis() - this.lastStatusTime) + " - " + message);
         this.status.textContent = message;
         this.lastStatusKind = kind;
+        this.lastStatusTime = Time.currentTimeMillis();
     }
 
     public async start(): Promise<void>
@@ -94,7 +105,7 @@ export default class ZX81Emulator
         this.drawer.start();
         this.setStatus(StatusKind.Info, "Loading ROM...");
         await this.machine.loadROM();
-        this.setStatus(StatusKind.OK, "ROM loaded");
+        this.setStatus(StatusKind.Info, "ROM loaded");
     }
 
     public stop(): void

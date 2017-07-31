@@ -21,6 +21,7 @@
 
 import Machine from "../machine/Machine";
 import Scanline from "./Scanline";
+import Time from "../io/Time";
 
 const HTOL: number = 405;
 const HMIN: number = 10;
@@ -93,14 +94,9 @@ export default class Drawer
             this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
     }
 
-    private static currentTimeMillis(): number
-    {
-        return +new Date();
-    }
-
     private updateDisplay()
     {
-        const currentTime: number = Drawer.currentTimeMillis();
+        const currentTime: number = Time.currentTimeMillis();
         if (currentTime - this.lastDisplayUpdate >= targetDisplayUpdate)
         {
             this.redrawDisplay();
@@ -198,9 +194,9 @@ export default class Drawer
         {
             if (this.paused)
             {
-                await Machine.sleep(1000);
+                await Time.sleep(1000);
                 fps = 0;
-                framesStartTime = Drawer.currentTimeMillis();
+                framesStartTime = Time.currentTimeMillis();
                 return;
             }
 
@@ -214,14 +210,14 @@ export default class Drawer
             }
             this.borrow = j;
 
-            const currentTime: number = Drawer.currentTimeMillis();
+            const currentTime: number = Time.currentTimeMillis();
             const delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
             if (delay > 0)
-                await Machine.sleep(delay);
+                await Time.sleep(delay);
 
             if (fps === 100)
             {
-                framesStartTime = Drawer.currentTimeMillis();
+                framesStartTime = Time.currentTimeMillis();
                 fps = 0;
             }
         }

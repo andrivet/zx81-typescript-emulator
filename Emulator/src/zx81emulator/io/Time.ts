@@ -19,21 +19,8 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Scanline from "../display/Scanline";
-
-abstract class Machine
+export default abstract class Time
 {
-    public readonly tPerScanLine: number = 207;
-    public readonly tPerFrame: number = 312 * 207;
-
-    public abstract doScanline(scanLine: Scanline): number;
-    public abstract readByte(address: number): number;
-    public abstract writeByte(address: number, data: number): void;
-    public abstract contendMem(address: number, states: number, time: number): number;
-    public abstract contendIO(address: number, states: number, time: number): number;
-    public abstract readPort(address: number): number;
-    public abstract writePort(address: number, data: number): void;
-    public abstract opcodeFetch(address: number): number;
+    public static sleep(delay: number): Promise<void> { return new Promise((resolve) => setTimeout(resolve, delay));}
+    public static currentTimeMillis(): number { return +new Date(); }
 }
-
-export default Machine;

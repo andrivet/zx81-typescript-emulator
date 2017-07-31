@@ -4,7 +4,7 @@ const CommonConfig = require("./webpack.common.js");
 
 module.exports = Merge(CommonConfig, {
     watch: true,
-    devtool: "sourceMap",
+    devtool: "source-map",
     plugins: [
         new webpack.LoaderOptionsPlugin({
             debug: true,

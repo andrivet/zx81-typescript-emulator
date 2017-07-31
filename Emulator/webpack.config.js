@@ -3,7 +3,6 @@
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const FaviconsWebpackPlugin = require('favicons-webpack-plugin');
@@ -54,7 +53,6 @@ module.exports = {
             inject: true,
             filename: 'index.html'
         }),
-        new UglifyJsPlugin({sourceMap: true}),
         new ExtractTextPlugin("styles.css"),
         new CopyWebpackPlugin([{from: 'PROGS/', to: 'PROGS/'}, {from: 'robots.txt'}]),
         new FaviconsWebpackPlugin({logo: './logo.png', prefix: 'icons/', inject: true, background: '#FFF'}),

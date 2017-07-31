@@ -44,7 +44,6 @@ const WinB: number = WinT + WinH;
 const TVW: number = 520;
 const TVH: number = 380;
 
-class Color {public r: number; public g: number; public b: number; public a: number;}
 const Black = {r: 0x20, g: 0x20, b:0x20, a:0xFF};
 const White = {r: 0xFF, g: 0xFF, b:0xFF, a:0xFF};
 const Gray  = {r: 0xAA, g: 0xAA, b:0xAA, a:0xFF};
@@ -83,7 +82,11 @@ export default class Drawer
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
         if(this.context != null)
+        {
             this.context.webkitImageSmoothingEnabled = false;
+            this.context.fillStyle = "#808080";
+            this.context.fillRect(0, 0,this.canvas.width, this.canvas.height);
+        }
 
         this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
         this.srcCanvas.width = TVW;

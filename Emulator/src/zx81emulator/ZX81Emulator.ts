@@ -83,10 +83,7 @@ export default class ZX81Emulator
 
         // Use while because several calls may be waiting. Be sure to have the same minimal delay between them
         while(Time.currentTimeMillis() - this.lastStatusTime < MinDayBetweenStatuses)
-        {
-            console.log("Sleep... " + message);
             await Time.sleep(MinDayBetweenStatuses);
-        }
 
         if(kind !== this.lastStatusKind)
         {
@@ -94,7 +91,6 @@ export default class ZX81Emulator
             this.status.classList.add(mapStatus[kind]);
         }
 
-        console.log((Time.currentTimeMillis() - this.lastStatusTime) + " - " + message);
         this.status.textContent = message;
         this.lastStatusKind = kind;
         this.lastStatusTime = Time.currentTimeMillis();

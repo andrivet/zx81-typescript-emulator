@@ -43,7 +43,8 @@ const WinB: number = WinT + WinH;
 const TVW: number = 520;
 const TVH: number = 380;
 
-const targetFrameTime: number = 1000 / 50; // Target frame time should result in 50Hz display
+const targetFrameTime = 1000 / 50; // Target frame time should result in 50Hz display
+const targetDisplayUpdate = 1000 / 50;
 
 export default class Drawer
 {
@@ -95,8 +96,7 @@ export default class Drawer
     private updateDisplay()
     {
         const currentTime: number = Drawer.currentTimeMillis();
-        // Aim for 50Hz display
-        if (currentTime - this.lastDisplayUpdate >= (1000 / 50))
+        if (currentTime - this.lastDisplayUpdate >= targetDisplayUpdate)
         {
             this.redrawDisplay();
             this.lastDisplayUpdate = currentTime;
@@ -120,7 +120,7 @@ export default class Drawer
         for (let i: number = 0; i < scanline.getLength(); i++)
         {
             if(scanline.getPixel(i))
-                this.setPixel(bufferPos + this.rasterX, 0x00, 0x00, 0x00, 0xFF);
+                this.setPixel(bufferPos + this.rasterX, 0x20, 0x20, 0x20, 0xFF);
             else
                 this.setPixel(bufferPos + this.rasterX, 0xFF, 0xFF, 0xFF, 0xFF);
             this.rasterX += 1;
@@ -191,42 +191,33 @@ export default class Drawer
         this.keepGoing = true;
         while(this.keepGoing)
         {
-            try
+            if (this.paused)
             {
-                if (this.paused)
-                {
-                    await Machine.sleep(1000);
-                    fps = 0;
-                    framesStartTime = Drawer.currentTimeMillis();
-                    return;
-                }
-
-                fps++;
-
-                let j: number = this.machine.tPerFrame + this.borrow;
-                while (j > 0)
-                {
-                    j -= this.machine.doScanline(buildLine);
-                    this.draw(buildLine);
-                }
-                this.borrow = j;
-
-                const currentTime: number = Drawer.currentTimeMillis();
-                const delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
-                if (delay > 0)
-                {
-                    await Machine.sleep(delay);
-                }
-
-                if (fps === 100)
-                {
-                    framesStartTime = Drawer.currentTimeMillis();
-                    fps = 0;
-                }
+                await Machine.sleep(1000);
+                fps = 0;
+                framesStartTime = Drawer.currentTimeMillis();
+                return;
             }
-            catch(err)
+
+            fps++;
+
+            let j: number = this.machine.tPerFrame + this.borrow;
+            while (j > 0)
             {
-                // TODO
+                j -= this.machine.doScanline(buildLine);
+                this.draw(buildLine);
+            }
+            this.borrow = j;
+
+            const currentTime: number = Drawer.currentTimeMillis();
+            const delay: number = (targetFrameTime * fps) - (currentTime - framesStartTime);
+            if (delay > 0)
+                await Machine.sleep(delay);
+
+            if (fps === 100)
+            {
+                framesStartTime = Drawer.currentTimeMillis();
+                fps = 0;
             }
         }
     }

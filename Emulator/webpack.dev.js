@@ -4,7 +4,7 @@ const CommonConfig = require("./webpack.common.js");
 
 module.exports = Merge(CommonConfig, {
     watch: true,
-    devtool: "cheap-module-eval-source-map",
+    devtool: "sourceMap",
     plugins: [
         new webpack.LoaderOptionsPlugin({
             debug: true,

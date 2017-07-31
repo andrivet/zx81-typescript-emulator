@@ -21,9 +21,9 @@
 
 import Scanline from "../display/Scanline";
 import Keyboard, {VK_ENTER, VK_J, VK_P, VK_SHIFT} from "../io/Keyboard";
+import Time from "../io/Time";
 import Machine from "../machine/Machine";
 import Z80 from "../z80/Z80";
-import Time from "../io/Time";
 
 const ROM = require("ROM/ZX81.rom") as string;
 
@@ -32,7 +32,6 @@ const ROMTOP = 8191;
 
 const enum SYNCTYPE { H = 1, V = 2 }
 const enum LASTINST { NONE = 0, INFE, OUTFE, OUTFD, OUTFF }
-const enum COLOR { BLACK = 0, WHITE = 1 }
 const MEMORY_SIZE = 64 * 1024;
 
 export default class ZX81 extends Machine
@@ -218,7 +217,7 @@ export default class ZX81 extends Machine
         const maxScanLen = 420;
         if (scanLine.getSyncValid() !== 0)
         {
-            scanLine.addBlank(this.borrow, this.hsyncGenerator ? COLOR.WHITE : COLOR.BLACK);
+            scanLine.addBlank(this.borrow, this.hsyncGenerator);
             this.borrow = 0;
         }
 
@@ -238,12 +237,7 @@ export default class ZX81 extends Machine
             for (let i = 0; i < pixels; i++)
             {
                 const bit = ((this.shiftRegister ^ this.shiftRegInv) & 32768);
-
-                let colour = 0;
-                if (this.hsyncGenerator)
-                    colour = (bit !== 0 ? COLOR.BLACK : COLOR.WHITE);
-
-                scanLine.addPixel(colour);
+                scanLine.addPixel(this.hsyncGenerator ? bit === 0: false);
 
                 this.shiftRegister <<= 1;
                 this.shiftRegInv <<= 1;

@@ -24,14 +24,14 @@ export default class Scanline
     private syncLength: number = 0;
     private syncValid: number = 0;
     private scanlineLength: number = 0;
-    private scanline: number[] = new Array(4000);
+    private scanline: boolean[] = new Array(4000);
 
-    public addBlank(tstates: number, color: number): void
+    public addBlank(tstates: number, bit: boolean): void
     {
         while (tstates-- > 0)
         {
-            this.scanline[this.scanlineLength++] = color;
-            this.scanline[this.scanlineLength++] = color;
+            this.scanline[this.scanlineLength++] = bit;
+            this.scanline[this.scanlineLength++] = bit;
         }
 
         this.syncValid = 0;
@@ -48,14 +48,14 @@ export default class Scanline
         this.scanlineLength = length;
     }
 
-    public getPixel(i: number): number
+    public getPixel(i: number): boolean
     {
         return this.scanline[i];
     }
 
-    public addPixel(color: number): void
+    public addPixel(bit: boolean): void
     {
-        this.scanline[this.scanlineLength++] = color;
+        this.scanline[this.scanlineLength++] = bit;
     }
 
     public nextLine(): number

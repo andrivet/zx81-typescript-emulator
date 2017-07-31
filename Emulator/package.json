@@ -1,5 +1,5 @@
 {
-    "name": "ZX81emulator",
+    "name": "zx81-emulator",
     "version": "0.0.1",
     "description": "ZX81 emulator written in TypeScript (transcompilation)",
     "license": "GPL-3.0",

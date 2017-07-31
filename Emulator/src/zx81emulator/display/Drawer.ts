@@ -43,6 +43,11 @@ const WinB: number = WinT + WinH;
 const TVW: number = 520;
 const TVH: number = 380;
 
+class Color {public r: number; public g: number; public b: number; public a: number;}
+const Black = {r: 0x20, g: 0x20, b:0x20, a:0xFF};
+const White = {r: 0xFF, g: 0xFF, b:0xFF, a:0xFF};
+const Gray  = {r: 0xAA, g: 0xAA, b:0xAA, a:0xFF};
+
 const targetFrameTime = 1000 / 50; // Target frame time should result in 50Hz display
 const targetDisplayUpdate = 1000 / 50;
 
@@ -117,20 +122,24 @@ export default class Drawer
     private draw(scanline: Scanline)
     {
         let bufferPos: number = this.dest + this.frameNo * TVW;
+        let p = (bufferPos + this.rasterX) * 4;
         for (let i: number = 0; i < scanline.getLength(); i++)
         {
-            if(scanline.getPixel(i))
-                this.setPixel(bufferPos + this.rasterX, 0x20, 0x20, 0x20, 0xFF);
-            else
-                this.setPixel(bufferPos + this.rasterX, 0xFF, 0xFF, 0xFF, 0xFF);
-            this.rasterX += 1;
+            const color = scanline.getPixel(i) ? Black : White;
+            this.argb.data[p    ] = color.r;
+            this.argb.data[p + 1] = color.g;
+            this.argb.data[p + 2] = color.b;
+            this.argb.data[p + 3] = color.a;
+            this.rasterX++;
+            p += 4;
 
             if (this.rasterX > this.scanLen)
             {
                 this.rasterX = 0;
                 this.dest += TVW;
                 bufferPos = this.dest + this.frameNo * TVW;
-                this.rasterY += 1;
+                p = (bufferPos + this.rasterX) * 4;
+                this.rasterY++;
                 if (this.rasterY >= TVH)
                     i = scanline.nextLine();
             }
@@ -141,45 +150,41 @@ export default class Drawer
             if (this.rasterX > HSYNC_TOLLERANCE)
             {
                 this.rasterX = 0;
-                this.rasterY += 1;
+                this.rasterY++;
                 this.dest += TVW;
             }
             if (this.rasterY >= TVH || this.rasterY >= VSYNC_TOLLERANCEMAX || (scanline.getSyncLength() > VSYNC_MINLEN && this.rasterY > VSYNC_TOLLERANCEMIN))
             {
                 this.completeFrame();
-                this.rasterX = this.rasterY = 0;
-                this.dest = 0;
                 this.frameNo = 0;
                 this.updateDisplay();
             }
         }
     }
 
-    private setPixel(i: number, r: number, g: number, b: number, a: number)
-    {
-        i *= 4;
-        this.argb.data[i    ] = r;
-        this.argb.data[i + 1] = g;
-        this.argb.data[i + 2] = b;
-        this.argb.data[i + 3] = a;
-    }
-
     private completeFrame()
     {
-        let x: number = this.rasterX;
-        let y: number = this.rasterY;
-        let dest: number = y * TVW;
-        while(y <= WinB)
+        let dest: number = this.rasterY * TVW;
+        let p = (dest + this.rasterX) * 4;
+        while(this.rasterY <= WinB)
         {
-            while(x <= WinR)
+            while(this.rasterX <= WinR)
             {
-                this.setPixel(dest + x, 0xAA, 0xAA, 0xAA, 0xFF); // Gray
-                x += 1;
+                this.argb.data[p    ] = Gray.r;
+                this.argb.data[p + 1] = Gray.g;
+                this.argb.data[p + 2] = Gray.b;
+                this.argb.data[p + 3] = Gray.a;
+                this.rasterX += 1;
+                p += 4;
             }
-            x = 0;
-            y++;
+            this.rasterX = 0;
+            this.rasterY++;
             dest += TVW;
+            p = (dest + this.rasterX) * 4;
         }
+
+        this.rasterX = this.rasterY = 0;
+        this.dest = 0;
     }
 
     public async run(): Promise<void>

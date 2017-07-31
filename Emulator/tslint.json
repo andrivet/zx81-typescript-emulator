@@ -15,7 +15,8 @@
         "max-classes-per-file": [true, 5],
         "trailing-comma": false,
         "no-bitwise": false,
-        "no-var-requires": false
+        "no-var-requires": false,
+        "interface-name": false
     },
     "rulesDirectory": []
 }

@@ -1,5 +1,5 @@
 
-import ZX81Emulator from "./zx81emulator/ZX81Emulator";
+import ZX81Emulator, {StatusKind} from "./zx81emulator/ZX81Emulator";
 
 const canvasID = "canvas";
 const fileNameID = "program";
@@ -42,7 +42,9 @@ function Main(): void
                 // When the iPad displays the keyboard, it scrolls the view so scroll it back to top
                 window.scrollTo(0, 0);
             })
-            .catch(/* nothing */);
+            .catch(
+                (err) => { emulator.setStatus(StatusKind.Error, err); }
+            );
     });
 
     window.addEventListener("unload",  () => { emulator.stop(); });

@@ -22,7 +22,7 @@
 import Drawer from "./display/Drawer";
 import ZX81 from "./machine/ZX81";
 
-const enum StatusKind { OK, Info, Warning, Error }
+export const enum StatusKind { OK, Info, Warning, Error }
 const mapStatus: string[] = ["alert-success", "alert-info", "alert-warning", "alert-danger"];
 
 export default class ZX81Emulator
@@ -54,7 +54,7 @@ export default class ZX81Emulator
             {
                 this.setStatus(StatusKind.Info, "Loading program " + fileName + "...");
                 await this.machine.load_program(fileName);
-                this.setStatus(StatusKind.Info, "Program " + fileName + " loaded, execute it...");
+                this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
                 await this.machine.autoLoad();
             }
 
@@ -74,7 +74,7 @@ export default class ZX81Emulator
         this.status.style.visibility = show ? "visible": "hidden";
     }
 
-    private setStatus(kind: StatusKind, message: string): void
+    public setStatus(kind: StatusKind, message: string): void
     {
         if(null == this.status)
             return;

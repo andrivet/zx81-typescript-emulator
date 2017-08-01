@@ -24,8 +24,7 @@ import Keyboard, {VK_ENTER, VK_J, VK_P, VK_SHIFT} from "../io/Keyboard";
 import Time from "../io/Time";
 import Machine from "../machine/Machine";
 import Z80 from "../z80/Z80";
-
-const ROM = require("ROM/ZX81.rom") as string;
+import ROM from "ROM/ZX81.rom";
 
 const RAMTOP = 32767;
 const ROMTOP = 8191;

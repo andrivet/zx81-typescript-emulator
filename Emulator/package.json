@@ -10,7 +10,9 @@
         "webpack:prod": "webpack --config webpack.prod.js"
     },
     "dependencies": {
+        "@types/detect-browser": "^1.6.0",
         "bootstrap-loader": "^2.1.0",
+        "detect-browser": "^1.7.1",
         "es6-promise": "^4.1.1",
         "postcss": "^6.0.8",
         "whatwg-fetch": "^2.0.3"

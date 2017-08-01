@@ -19,6 +19,7 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import * as Browser from "detect-browser";
 import Drawer from "./display/Drawer";
 import Time from "./io/Time";
 import ZX81 from "./machine/ZX81";
@@ -45,6 +46,12 @@ export default class ZX81Emulator
     {
         try
         {
+            if(Browser.name === "ie")
+            {
+                this.setStatus(StatusKind.Warning, "Sorry, this emulator is currently not compatible with Internet Explorer.");
+                return;
+            }
+
             this.setStatus(StatusKind.Info, "Initializing emulator...");
 
             this.machine = new ZX81();
@@ -98,6 +105,9 @@ export default class ZX81Emulator
 
     public async start(): Promise<void>
     {
+        if(!this.drawer || !this.machine)
+            return;
+
         this.drawer.start();
         this.setStatus(StatusKind.Info, "Loading ROM...");
         await this.machine.loadROM();
@@ -106,6 +116,8 @@ export default class ZX81Emulator
 
     public stop(): void
     {
+        if(!this.drawer)
+            return;
         this.drawer.stop();
     }
 
@@ -117,6 +129,8 @@ export default class ZX81Emulator
 
     public onKeyDown(event: KeyboardEvent): any
     {
+        if(!this.machine)
+            return;
         event.preventDefault();
         this.machine.keyDown(event.which, event.shiftKey);
         return null;
@@ -124,6 +138,8 @@ export default class ZX81Emulator
 
     public onKeyUp(event: KeyboardEvent): any
     {
+        if(!this.machine)
+            return;
         event.preventDefault();
         this.machine.keyUp(event.which, event.shiftKey);
         return null;

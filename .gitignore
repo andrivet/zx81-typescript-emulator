@@ -2,9 +2,3 @@
 **/.idea/workspace.xml
 **/.idea/tasks.xml
 *.iml
-EightyOne
-Emulator/node_modules
-package-lock.json
-bundle.js
-bundle.js.map
-EmulatorJava

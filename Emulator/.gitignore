@@ -1,3 +1,7 @@
+node_modules
+package-lock.json
+bundle.js
+bundle.js.map
 src/**/*.js
 src/**/*.js.map
 build/

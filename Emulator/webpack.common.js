@@ -13,11 +13,6 @@ module.exports = {
         polyfill: ["./src/polyfill/polyfill.ts", "whatwg-fetch"],
         app: "./src/Main.ts"
     },
-    output: {
-        path: path.resolve(__dirname, "build"),
-        filename: "js/[name].js"
-    },
-    stats: "detailed",
     resolve: {
         alias: {
             ROM: path.resolve(__dirname, 'ROM/')

@@ -1,12 +1,21 @@
 const Merge = require("webpack-merge");
+const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
 const CommonConfig = require("./webpack.common.js");
 
 module.exports = Merge(CommonConfig, {
-    watch: false,
+    output: {
+        path: path.resolve(__dirname, "build/prod"),
+        filename: "js/[name].js"
+    },
     devtool: "hidden-source-map",
+    stats: "normal",
     plugins: [
         new webpack.DefinePlugin({ "process.env": {"NODE_ENV": JSON.stringify("production") }}),
+        new webpack.LoaderOptionsPlugin({
+            debug: false,
+            sourceMap: true
+        }),
         new webpack.optimize.UglifyJsPlugin({
             beautify: false,
             mangle: {

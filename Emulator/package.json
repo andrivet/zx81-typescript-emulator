@@ -1,11 +1,12 @@
 {
-    "name": "zx81-emulator",
-    "version": "0.0.1",
+    "name": "zx81-typescript-emulator",
+    "version": "1.0.0",
     "description": "ZX81 emulator written in TypeScript (transcompilation)",
     "license": "GPL-3.0",
     "author": "Sebastien Andrivet <sebastien@andrivet.com>",
     "scripts": {
-        "webpack:dev": "webpack --config webpack.dev.js",
+        "webpack:dev-watch": "webpack --watch --config webpack.dev.js",
+        "webpack:dev": "webpack --profile --config webpack.dev.js",
         "webpack:prod": "webpack --config webpack.prod.js"
     },
     "dependencies": {

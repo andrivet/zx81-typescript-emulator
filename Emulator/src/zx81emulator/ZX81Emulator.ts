@@ -46,12 +46,6 @@ export default class ZX81Emulator
     {
         try
         {
-            if(Browser.name === "ie")
-            {
-                this.setStatus(StatusKind.Warning, "Sorry, this emulator is currently not compatible with Internet Explorer.");
-                return;
-            }
-
             this.setStatus(StatusKind.Info, "Initializing emulator...");
 
             this.machine = new ZX81();
@@ -67,7 +61,7 @@ export default class ZX81Emulator
                 await this.machine.load_program(fileName);
                 this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
                 await this.machine.autoLoad();
-                this.setStatus(StatusKind.OK, "Emulator ready and programm running");
+                this.setStatus(StatusKind.OK, "Emulator ready and program running");
             }
             else
                 this.setStatus(StatusKind.OK, "Emulator ready");

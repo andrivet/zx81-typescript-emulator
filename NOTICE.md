@@ -11,7 +11,7 @@ This software is based on these software:
 
 It is **not** based on the Javascript emulator of Simon Holdsworth, even if they have similar goal.
  
-This project uses the following:
+This project uses the following NPM packages:
 
 * es6-promise
 * postcss

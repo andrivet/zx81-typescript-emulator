@@ -19,9 +19,9 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import Time from "../io/Time";
 import Machine from "../machine/Machine";
 import Scanline from "./Scanline";
-import Time from "../io/Time";
 
 const HTOL = 405;
 const HMIN = 10;
@@ -62,7 +62,6 @@ export default class Drawer
     private srcCanvas: HTMLCanvasElement;
     private srcContext: CanvasRenderingContext2D | null;
     private keepGoing: boolean = true;
-    private paused: boolean = false;
     private dest: number = 0;
     private lastDisplayUpdate: number = 0;
     private rasterX: number = 0;
@@ -195,14 +194,6 @@ export default class Drawer
         this.keepGoing = true;
         while(this.keepGoing)
         {
-            if (this.paused)
-            {
-                await Time.sleep(1000);
-                fps = 0;
-                framesStartTime = Time.currentTimeMillis();
-                return;
-            }
-
             fps++;
 
             let j = this.machine.tPerFrame + this.borrow;
@@ -234,10 +225,5 @@ export default class Drawer
     public stop()
     {
         this.keepGoing = false;
-    }
-
-    public setPaused(paused: boolean)
-    {
-        this.paused = paused;
     }
 }

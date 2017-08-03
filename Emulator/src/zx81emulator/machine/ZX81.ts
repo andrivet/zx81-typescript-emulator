@@ -24,7 +24,8 @@ import Keyboard, {VK_ENTER, VK_J, VK_P, VK_SHIFT} from "../io/Keyboard";
 import Time from "../io/Time";
 import Machine from "../machine/Machine";
 import Z80 from "../z80/Z80";
-import ROM from "ROM/ZX81.rom";
+
+const ROM = <string>require("ROM/ZX81.rom");
 
 const RAMTOP = 32767;
 const ROMTOP = 8191;
@@ -317,14 +318,24 @@ export default class ZX81 extends Machine
 
     private async memory_load(filename: string, address: number, length: number): Promise<void>
     {
-        return fetch(filename, { method: "get"})
-            .then((response) => {
-                response.arrayBuffer().then((buffer) => {
-                    const data = new Uint8Array(buffer);
-                    const maxLength = (data.length < length) ? data.length : length;
-                    for (let i = 0; i < maxLength; ++i)
-                        this.memory[address + i] = data[i];
-                });
+        // Warning: contrary to AJAX, a 404 response code will not fail the fetch request so we have to test response.ok
+        return fetch(filename)
+            .then((response) =>
+            {
+                if(!response.ok)
+                    throw new Error(response.status + " - " + response.statusText);
+                return response.arrayBuffer();
+            })
+            .then((buffer) =>
+            {
+                const data = new Uint8Array(buffer);
+                const maxLength = (data.length < length) ? data.length : length;
+                for (let i = 0; i < maxLength; ++i)
+                    this.memory[address + i] = data[i];
+            })
+            .catch( (error) =>
+            {
+                throw new Error("Error while retrieving " + filename + ": " + error.message);
             });
     }
 

@@ -63,7 +63,7 @@ function Main(): void
                 window.scrollTo(0, 0);
             })
             .catch(
-                (err) => { emulator.setStatus(StatusKind.Error, err); }
+                (err) => { emulator.setStatus(StatusKind.Error, err.message); }
             );
     });
 

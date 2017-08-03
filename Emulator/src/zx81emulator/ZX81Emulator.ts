@@ -44,32 +44,25 @@ export default class ZX81Emulator
 
     public async load(fileName: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
     {
-        try
+        this.setStatus(StatusKind.Info, "Initializing emulator...");
+
+        this.machine = new ZX81();
+        this.drawer = new Drawer(this.machine, scale, canvas);
+
+        this.installListeners();
+
+        await this.start();
+
+        if (fileName.length > 0)
         {
-            this.setStatus(StatusKind.Info, "Initializing emulator...");
-
-            this.machine = new ZX81();
-            this.drawer = new Drawer(this.machine, scale, canvas);
-
-            this.installListeners();
-
-            await this.start();
-
-            if (fileName.length > 0)
-            {
-                this.setStatus(StatusKind.Info, "Loading program " + fileName + "...");
-                await this.machine.load_program(fileName);
-                this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
-                await this.machine.autoLoad();
-                this.setStatus(StatusKind.OK, "Emulator ready and program running");
-            }
-            else
-                this.setStatus(StatusKind.OK, "Emulator ready");
+            this.setStatus(StatusKind.Info, "Loading program " + fileName + "...");
+            await this.machine.load_program(fileName);
+            this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
+            await this.machine.autoLoad();
+            this.setStatus(StatusKind.OK, "Emulator ready and program running");
         }
-        catch(err)
-        {
-            this.setStatus(StatusKind.Error,"Error while initializing Emulator: " + err);
-        }
+        else
+            this.setStatus(StatusKind.OK, "Emulator ready");
     }
 
     public setStatus(kind: StatusKind, message: string): void
@@ -79,7 +72,8 @@ export default class ZX81Emulator
 
     private async displayStatus(kind: StatusKind, message: string): Promise<void>
     {
-        if(!this.status)
+        // In the last message was an error, be sure it stays
+        if(!this.status || StatusKind.Error == this.lastStatusKind)
             return;
 
         // Use while because several calls may be waiting. Be sure to have the same minimal delay between them
@@ -102,10 +96,10 @@ export default class ZX81Emulator
         if(!this.drawer || !this.machine)
             return;
 
-        this.drawer.start();
         this.setStatus(StatusKind.Info, "Loading ROM...");
         await this.machine.loadROM();
         this.setStatus(StatusKind.Info, "ROM loaded");
+        this.drawer.start();
     }
 
     public stop(): void

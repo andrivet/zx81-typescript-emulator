@@ -45,9 +45,9 @@ I found one of my first application, a game I build in 1985. Texts were in Frenc
 
 It is written with a mix of `BASIC` (to display the menu, the rules of the game, etc) and `Z80` assembly code (for the game itself).
 
-Want to try the game and the emulator? It is available at the following address: www.andrivet.com/static/ZX81/.
+Want to try the game and the emulator? It is available at the following address: [www.andrivet.com/static/ZX81/]((http://www.andrivet.com/static/ZX81/)).
 
-[![FACTORY](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Programs/FACTORY.png)](www.andrivet.com/static/ZX81/)
+[![FACTORY](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Programs/FACTORY.png)](http://www.andrivet.com/static/ZX81/)
 
 In the emulator, you can exit the game (`Menu 5`) and play with the ZX81. The original manual [Sinclair ZX81 BASIC Programming](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Documents/Sinclair%20ZX81%20BASIC%20Programming.pdf) is available.
 

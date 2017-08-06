@@ -27,7 +27,7 @@ import ZX81 from "./machine/ZX81";
 export const enum StatusKind { OK, Info, Warning, Error }
 const mapStatus: string[] = ["alert-success", "alert-info", "alert-warning", "alert-danger"];
 
-const MinDayBetweenStatuses = 1000; // 1 sec
+const MinDayBetweenStatuses = 500; // 500 ms
 
 export default class ZX81Emulator
 {
@@ -50,14 +50,15 @@ export default class ZX81Emulator
         this.drawer = new Drawer(this.machine, scale, canvas);
 
         this.installListeners();
-
         await this.start();
 
         if (fileName.length > 0)
         {
             this.setStatus(StatusKind.Info, "Loading program " + fileName + "...");
             await this.machine.load_program(fileName);
-            this.setStatus(StatusKind.Info, "Program " + fileName + " loaded. Execute it...");
+            this.setStatus(StatusKind.Info, "Program " + fileName + " loaded.");
+            await Time.sleep(4000);
+            this.setStatus(StatusKind.Info, "Execute the program...");
             await this.machine.autoLoad();
             this.setStatus(StatusKind.OK, "Emulator ready and program running");
         }

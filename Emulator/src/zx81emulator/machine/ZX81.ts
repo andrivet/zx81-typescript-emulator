@@ -379,8 +379,6 @@ export default class ZX81 extends Machine
 
     public async autoLoad()
     {
-        await Time.sleep(4000);
-
         await this.key(VK_J);
         await this.key(VK_P, true);
         await this.key(VK_P, true);

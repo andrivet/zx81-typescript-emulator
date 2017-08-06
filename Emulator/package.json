@@ -1,9 +1,10 @@
 {
     "name": "zx81-typescript-emulator",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "description": "ZX81 emulator written in TypeScript (transcompilation)",
     "license": "GPL-3.0",
     "author": "Sebastien Andrivet <sebastien@andrivet.com>",
+    "repository": "andrivet/zx81-typescript-emulator",
     "scripts": {
         "webpack:dev-watch": "webpack --watch --config webpack.dev.js",
         "webpack:dev": "webpack --profile --config webpack.dev.js",
@@ -12,7 +13,6 @@
     "dependencies": {
         "@types/detect-browser": "^1.6.0",
         "bootstrap-loader": "^2.1.0",
-        "detect-browser": "^1.7.1",
         "es6-promise": "^4.1.1",
         "postcss": "^6.0.8",
         "whatwg-fetch": "^2.0.3"
@@ -34,7 +34,7 @@
         "sass-loader": "^6.0.6",
         "style-loader": "^0.18.2",
         "tslint": "^5.5.0",
-        "typescript": "^2.5.0-dev.20170801",
+        "typescript": "^2.5.0-dev.20170803",
         "url-loader": "^0.5.9",
         "webpack": "^3.4.1",
         "webpack-merge": "^4.1.0"

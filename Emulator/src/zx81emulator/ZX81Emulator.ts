@@ -19,7 +19,6 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import * as Browser from "detect-browser";
 import Drawer from "./display/Drawer";
 import Time from "./io/Time";
 import ZX81 from "./machine/ZX81";

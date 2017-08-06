@@ -44,9 +44,9 @@ const WinB = WinT + WinH;
 const TVW = 520;
 const TVH = 380;
 
-const Black = {r: 0x20, g: 0x20, b:0x20, a:0xFF};
-const White = {r: 0xFF, g: 0xFF, b:0xFF, a:0xFF};
-const Gray  = {r: 0xAA, g: 0xAA, b:0xAA, a:0xFF};
+const Black = 0xFF202020;
+const White = 0xFFFFFFFF;
+const Gray  = 0xFFAAAAAA;
 
 const targetFrameTime = 1000 / 50; // Target frame time should result in 50Hz display
 const targetDisplayUpdate = 1000 / 50;
@@ -58,9 +58,10 @@ export default class Drawer
     private scale: number = 1;
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D | null;
-    private argb: ImageData;
-    private srcCanvas: HTMLCanvasElement;
-    private srcContext: CanvasRenderingContext2D | null;
+    private imageData: ImageData;
+    private argb: Uint32Array;
+    private hiddenCanvas: HTMLCanvasElement;
+    private hiddenContext: CanvasRenderingContext2D | null;
     private keepGoing: boolean = true;
     private dest: number = 0;
     private lastDisplayUpdate: number = 0;
@@ -80,20 +81,25 @@ export default class Drawer
         this.canvas.height = WinH * this.scale;
         this.canvas.hidden = false;
         this.context = this.canvas.getContext("2d");
-        if(this.context)
-        {
-            this.context.webkitImageSmoothingEnabled = false;
-            this.context.fillStyle = "#808080";
-            this.context.fillRect(0, 0,this.canvas.width, this.canvas.height);
-        }
+        if(!this.context)
+            throw new Error("Error creating 2D context");
 
-        this.srcCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
-        this.srcCanvas.width = TVW;
-        this.srcCanvas.height = TVH;
-        this.srcCanvas.hidden = true;
-        this.srcContext = this.srcCanvas.getContext("2d");
-        if(this.srcContext)
-            this.argb = this.srcContext.getImageData(0, 0, TVW, TVH);
+        this.context.fillStyle = "#808080";
+        this.context.fillRect(0, 0,this.canvas.width, this.canvas.height);
+
+        // Create an hidden Canvas (and associated context).
+        // It will be used to generate the screen of the emulator (1:1 scale).
+        // This screen will then be scaled (eventually) on the visible canvas.
+        this.hiddenCanvas = <HTMLCanvasElement>(document.createElement("CANVAS"));
+        this.hiddenCanvas.width = TVW;
+        this.hiddenCanvas.height = TVH;
+        this.hiddenCanvas.hidden = true;
+        this.hiddenContext = this.hiddenCanvas.getContext("2d");
+        if(!this.hiddenContext)
+            throw new Error("Error creating hidden 2D context");
+
+        this.imageData = this.hiddenContext.createImageData(TVW, TVH);
+        this.argb = new Uint32Array(this.imageData.data.buffer);
     }
 
     private updateDisplay()
@@ -108,35 +114,31 @@ export default class Drawer
 
     public redrawDisplay()
     {
-        if(!this.srcContext|| !this.context)
+        if(!this.hiddenContext || !this.context)
             return;
 
-        this.srcContext.putImageData(this.argb, 0, 0, 0, 0, TVW, TVH);
-        this.context.drawImage(this.srcCanvas,
+        // Set the bytes of the hidden canvas and then draw it (eventually scalled) in the visible one
+        this.hiddenContext.putImageData(this.imageData, 0, 0, 0, 0, TVW, TVH);
+        this.context.drawImage(this.hiddenCanvas,
             WinL, WinT, WinW, WinH,
            0, 0, this.canvas.width, this.canvas.height);
     }
 
     private draw(scanline: Scanline)
     {
-        let bufferPos = this.dest + this.frameNo * TVW;
-        let p = (bufferPos + this.rasterX) * 4;
+        let bufferPos = this.dest + this.frameNo * TVW + this.rasterX;
+
         for (let i = 0; i < scanline.getLength(); i++)
         {
-            const color = scanline.getPixel(i) ? Black : White;
-            this.argb.data[p    ] = color.r;
-            this.argb.data[p + 1] = color.g;
-            this.argb.data[p + 2] = color.b;
-            this.argb.data[p + 3] = color.a;
+            this.argb[bufferPos] = scanline.getPixel(i) ? Black : White;
             this.rasterX++;
-            p += 4;
+            bufferPos++;
 
             if (this.rasterX > this.scanLen)
             {
                 this.rasterX = 0;
                 this.dest += TVW;
-                bufferPos = this.dest + this.frameNo * TVW;
-                p = (bufferPos + this.rasterX) * 4;
+                bufferPos = this.dest + this.frameNo * TVW + this.rasterX;
                 this.rasterY++;
                 if (this.rasterY >= TVH)
                     i = scanline.nextLine();
@@ -162,23 +164,20 @@ export default class Drawer
 
     private completeFrame()
     {
-        let dest = this.rasterY * TVW;
-        let p = (dest + this.rasterX) * 4;
+        let bufferPos = this.dest + this.frameNo * TVW + this.rasterX;
+
         while(this.rasterY <= WinB)
         {
             while(this.rasterX <= WinR)
             {
-                this.argb.data[p    ] = Gray.r;
-                this.argb.data[p + 1] = Gray.g;
-                this.argb.data[p + 2] = Gray.b;
-                this.argb.data[p + 3] = Gray.a;
-                this.rasterX += 1;
-                p += 4;
+                this.argb[bufferPos] = Gray;
+                this.rasterX++;
+                bufferPos++;
             }
             this.rasterX = 0;
             this.rasterY++;
-            dest += TVW;
-            p = (dest + this.rasterX) * 4;
+            this.dest = this.rasterY * TVW;
+            bufferPos = this.dest + this.frameNo * TVW + this.rasterX;
         }
 
         this.rasterX = this.rasterY = 0;

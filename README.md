@@ -31,7 +31,6 @@ These are my objectives for this project:
 
 Currently, all the objectives are fullfiled except those:
 
-* The emulator does not run under Internet Explorer (it works however under Edge).
 * There are still some Javascript code, in particular for Webpack configuration.
 
 ## Game

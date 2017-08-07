@@ -2,13 +2,13 @@
 
 ## Sinclair ZX81
 
-The [Sinclair ZX81](https://en.wikipedia.org/wiki/ZX81) was by first computer. It is one of those home computers very popular and affordable. 
+The [Sinclair ZX81](https://en.wikipedia.org/wiki/ZX81) was by first computer, in 1982. It is one of those home computers very popular in the '80s and affordable (£49.95 in kit). 
 Other very popular computers were the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64) and the [Apple II](https://en.wikipedia.org/wiki/Apple_II) but were far more expensive.
 The successor of the ZX81 was the [ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum).
 
 ![ZX81](https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Sinclair-ZX81.png/320px-Sinclair-ZX81.png)
 
-The ZX81 computer was based on a 8-bit processor ([Z80A](https://en.wikipedia.org/wiki/Zilog_Z80) from Zilog or `µPD780C` from NEC) at 3.5 MHz with 1KiB of RAM and 8KiB of ROM.
+The ZX81 computer was based on a 8-bit processor ([`Z80A`](https://en.wikipedia.org/wiki/Zilog_Z80) from Zilog or `µPD780C` from NEC) at 3.5 MHz with 1 KiB of RAM and 8 KiB of ROM. It was possible the buy a RAM extension (I had a 16 KiB one).
 
 The characters set was not based on `ASCII` but was custom and includes only capital letters. It includes also some graphic characters:
 
@@ -38,18 +38,20 @@ These are my objectives for this project:
 Currently, all the objectives are fullfiled except those:
 
 * There are still some Javascript code, in particular for Webpack configuration.
+* The keyboard does not always display properly on iPad.
 
 ## Game
 
-I found one of my first application, a game I build in 1985. Texts were in French and I have translated them in English.
+I found one of my first applications: a game I build in 1985. Texts were in French and I have translated them in English.
 
 It is written with a mix of `BASIC` (to display the menu, the rules of the game, etc) and `Z80` assembly code (for the game itself).
 
-Want to try the game and the emulator? It is available at the following address: [www.andrivet.com/static/ZX81/]((http://www.andrivet.com/static/ZX81/)).
+Want to try the game and the emulator? It is available at the following address: [www.andrivet.com/static/ZX81/]((http://www.andrivet.com/static/ZX81/)):
 
 [![FACTORY](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Programs/FACTORY.png)](http://www.andrivet.com/static/ZX81/)
 
-In the emulator, you can exit the game (`Menu 5`) and play with the ZX81. The original manual [Sinclair ZX81 BASIC Programming](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Documents/Sinclair%20ZX81%20BASIC%20Programming.pdf) is available.
+Use `q` and `a` keys to move the left character, `p` and `l` to move the right one, and `j` to abandon. 
+In the menu, if you choose item `5`, you will exit the game and play with the ZX81 emulator. The original manual [Sinclair ZX81 BASIC Programming](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Documents/Sinclair%20ZX81%20BASIC%20Programming.pdf) is available.
 
 ## Files
 

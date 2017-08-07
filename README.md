@@ -61,4 +61,20 @@ In the menu, if you choose item `5`, you will exit the game and play with the ZX
 | Emulator | The Typescript emulator |
 | Programs |  The `FACTORY` game in English, `USINE` in French and their sources in text format. |
 
+## Credits et Copyrights
+
+_**Note**: A full list of components used by the emulator can be found in [NOTICE.md](https://github.com/andrivet/zx81-typescript-emulator/blob/master/NOTICE.md)._
+
+* **ZX81 Emulator written in Typescript** Copyright &copy; 2017 Sebastien Andrivet.
+* `FACTORY` and `USINE` games Copyright &copy; 1985-2017 Sebastien Andrivet.
+
+This emulator is based on these software:
+
+* C++ emulator [EightyOne](https://sourceforge.net/projects/eightyone-sinclair-emulator/) Copyright &copy; 2003-2006 Michael D Wynne and by others.
+* Java emulator [JtyOne Java translation](http://www.zx81stuff.org.uk/zx81/JtyOne.1.3.src.zip) &copy; 2006 Simon Holdsworth and others.
+* Z80 Emulation based on [Fuse - the Free Unix Spectrum Emulator](http://fuse-emulator.sourceforge.net) Copyright &copy; 2003 Philip Kendall.
+
+## License
+
+The emulator code is released under [GNU General Public License version 3 (GPLv3)](https://github.com/andrivet/zx81-typescript-emulator/blob/master/LICENSE). Components are released under their respective licenses.
 

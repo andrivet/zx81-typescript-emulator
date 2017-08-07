@@ -1,14 +1,14 @@
 # ZX81 Emulator written in Typescript
 
-ZX81-emulator Typescript transcompilation &copy; 2017 Sebastien Andrivet.
+* **ZX81 Emulator written in Typescript** Copyright &copy; 2017 Sebastien Andrivet.
+* `FACTORY` and `USINE` games Copyright &copy; 1985-2017 Sebastien Andrivet.
 
-FACTORY and USINE games are  &copy; 1985-2017 Sebastien Andrivet.
+This emulator is based on these software:
 
-This software is based on these software:
-
-* [EightyOne](https://sourceforge.net/projects/eightyone-sinclair-emulator/) Copyright &copy; 2003-2006 Michael D Wynne and by others.
-* [JtyOne Java translation](http://www.zx81stuff.org.uk/zx81/JtyOne.1.3.src.zip) &copy; 2006 Simon Holdsworth and others.
-
+* C++ emulator [EightyOne](https://sourceforge.net/projects/eightyone-sinclair-emulator/) Copyright &copy; 2003-2006 Michael D Wynne and by others.
+* Java emulator [JtyOne Java translation](http://www.zx81stuff.org.uk/zx81/JtyOne.1.3.src.zip) &copy; 2006 Simon Holdsworth and others.
+* Z80 Emulation based on [Fuse - the Free Unix Spectrum Emulator](http://fuse-emulator.sourceforge.net) Copyright &copy; 2003 Philip Kendall.
+                                                                                                        
 It is **not** based on the [Javascript emulator of Simon Holdsworth](http://www.zx81stuff.org.uk/zx81/jtyone.html), even if they have similar goal.
  
 This project uses the following NPM packages:
@@ -36,4 +36,4 @@ This project uses the following NPM packages:
 * typescript
 * url-loader
 * webpack-merge
-* detect-browser
+

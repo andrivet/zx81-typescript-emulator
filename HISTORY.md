@@ -1,5 +1,9 @@
 # ZX81 Emulator
 
+### 1.2.1 (August 8, 2017)
+
+* Fix missing JQuery in the example HTML page (index)
+
 ### 1.2.0 (August 8, 2017)
 
 * Remove dependency on `Boostrap 4`. This way, the emulator can be embedded in any web page

@@ -1,6 +1,6 @@
 {
     "name": "zx81-typescript-emulator",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "ZX81 emulator written in TypeScript (transcompilation)",
     "license": "GPL-3.0",
     "author": "Sebastien Andrivet <sebastien@andrivet.com>",

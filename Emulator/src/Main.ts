@@ -28,7 +28,7 @@ const fileNameID = "program";
 const romID = "rom";
 const keyboardInputID = "keyboardInput";
 const statusID = "status";
-const scale = 3;
+const scaleID = "scale";
 
 function showKeyboard(keyboardInput: HTMLInputElement): void
 {
@@ -67,6 +67,7 @@ function main(): void
     const status = <HTMLDivElement>document.getElementById(statusID);
     const filename = getValue(fileNameID);
     const rom = getValue(romID, "./ROM/ZX81.rom");
+    const scale = +getValue(scaleID, "3");
     const keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
     const emulator = new ZX81Emulator(status);

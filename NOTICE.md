@@ -14,10 +14,8 @@ It is **not** based on the [Javascript emulator of Simon Holdsworth](http://www.
 This project uses the following NPM packages:
 
 * es6-promise
-* postcss
 * whatwg-fetch
 * webpack
-* bootstrap-loader
 * awesome-typescript-loader
 * copy-webpack-plugin
 * css-loader
@@ -28,7 +26,6 @@ This project uses the following NPM packages:
 * html-webpack-plugin
 * imports-loader
 * node-sass
-* postcss-loader
 * resolve-url-loader
 * sass-loader
 * style-loader

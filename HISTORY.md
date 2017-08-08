@@ -1,5 +1,11 @@
 # ZX81 Emulator
 
+### 1.2.0 (August 8, 2017)
+
+* Remove dependency on `Boostrap 4`. This way, the emulator can be embedded in any web page
+* Remove indirect dependencies (such as postcss, ...) As a consequence, vendor is now empty
+* Update NPM packages
+
 ### 1.1.0 (August 6, 2017)
 
 * Now compatible with Internet Explorer 11 (older versions not tested)

@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "es6-promise": "^4.1.1",
+        "json-loader": "^0.5.7",
         "whatwg-fetch": "^2.0.3"
     },
     "devDependencies": {

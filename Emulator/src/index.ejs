@@ -15,7 +15,7 @@
 
     <div class="row justify-content-center mt-4">
         <div class="col-12 text-center">
-            <h3>ZX81 Emulator <small class="text-muted">written in Typescript - version 1.2.0</small></h3>
+            <h3>ZX81 Emulator <small class="text-muted">written in Typescript - version <span id="version"></span></small></h3>
             <canvas id="canvas" class="img-fluid"></canvas>
         </div>
     </div>
@@ -31,6 +31,7 @@
             <h6>Emulator copyright &copy; 2017, Game copyright &copy; 1984-2017 <a href="https://twitter.com/AndrivetSeb" target="_blank">Sebastien Andrivet.</a></h6>
             <p class="text-muted">Released under GPLv3 license. Code available on <a href="https://github.com/andrivet/zx81-typescript-emulator" target="_blank">GitHub</a>.</p>
             <input id="program" style="width:1px; height:1px; visibility:hidden; opacity: 0" value="PROGS/FACTORY.P"/>
+            <input id="rom" style="width:1px; height:1px; visibility:hidden; opacity: 0" value="./ROM/ZX81.rom"/>
             <input id="keyboardInput" style="width:1px; height:1px; visibility: hidden; opacity: 0" />
         </div>
     </div>

@@ -20,14 +20,17 @@
  */
 
 import ZX81Emulator, {StatusKind} from "./zx81emulator/ZX81Emulator";
+const pkg = require("../package.json") as { version: string };
 
+const versionID = "version";
 const canvasID = "canvas";
 const fileNameID = "program";
+const romID = "rom";
 const keyboardInputID = "keyboardInput";
 const statusID = "status";
 const scale = 3;
 
-function ShowKeyboard(keyboardInput: HTMLInputElement): void
+function showKeyboard(keyboardInput: HTMLInputElement): void
 {
     if(keyboardInput)
     {
@@ -37,28 +40,42 @@ function ShowKeyboard(keyboardInput: HTMLInputElement): void
     }
 }
 
-function Main(): void
+function getValue(elementID: string, defaultValue: string = ""): string
 {
+    const input = <HTMLInputElement>document.getElementById(elementID);
+    if(input)
+        return input.value;
+    return defaultValue;
+}
+
+function setVersion(): void
+{
+    const span = <HTMLSpanElement>document.getElementById(versionID);
+    if(!span)
+        return;
+    span.textContent = pkg.version;
+}
+
+function main(): void
+{
+    setVersion();
+
     const canvas = <HTMLCanvasElement>document.getElementById(canvasID);
     if(!canvas)
         throw new Error("No HTML element found with id \'canvas\'");
 
     const status = <HTMLDivElement>document.getElementById(statusID);
-
-    let filename = "";
-    const filenameInput = <HTMLInputElement>document.getElementById(fileNameID);
-    if(filenameInput)
-        filename = filenameInput.value;
-
+    const filename = getValue(fileNameID);
+    const rom = getValue(romID, "./ROM/ZX81.rom");
     const keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
     const emulator = new ZX81Emulator(status);
 
     window.addEventListener("load",  () =>
     {
-        emulator.load(filename, scale, canvas).then(() =>
+        emulator.load(filename, rom, scale, canvas).then(() =>
             {
-                ShowKeyboard(keyboardInput);
+                showKeyboard(keyboardInput);
                 // When the iPad displays the keyboard, it scrolls the view so scroll it back to top
                 window.scrollTo(0, 0);
             })
@@ -70,4 +87,4 @@ function Main(): void
     window.addEventListener("unload",  () => { emulator.stop(); });
 }
 
-Main();
+main();

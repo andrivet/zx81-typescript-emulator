@@ -25,8 +25,6 @@ import Time from "../io/Time";
 import Machine from "../machine/Machine";
 import Z80 from "../z80/Z80";
 
-const ROM = <string>require("ROM/ZX81.rom");
-
 const RAMTOP = 32767;
 const ROMTOP = 8191;
 
@@ -58,9 +56,9 @@ export default class ZX81 extends Machine
             this.memory[i] = 7;
     }
 
-    public async loadROM(): Promise<void>
+    public async loadROM(rom: string): Promise<void>
     {
-        await this.memory_load(ROM, 0, MEMORY_SIZE);
+        await this.memory_load(rom, 0, MEMORY_SIZE);
         this.nmiGenerator = false;
         this.hsyncGenerator = false;
         this.z80.reset();

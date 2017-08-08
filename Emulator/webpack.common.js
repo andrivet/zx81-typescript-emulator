@@ -16,7 +16,7 @@ module.exports = {
         alias: {
             ROM: path.resolve(__dirname, 'ROM/')
         },
-        extensions: ['.ts', '.css', '.js', '.rom']
+        extensions: ['.ts', '.css', '.js', '.rom', '.json']
     },
     module: {
         rules: [
@@ -25,7 +25,8 @@ module.exports = {
                     fallback: "style-loader",
                     use: "css-loader"
             })},
-            { test: /\.rom$/, use: { loader: 'file-loader', query: { name: '[path][name].[ext]' }}}
+            { test: /\.rom$/, use: { loader: 'file-loader', query: { name: '[path][name].[ext]' }}},
+            { test: /\.json$/, use: { loader: 'json-loader' }}
         ]
     },
     plugins: [

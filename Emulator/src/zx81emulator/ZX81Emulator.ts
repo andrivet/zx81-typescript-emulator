@@ -41,7 +41,7 @@ export default class ZX81Emulator
         this.status = status;
     }
 
-    public async load(fileName: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
+    public async load(fileName: string, rom: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
     {
         this.setStatus(StatusKind.Info, "Initializing emulator...");
 
@@ -49,7 +49,7 @@ export default class ZX81Emulator
         this.drawer = new Drawer(this.machine, scale, canvas);
 
         this.installListeners();
-        await this.start();
+        await this.start(rom);
 
         if (fileName.length > 0)
         {
@@ -73,7 +73,7 @@ export default class ZX81Emulator
     private async displayStatus(kind: StatusKind, message: string): Promise<void>
     {
         // In the last message was an error, be sure it stays
-        if(!this.status || StatusKind.Error == this.lastStatusKind)
+        if(!this.status || StatusKind.Error === this.lastStatusKind)
             return;
 
         // Use while because several calls may be waiting. Be sure to have the same minimal delay between them
@@ -91,13 +91,13 @@ export default class ZX81Emulator
         this.lastStatusTime = Time.currentTimeMillis();
     }
 
-    public async start(): Promise<void>
+    public async start(rom: string): Promise<void>
     {
         if(!this.drawer || !this.machine)
             return;
 
         this.setStatus(StatusKind.Info, "Loading ROM...");
-        await this.machine.loadROM();
+        await this.machine.loadROM(rom);
         this.setStatus(StatusKind.Info, "ROM loaded");
         this.drawer.start();
     }

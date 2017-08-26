@@ -1,0 +1,25 @@
+{
+    "name": "zx81-emulator",
+    "version": "2.0.0",
+    "description": "ZX81 emulator library written in TypeScript (transcompilation)",
+    "license": "GPL-3.0",
+    "author": "Sebastien Andrivet <sebastien@andrivet.com>",
+    "repository": "andrivet/zx81-typescript-emulator",
+    "main": "dist/prod/index.js",
+    "types": "dist/prod/index.d.ts",
+    "scripts": {
+        "lib:dev-watch": "webpack --watch --config webpack.dev.js",
+        "lib:dev": "webpack --profile --config webpack.dev.js",
+        "lib:prod": "webpack --config webpack.prod.js"
+    },
+    "dependencies": {
+        "json-loader": "^0.5.7"
+    },
+    "devDependencies": {
+        "awesome-typescript-loader": "^3.2.3",
+        "tslint": "^5.6.0",
+        "typescript": "^2.5.0",
+        "webpack": "^3.5.5",
+        "webpack-merge": "^4.1.0"
+    }
+}

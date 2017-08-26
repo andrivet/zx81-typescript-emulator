@@ -1,12 +1,11 @@
-const Merge = require("webpack-merge");
+const merge = require("webpack-merge");
 const path = require('path');
 const webpack = require('webpack'); //to access built-in plugins
-const CommonConfig = require("./webpack.common.js");
+const commonConfig = require("./webpack.common.js");
 
-module.exports = Merge(CommonConfig, {
+const config = {
     output: {
-        path: path.resolve(__dirname, "build/dev"),
-        filename: "js/[name].js"
+        path: path.resolve(__dirname, "dist/dev")
     },
     devtool: "source-map",
     stats: "verbose",
@@ -16,4 +15,6 @@ module.exports = Merge(CommonConfig, {
             sourceMap: true
         })
     ]
-});
+};
+
+module.exports = merge(commonConfig, config);

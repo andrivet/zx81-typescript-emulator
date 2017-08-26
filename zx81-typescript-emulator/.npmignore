@@ -1,0 +1,9 @@
+src
+config
+examples
+test
+tsconfig.json
+tslint.json
+.github
+dist/temp
+dist/docs

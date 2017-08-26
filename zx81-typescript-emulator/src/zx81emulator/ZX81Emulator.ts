@@ -20,33 +20,33 @@
  */
 
 import Drawer from "./display/Drawer";
+import {Status, StatusKind} from "./display/Status";
 import Time from "./io/Time";
 import ZX81 from "./machine/ZX81";
-
-export const enum StatusKind { OK, Info, Warning, Error }
-const mapStatus: string[] = ["alert-success", "alert-info", "alert-warning", "alert-danger"];
 
 const MinDayBetweenStatuses = 500; // 500 ms
 
 export default class ZX81Emulator
 {
-    private status: HTMLDivElement;
+    private canvas: HTMLCanvasElement;
+    private status: Status;
     private lastStatusTime: number = 0;
     private lastStatusKind: StatusKind = StatusKind.OK;
     private machine: ZX81;
     private drawer: Drawer;
 
-    public constructor(status: HTMLDivElement)
+    public constructor(canvas: HTMLCanvasElement, status: Status)
     {
+        this.canvas = canvas;
         this.status = status;
     }
 
-    public async load(fileName: string, rom: string, scale: number, canvas: HTMLCanvasElement): Promise<void>
+    public async load(fileName: string, rom: string, scale: number): Promise<void>
     {
         this.setStatus(StatusKind.Info, "Initializing emulator...");
 
         this.machine = new ZX81();
-        this.drawer = new Drawer(this.machine, scale, canvas);
+        this.drawer = new Drawer(this.machine, scale, this.canvas);
 
         this.installListeners();
         await this.start(rom);
@@ -80,13 +80,7 @@ export default class ZX81Emulator
         while(Time.currentTimeMillis() - this.lastStatusTime < MinDayBetweenStatuses)
             await Time.sleep(MinDayBetweenStatuses);
 
-        if(kind !== this.lastStatusKind)
-        {
-            this.status.classList.remove(mapStatus[this.lastStatusKind]);
-            this.status.classList.add(mapStatus[kind]);
-        }
-
-        this.status.textContent = message;
+        this.status.status(message, kind, this.lastStatusKind);
         this.lastStatusKind = kind;
         this.lastStatusTime = Time.currentTimeMillis();
     }

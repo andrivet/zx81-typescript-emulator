@@ -27,5 +27,5 @@
         "paths": { "*": ["src/types/*"] }
     },
     "include": ["./src/**/*"],
-    "exclude": ["node_module"]
+    "exclude": ["node_module", "index.d.ts"]
 }

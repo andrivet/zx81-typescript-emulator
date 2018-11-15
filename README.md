@@ -2,7 +2,7 @@
 
 ## Sinclair ZX81
 
-The [Sinclair ZX81](https://en.wikipedia.org/wiki/ZX81) was by first computer, in 1982. It is one of those home computers very popular in the '80s and affordable (£49.95 in kit). 
+The [Sinclair ZX81](https://en.wikipedia.org/wiki/ZX81) was my first computer, in 1982. It is one of those home computers very popular in the '80s and affordable (£49.95 in kit). 
 Other very popular computers were the [Commodore 64](https://en.wikipedia.org/wiki/Commodore_64) and the [Apple II](https://en.wikipedia.org/wiki/Apple_II) but were far more expensive.
 The successor of the ZX81 was the [ZX Spectrum](https://en.wikipedia.org/wiki/ZX_Spectrum).
 

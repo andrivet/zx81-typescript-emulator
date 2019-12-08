@@ -61,7 +61,7 @@ In the menu, if you choose item `5`, you will exit the game and play with the ZX
 | Emulator | The Typescript emulator |
 | Programs |  The `FACTORY` game in English, `USINE` in French and their sources in text format. |
 
-## Credits et Copyrights
+## Credits and Copyrights
 
 _**Note**: A full list of components used by the emulator can be found in [NOTICE.md](https://github.com/andrivet/zx81-typescript-emulator/blob/master/NOTICE.md)._
 

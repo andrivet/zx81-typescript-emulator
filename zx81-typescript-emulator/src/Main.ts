@@ -19,8 +19,8 @@
  * along with ZX81emulator.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import ZX81Emulator from "zx81-emulator";
-const pkg = require("../../package.json") as { version: string };
+import {Status, StatusKind, ZX81Emulator} from "./zx81emulator/ZX81Emulator";
+const pkg = require("../package.json") as { version: string };
 
 const versionID = "version";
 const canvasID = "canvas";
@@ -30,7 +30,7 @@ const keyboardInputID = "keyboardInput";
 const statusID = "status";
 const scaleID = "scale";
 
-class Main implements ZX81Emulator.Status
+class Main implements Status
 {
     private showKeyboard(keyboardInput: HTMLInputElement): void
     {
@@ -58,7 +58,7 @@ class Main implements ZX81Emulator.Status
         span.textContent = pkg.version;
     }
 
-    public status(message: string, kind: ZX81Emulator.StatusKind, previousKind: ZX81Emulator.StatusKind): void
+    public status(message: string, kind: StatusKind, previousKind: StatusKind): void
     {
         const status = <HTMLDivElement>document.getElementById(statusID);
         if(!status)
@@ -80,7 +80,7 @@ class Main implements ZX81Emulator.Status
         const scale = +this.getValue(scaleID, "3");
         const keyboardInput = <HTMLInputElement>document.getElementById(keyboardInputID);
 
-        const emulator = new ZX81Emulator(canvas, this as ZX81Emulator.Status);
+        const emulator = new ZX81Emulator(canvas, this as Status);
 
         window.addEventListener("load", () => {
             emulator.load(filename, rom, scale).then(() => {
@@ -90,7 +90,7 @@ class Main implements ZX81Emulator.Status
             })
                 .catch(
                     (err: Error) => {
-                        emulator.setStatus(ZX81Emulator.StatusKind.Error, err.message);
+                        emulator.setStatus(StatusKind.Error, err.message);
                     }
                 );
         });

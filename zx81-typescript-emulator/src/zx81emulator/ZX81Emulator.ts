@@ -20,13 +20,19 @@
  */
 
 import Drawer from "./display/Drawer";
-import {Status, StatusKind} from "./display/Status";
 import Time from "./io/Time";
 import ZX81 from "./machine/ZX81";
 
 const MinDayBetweenStatuses = 500; // 500 ms
 
-export default class ZX81Emulator
+export const enum StatusKind { OK, Info, Warning, Error }
+
+export interface Status
+{
+    status(message: string, kind: StatusKind, previousKind: StatusKind): void;
+}
+
+export class ZX81Emulator
 {
     private canvas: HTMLCanvasElement;
     private status: Status;

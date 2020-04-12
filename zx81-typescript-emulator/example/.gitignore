@@ -1,6 +1,0 @@
-node_modules
-bundle.js
-bundle.js.map
-src/**/*.js
-src/**/*.js.map
-dist/

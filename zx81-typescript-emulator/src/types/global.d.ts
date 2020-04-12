@@ -24,7 +24,7 @@
 declare module "*.rom"
 {
     const _: string;
-    export default  _;
+    export default _;
 }
 
 declare const require: {

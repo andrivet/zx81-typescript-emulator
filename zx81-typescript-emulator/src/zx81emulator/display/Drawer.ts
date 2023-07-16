@@ -44,8 +44,10 @@ const WinB = WinT + WinH;
 const TVW = 520;
 const TVH = 380;
 
-const Black = 0xFF202020;
-const White = 0xFFFFFFFF;
+//const Black = 0xFF202020;
+//const White = 0xFFFFFFFF;
+const Black = 0xFFFFFFFF;
+const White = 0xFF202020;
 const Gray  = 0xFFAAAAAA;
 
 const targetFrameTime = 1000 / 50; // Target frame time should result in 50Hz display

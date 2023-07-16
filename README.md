@@ -43,30 +43,28 @@ Currently, all the objectives are fullfiled except those:
 ## Game
 
 I found one of my first applications: a game I build in 1985. Texts were in French and I have translated them in English.
-
-It is written with a mix of `BASIC` (to display the menu, the rules of the game, etc) and `Z80` assembly code (for the game itself).
+It was written with a mix of `BASIC` (to display the menu, the rules of the game, etc) and `Z80` assembly code (for the game itself).
+I have recently (2023) rewritten it in pure Z80 assembler and with comments to explain the code.
+The complete source code (with comments) of this game is [published on GitHub](https://github.com/andrivet/Factory-2023).
 
 Want to try the game and the emulator? It is available at the following address: [www.andrivet.com/static/ZX81/]((http://www.andrivet.com/static/ZX81/)):
 
 [![FACTORY](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Programs/FACTORY.png)](http://www.andrivet.com/static/ZX81/)
 
-Use `q` and `a` keys to move the left character, `p` and `l` to move the right one, and `j` to abandon. 
-In the menu, if you choose item `5`, you will exit the game and play with the ZX81 emulator. The original manual [Sinclair ZX81 BASIC Programming](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Documents/Sinclair%20ZX81%20BASIC%20Programming.pdf) is available.
-
 ## Files
 
-| Folder | Description |
-|--------|-------------|
+| Folder | Description                                                                                                                                                                                                                                                  |
+|--------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | Documents | Contains some documents related to ZX81, such as the original manual [Sinclair ZX81 BASIC Programming](https://github.com/andrivet/zx81-typescript-emulator/raw/master/Documents/Sinclair%20ZX81%20BASIC%20Programming.pdf), the Z80 CPU User document, etc. |
-| Emulator | The Typescript emulator |
-| Programs |  The `FACTORY` game in English, `USINE` in French and their sources in text format. |
+| Emulator | The Typescript emulator                                                                                                                                                                                                                                      |
+| Programs | The `factory2023` game in English                                                                                                                                                                                                                          |
 
 ## Credits and Copyrights
 
 _**Note**: A full list of components used by the emulator can be found in [NOTICE.md](https://github.com/andrivet/zx81-typescript-emulator/blob/master/NOTICE.md)._
 
-* **ZX81 Emulator written in Typescript** Copyright &copy; 2017 Sebastien Andrivet.
-* `FACTORY` and `USINE` games Copyright &copy; 1985-2017 Sebastien Andrivet.
+* **ZX81 Emulator written in Typescript** Copyright &copy; 2017-2023 Sebastien Andrivet.
+* `FACTORY2023` game Copyright &copy; 1985-2023 Sebastien Andrivet.
 
 This emulator is based on these software:
 
